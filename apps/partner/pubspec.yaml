@@ -1,0 +1,30 @@
+name: dyar_partner
+description: Dyar v10 Partner — تطبيق التاجر (طلبات لحظية، قائمة، عروض، حجوزات).
+version: 1.0.0+1
+publish_to: none
+
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+  flutter: ">=3.22.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  dyar_core:
+    path: ../../packages/dyar_core
+  dyar_ui:
+    path: ../../packages/dyar_ui
+  firebase_core: ^3.6.0
+  flutter_riverpod: ^2.5.1
+  shared_preferences: ^2.3.2
+  lucide_icons: ^0.257.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true

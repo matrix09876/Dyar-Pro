@@ -1,0 +1,18 @@
+name: dyar_v10
+repository: https://github.com/matrix09876/Dyar-Pro
+
+packages:
+  - apps/*
+  - packages/*
+
+command:
+  bootstrap:
+    runPubGetInParallel: true
+
+scripts:
+  analyze:
+    run: melos exec -- dart analyze .
+  format:
+    run: melos exec -- dart format .
+  test:
+    run: melos exec --dir-exists=test -- flutter test
