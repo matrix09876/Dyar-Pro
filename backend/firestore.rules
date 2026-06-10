@@ -1,0 +1,117 @@
+rules_version = '2';
+// Dyar Firestore Security Rules — تنفّذ مصفوفة الصلاحيات في docs/DATA-MODEL.md
+// المبدأ: العميل لا يُوثَق به للعمليات الحساسة (الدفع/الحالة/الأرباح) —
+// تلك تمرّ عبر Cloud Functions بصلاحيات Admin.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() { return request.auth != null; }
+    function uid() { return request.auth.uid; }
+    // الأدوار من Custom Claims (تُضبط عبر Cloud Functions)
+    function role() { return request.auth.token.role; }
+    function isAdmin() { return isSignedIn() && role() == 'admin'; }
+    function isDriver() { return isSignedIn() && role() == 'driver'; }
+    function isPartner() { return isSignedIn() && role() == 'partner'; }
+    function isOwner(resourceUid) { return isSignedIn() && uid() == resourceUid; }
+
+    // ---- users ----
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      // إنشاء الملف الخاص فقط؛ الحقول الحسّاسة (role, walletBalance) لا تُكتب من العميل
+      allow create: if isOwner(userId)
+        && !request.resource.data.keys().hasAny(['role','walletBalance','status']);
+      allow update: if isAdmin() ||
+        (isOwner(userId)
+         && !request.resource.data.diff(resource.data).affectedKeys()
+              .hasAny(['role','walletBalance','status']));
+      allow delete: if isAdmin();
+    }
+
+    // ---- stores + menu ----
+    match /stores/{storeId} {
+      allow read: if true; // عامة للتصفّح
+      allow create: if isPartner() && request.resource.data.ownerUid == uid()
+        && request.resource.data.status == 'pending';
+      allow update: if isAdmin() ||
+        (isPartner() && resource.data.ownerUid == uid()
+         && !request.resource.data.diff(resource.data).affectedKeys()
+              .hasAny(['status','commissionPct','rating','ratingCount']));
+      allow delete: if isAdmin();
+
+      match /menu/{itemId} {
+        allow read: if true;
+        allow write: if isAdmin() ||
+          (isPartner() && get(/databases/$(database)/documents/stores/$(storeId)).data.ownerUid == uid());
+      }
+      match /options/{groupId} {
+        allow read: if true;
+        allow write: if isAdmin() ||
+          (isPartner() && get(/databases/$(database)/documents/stores/$(storeId)).data.ownerUid == uid());
+      }
+    }
+
+    // ---- orders ----
+    match /orders/{orderId} {
+      allow read: if isAdmin()
+        || isOwner(resource.data.customerUid)
+        || (isDriver() && resource.data.driverUid == uid())
+        || (isPartner() && get(/databases/$(database)/documents/stores/$(resource.data.storeId)).data.ownerUid == uid());
+      // الزبون ينشئ طلبًا بحالة pending فقط؛ الدفع والتعيين عبر Functions
+      allow create: if isOwner(request.resource.data.customerUid)
+        && request.resource.data.status == 'pending';
+      // تحديثات محدودة: التاجر يقبل/يحضّر؛ السائق يحدّث حالة التوصيل.
+      // تغيير الدفع/الأرباح/تعيين السائق ممنوع من العميل (Functions فقط).
+      allow update: if isAdmin() ||
+        ( (isPartner() || isDriver())
+          && !request.resource.data.diff(resource.data).affectedKeys()
+               .hasAny(['payment','pricing','customerUid','storeId','items']) );
+      allow delete: if isAdmin();
+    }
+
+    // ---- drivers ----
+    match /drivers/{driverId} {
+      allow read: if isAdmin() || isOwner(driverId);
+      allow create: if isOwner(driverId) && request.resource.data.status == 'pending';
+      allow update: if isAdmin() ||
+        (isOwner(driverId)
+         && !request.resource.data.diff(resource.data).affectedKeys()
+              .hasAny(['status','earnings','rating','ratingCount']));
+      allow delete: if isAdmin();
+    }
+
+    // ---- مرجعية عامة: قراءة للجميع، كتابة للإدارة ----
+    match /categories/{id}   { allow read: if true; allow write: if isAdmin(); }
+    match /cities/{id}       { allow read: if true; allow write: if isAdmin(); }
+    match /coupons/{id}      { allow read: if true; allow write: if isAdmin(); }
+    match /promotions/{id}   { allow read: if true; allow write: if isAdmin(); }
+    match /config/{id}       { allow read: if true; allow write: if isAdmin(); }
+
+    // ---- reviews ----
+    match /reviews/{id} {
+      allow read: if true;
+      allow create: if isOwner(request.resource.data.customerUid);
+      allow update, delete: if isAdmin();
+    }
+
+    // ---- transactions (مالية): قراءة للمالك، كتابة Functions فقط ----
+    match /transactions/{id} {
+      allow read: if isAdmin() || isOwner(resource.data.uid);
+      allow write: if false; // Admin SDK فقط
+    }
+
+    // ---- notifications ----
+    match /notifications/{id} {
+      allow read: if isOwner(resource.data.uid) || isAdmin();
+      allow update: if isOwner(resource.data.uid)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
+      allow create, delete: if isAdmin();
+    }
+
+    // ---- support ----
+    match /support/{ticketId} {
+      allow read, create: if isSignedIn() &&
+        (isAdmin() || request.resource.data.uid == uid() || resource.data.uid == uid());
+      allow update: if isAdmin() || (isSignedIn() && resource.data.uid == uid());
+    }
+  }
+}

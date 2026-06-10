@@ -1,0 +1,16 @@
+# LLM Council generated artifacts
+council-report-*.html
+council-transcript-*.md
+
+# Common
+*.log
+.DS_Store
+node_modules/
+
+node_modules/
+dist/
+lib/
+.env
+*.local
+.DS_Store
+.firebase/

@@ -1,0 +1,33 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function isSignedIn() { return request.auth != null; }
+    function isAdmin() { return isSignedIn() && request.auth.token.role == 'admin'; }
+    function isImage() { return request.resource.contentType.matches('image/.*'); }
+    function underSize() { return request.resource.size < 8 * 1024 * 1024; }
+
+    // صور المتاجر/المنتجات: قراءة عامة، كتابة لصاحب الجلسة (يُحكم تفصيلًا في Firestore)
+    match /stores/{storeId}/{allPaths=**} {
+      allow read: if true;
+      allow write: if isSignedIn() && isImage() && underSize();
+    }
+    match /menu/{allPaths=**} {
+      allow read: if true;
+      allow write: if isSignedIn() && isImage() && underSize();
+    }
+    match /promotions/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdmin() && isImage() && underSize();
+    }
+    // وثائق السائقين: خاصة (السائق نفسه + الإدارة)
+    match /drivers/{uid}/{allPaths=**} {
+      allow read: if isAdmin() || (isSignedIn() && request.auth.uid == uid);
+      allow write: if isSignedIn() && request.auth.uid == uid && underSize();
+    }
+    // صور المستخدمين
+    match /users/{uid}/{allPaths=**} {
+      allow read: if true;
+      allow write: if isSignedIn() && request.auth.uid == uid && isImage() && underSize();
+    }
+  }
+}
