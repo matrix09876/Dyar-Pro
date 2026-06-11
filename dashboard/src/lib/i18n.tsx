@@ -138,6 +138,16 @@ export const T: Dict = {
   st_rejected:  { ar: 'مرفوض', he: 'נדחה', en: 'Rejected' },
   st_approved:  { ar: 'معتمد', he: 'מאושר', en: 'Approved' },
   st_sold:      { ar: 'مُباع', he: 'נמכר', en: 'Sold' },
+
+  // التوظيف (المتقدمون + CV)
+  applicants:   { ar: 'المتقدمون', he: 'מועמדים', en: 'Applicants' },
+  cv:           { ar: 'السيرة الذاتية', he: 'קורות חיים', en: 'CV' },
+  shortlist:    { ar: 'ترشيح', he: 'רשימה מצומצמת', en: 'Shortlist' },
+  hire:         { ar: 'توظيف', he: 'גיוס', en: 'Hire' },
+  noApplicants: { ar: 'لا متقدمين بعد', he: 'אין מועמדים עדיין', en: 'No applicants yet' },
+  st_new:        { ar: 'جديد', he: 'חדש', en: 'New' },
+  st_shortlisted:{ ar: 'مرشَّح مبدئيًا', he: 'ברשימה מצומצמת', en: 'Shortlisted' },
+  st_hired:      { ar: 'تم التوظيف', he: 'התקבל', en: 'Hired' },
 };
 
 interface I18nState {

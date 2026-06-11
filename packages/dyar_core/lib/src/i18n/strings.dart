@@ -185,6 +185,24 @@ class S {
     'catHome': ['منزل', 'בית', 'Home'],
     'catCars': ['سيارات', 'רכב', 'Cars'],
     'catOther': ['أخرى', 'אחר', 'Other'],
+    // التوظيف (الوظائف + التقديم بسيرة ذاتية)
+    'jobsBoard': ['وظائف', 'משרות', 'Jobs'],
+    'jobsSub': ['وظائف شاغرة — قدّم الآن', 'משרות פנויות — הגש עכשיו', 'Open roles — apply now'],
+    'openJobs': ['الوظائف المفتوحة', 'משרות פתוחות', 'Open jobs'],
+    'myApplications': ['طلباتي', 'הבקשות שלי', 'My applications'],
+    'applyNow': ['قدّم الآن', 'הגש מועמדות', 'Apply now'],
+    'yourCv': ['سيرتك الذاتية / نبذة عنك', 'קורות חיים / קצת עליך', 'Your CV / about you'],
+    'jobDetails': ['تفاصيل الوظيفة', 'פרטי המשרה', 'Job details'],
+    'salary': ['الراتب', 'שכר', 'Salary'],
+    'applicationSent': ['أُرسل طلبك! سنتواصل معك قريبًا', 'הבקשה נשלחה! ניצור קשר בקרוב', 'Application sent! We will be in touch'],
+    'alreadyApplied': ['قدّمت على هذه الوظيفة سابقًا', 'כבר הגשת מועמדות למשרה זו', 'You already applied to this job'],
+    'new': ['جديد', 'חדש', 'New'],
+    'shortlisted': ['مرشَّح مبدئيًا', 'ברשימה מצומצמת', 'Shortlisted'],
+    'hired': ['تم التوظيف', 'התקבלת ✓', 'Hired'],
+    'jtDriver': ['سائق', 'נהג', 'Driver'],
+    'jtKitchen': ['مطبخ', 'מטבח', 'Kitchen'],
+    'jtService': ['خدمة', 'שירות', 'Service'],
+    'jtOther': ['أخرى', 'אחר', 'Other'],
   };
 
   String call(String key) {

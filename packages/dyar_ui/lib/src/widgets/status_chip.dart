@@ -24,6 +24,10 @@ class StatusChip extends StatelessWidget {
     'no_show': (Color(0xFFFEE2E2), Color(0xFFB91C1C)),
     'approved': (Color(0xFFDCFCE7), Color(0xFF15803D)),
     'sold': (Color(0xFFEDE9FE), Color(0xFF6D28D9)),
+    // طلبات التوظيف
+    'new': (Color(0xFFDBEAFE), Color(0xFF1D4ED8)),
+    'shortlisted': (Color(0xFFFEF3C7), Color(0xFFB45309)),
+    'hired': (Color(0xFFDCFCE7), Color(0xFF15803D)),
   };
 
   @override

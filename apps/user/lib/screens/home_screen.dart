@@ -10,6 +10,7 @@ import 'store_screen.dart';
 import 'taxi_screen.dart';
 import 'parcel_screen.dart';
 import 'marketplace_screen.dart';
+import 'jobs_screen.dart';
 
 final approvedStoresProvider = StreamProvider.family<List<Store>, String?>(
     (ref, type) => ref.watch(storeServiceProvider).watchApproved(type: type));
@@ -280,14 +281,31 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                 ]),
                 const SizedBox(height: 12),
-                _ActionCard(
-                  emoji: '🛍️',
-                  label: s('marketplace'),
-                  sub: s('marketplaceSub'),
-                  colors: const [Color(0xFF8B5CF6), Color(0xFF5B21B6)],
-                  onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                      builder: (_) => const MarketplaceScreen())),
-                ),
+                Row(children: [
+                  Expanded(
+                    child: _ActionCard(
+                      emoji: '🛍️',
+                      label: s('marketplace'),
+                      sub: s('marketplaceSub'),
+                      colors: const [Color(0xFF8B5CF6), Color(0xFF5B21B6)],
+                      onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                              builder: (_) => const MarketplaceScreen())),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _ActionCard(
+                      emoji: '💼',
+                      label: s('jobsBoard'),
+                      sub: s('jobsSub'),
+                      colors: const [Color(0xFF1E3A8A), Color(0xFF0F172A)],
+                      onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                              builder: (_) => const JobsScreen())),
+                    ),
+                  ),
+                ]),
               ]),
             ),
           ),

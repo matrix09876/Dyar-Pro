@@ -122,6 +122,37 @@ service cloud.firestore {
       allow delete: if isAdmin() || isOwner(resource.data.sellerUid);
     }
 
+    // ---- jobs (لوحة الوظائف): القراءة عامة، الإدارة تنشر وتدير ----
+    match /jobs/{jobId} {
+      allow read: if true;
+      allow write: if isAdmin() || staffCan('jobs');
+    }
+
+    // ---- jobApplications (طلبات التوظيف + CV) ----
+    match /jobApplications/{appId} {
+      // partner صاحب متجر الوظيفة المرتبطة بالطلب
+      function isJobOwner() {
+        return isPartner()
+          && get(/databases/$(database)/documents/stores/$(
+               get(/databases/$(database)/documents/jobs/$(resource.data.jobId)).data.storeId
+             )).data.ownerUid == uid();
+      }
+      // المتقدم يقرأ طلباته؛ الإدارة وصاحب الوظيفة يقرآن الكل
+      allow read: if isBackoffice()
+        || isOwner(resource.data.applicantUid)
+        || isJobOwner();
+      // المتقدم ينشئ طلبًا باسمه بحالة new فقط
+      allow create: if isSignedIn()
+        && request.resource.data.applicantUid == uid()
+        && request.resource.data.status == 'new';
+      // الإدارة/صاحب الوظيفة يغيّران الحالة فقط (shortlisted/rejected/hired)
+      allow update: if isAdmin() ||
+        ((isStaff() || isJobOwner())
+         && request.resource.data.diff(resource.data).affectedKeys()
+              .hasOnly(['status']));
+      allow delete: if isAdmin();
+    }
+
     // ---- reviews ----
     match /reviews/{id} {
       allow read: if true;

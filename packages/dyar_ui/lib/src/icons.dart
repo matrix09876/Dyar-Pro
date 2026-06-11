@@ -52,4 +52,9 @@ abstract final class LucideIcons {
   static const IconData sunrise = Icons.wb_twilight_rounded;
   static const IconData calendarDays = Icons.calendar_month_rounded;
   static const IconData badgeCheck = Icons.verified_rounded;
+  static const IconData briefcase = Icons.work_rounded;
+  static const IconData chefHat = Icons.restaurant_menu_rounded;
+  static const IconData fileText = Icons.description_rounded;
+  static const IconData send = Icons.send_rounded;
+  static const IconData tag = Icons.sell_rounded;
 }
