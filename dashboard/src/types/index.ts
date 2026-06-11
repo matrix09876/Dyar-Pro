@@ -61,6 +61,9 @@ export interface Order {
   type: string;
   pricing: { subtotal: number; deliveryFee: number; serviceFee: number; discount: number; tip: number; total: number };
   payment: { method: string; status: string };
+  timeline?: { status: OrderStatus; at: Timestamp; by: string }[];
+  etaMins?: number;
+  address?: { line?: string; notes?: string };
   createdAt?: Timestamp;
 }
 

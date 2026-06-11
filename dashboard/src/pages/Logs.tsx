@@ -14,7 +14,7 @@ interface LogEntry {
   createdAt?: Timestamp;
 }
 
-const TABS = ['all', 'business', 'menu', 'users', 'zones', 'timings', 'discounts'];
+const TABS = ['all', 'security', 'business', 'menu', 'users', 'orders', 'zones', 'timings', 'discounts'];
 
 /** سجل التدقيق (Audit Log) — من يكتبه: Cloud Functions عند كل عملية حساسة. */
 export default function Logs() {

@@ -172,7 +172,9 @@ class _EtaHeroState extends ConsumerState<_EtaHero> {
   Widget build(BuildContext context) {
     final s = ref.watch(stringsProvider);
     final created = widget.order.createdAt ?? DateTime.now();
-    final eta = created.add(const Duration(minutes: 35));
+    // 🧠 ETA متعلَّم من الخادم (متوسط تسليمات المتجر الفعلية)
+    final etaMins = widget.order.etaMins ?? 35;
+    final eta = created.add(Duration(minutes: etaMins));
 
     return StreamBuilder<int>(
       stream: _tick,
@@ -181,7 +183,7 @@ class _EtaHeroState extends ConsumerState<_EtaHero> {
         final mins = remaining.inMinutes.clamp(0, 99);
         final secs = (remaining.inSeconds % 60).clamp(0, 59);
         final progress = 1 -
-            (remaining.inSeconds / const Duration(minutes: 35).inSeconds)
+            (remaining.inSeconds / Duration(minutes: etaMins).inSeconds)
                 .clamp(0.0, 1.0);
 
         return Container(

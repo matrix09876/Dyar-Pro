@@ -36,7 +36,7 @@ class DriverApp extends ConsumerWidget {
       ],
       builder: (context, child) => Directionality(
         textDirection: lang.direction,
-        child: child ?? const SizedBox(),
+        child: AppLockGate(child: child ?? const SizedBox()),
       ),
       home: const AuthGate(),
     );

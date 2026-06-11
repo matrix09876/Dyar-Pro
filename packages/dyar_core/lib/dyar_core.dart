@@ -28,3 +28,4 @@ export 'src/services/job_service.dart';
 export 'src/i18n/strings.dart';
 export 'src/providers.dart';
 export 'src/firebase_boot.dart';
+export 'src/security/app_lock.dart';

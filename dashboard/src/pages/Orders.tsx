@@ -132,6 +132,31 @@ export default function Orders() {
 
             <div className="mb-4"><StatusBadge status={selected.status} /></div>
 
+            {/* 🔎 تتبع كامل: الخط الزمني الموثق لكل تحول (من/متى) */}
+            <div className="card !shadow-none p-4 mb-4">
+              <h3 className="font-bold text-sm mb-3">
+                Timeline · ETA {selected.etaMins ?? '—'}m
+              </h3>
+              <div className="space-y-2">
+                {(selected.timeline ?? []).map((tl, i) => (
+                  <div key={i} className="flex items-center gap-3 text-sm">
+                    <span className="h-2.5 w-2.5 rounded-full bg-brand-500 shrink-0" />
+                    <StatusBadge status={tl.status} />
+                    <span className="text-ink-muted text-xs">{dateTime(tl.at)}</span>
+                    <span className="ms-auto font-mono text-[10px] text-ink-muted">
+                      {tl.by === 'auto' ? '🤖 auto' : tl.by?.slice(0, 8)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              {selected.address?.line && (
+                <p className="text-xs text-ink-muted mt-3">
+                  📍 {selected.address.line}
+                  {selected.address.notes ? ` · 📝 ${selected.address.notes}` : ''}
+                </p>
+              )}
+            </div>
+
             <div className="card !shadow-none p-4 mb-4 space-y-2">
               {selected.items?.map((it, i) => (
                 <div key={i} className="flex justify-between text-sm">

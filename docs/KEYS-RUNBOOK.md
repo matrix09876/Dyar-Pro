@@ -56,3 +56,17 @@ open ios/Runner.xcworkspace               # Archive ثم App Store Connect
 
 > ✅ بعد البند 1 تعمل المنظومة كاملة على الإنتاج (الدفع نقدًا).
 > بعد البند 3 يتفعّل VISA/Bit. لا يوجد أي مكان آخر يحتاج مفاتيح.
+
+
+## 7) App Check (درع ضد البوتات وإساءة الاستخدام)
+في Firebase Console → App Check: فعّل **Play Integrity** (أندرويد)،
+**App Attest** (iOS)، **reCAPTCHA v3** (الويب)، ثم Enforce على
+Firestore وFunctions. التطبيقات جاهزة — أضف سطر التفعيل في
+`firebase_boot.dart` بعد initializeApp:
+```dart
+await FirebaseAppCheck.instance.activate(
+  androidProvider: AndroidProvider.playIntegrity,
+  appleProvider: AppleProvider.appAttest,
+);
+```
+(حزمة firebase_app_check تُضاف مع flutterfire configure.)

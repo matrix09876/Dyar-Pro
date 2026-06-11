@@ -21,6 +21,16 @@ export const createOrder = onCall(async (req) => {
     throw new HttpsError('invalid-argument', 'storeId and items required');
   }
 
+  // 🛡️ Rate-limit: حماية من إغراق الطلبات (≤3 خلال 60 ثانية)
+  const minuteAgo = Timestamp.fromMillis(Date.now() - 60_000);
+  const recent = await db().collection('orders')
+    .where('customerUid', '==', uid)
+    .where('createdAt', '>=', minuteAgo)
+    .limit(3).get();
+  if (recent.size >= 3) {
+    throw new HttpsError('resource-exhausted', 'too many orders, slow down');
+  }
+
   const storeSnap = await db().doc(`stores/${storeId}`).get();
   if (!storeSnap.exists) throw new HttpsError('not-found', 'store not found');
   const store = storeSnap.data()!;
@@ -91,6 +101,9 @@ export const createOrder = onCall(async (req) => {
   }
 
   const total = Math.max(0, subtotal + deliveryFee + serviceFee + tip - discount);
+  // 🧠 ETA متعلَّم من تسليمات المتجر السابقة (يَصدُق قبل الدفع — درس Wolt)
+  const etaMins = Math.round(
+    store.etaStats?.avgMins ?? ((store.prepTimeMins || 20) + 12));
   const now = Timestamp.now();
   const order: Partial<Order> = {
     code: shortCode(), customerUid: uid, storeId, items: verified,
@@ -98,6 +111,7 @@ export const createOrder = onCall(async (req) => {
     pricing: { subtotal, deliveryFee, serviceFee, discount, tip, total },
     payment: { method: req.data.paymentMethod || 'cash', status: 'pending' },
     timeline: [{ status: 'pending', at: now, by: uid }],
+    etaMins,
     ...(scheduledFor ? { scheduledFor: Timestamp.fromMillis(Number(scheduledFor)) } : {}),
     createdAt: now, updatedAt: now,
   };
@@ -189,6 +203,66 @@ export const updateOrderStatus = onCall(async (req) => {
       });
     }
   });
+
+  // 🧠 التعلم عند التسليم: زمن فعلي → إحصاء المتجر والسائق +
+  // مكافأة سرعة (تحفيز) + موقع تسليم متعلَّم (خندق HAAT لكن أذكى)
+  if (status === 'delivered') {
+    const after = (await ref.get()).data() as Order & {
+      etaMins?: number; address?: { lat?: number; lng?: number; line?: string };
+      customerUid: string; driverUid?: string; storeId: string;
+      createdAt: Timestamp;
+    };
+    const actualMins = Math.max(1, Math.round(
+      (Date.now() - after.createdAt.toMillis()) / 60_000));
+
+    // متوسط متحرك للمتجر (وزن 80/20)
+    const stRef = db().doc(`stores/${after.storeId}`);
+    const st = (await stRef.get()).data();
+    const prevAvg = st?.etaStats?.avgMins ?? actualMins;
+    const prevCnt = st?.etaStats?.count ?? 0;
+    await stRef.set({
+      etaStats: {
+        avgMins: Math.round(prevAvg * 0.8 + actualMins * 0.2),
+        count: prevCnt + 1,
+      },
+    }, { merge: true });
+
+    if (after.driverUid) {
+      const drRef = db().doc(`drivers/${after.driverUid}`);
+      const dr = (await drRef.get()).data();
+      const dAvg = dr?.stats?.avgDeliveryMins ?? actualMins;
+      await drRef.set({
+        stats: {
+          avgDeliveryMins: Math.round(dAvg * 0.8 + actualMins * 0.2),
+          deliveries: (dr?.stats?.deliveries ?? 0) + 1,
+        },
+      }, { merge: true });
+
+      // 🏆 مكافأة سرعة: التسليم ضمن الـ ETA الموعود → ₪2 تحفيز
+      if (after.etaMins && actualMins <= after.etaMins) {
+        await db().collection('transactions').add({
+          uid: after.driverUid, type: 'payout', amount: 200,
+          meta: { speedBonus: true, orderId, actualMins },
+          createdAt: Timestamp.now(),
+        });
+        await db().doc(`drivers/${after.driverUid}`).update({
+          'earnings.today': FieldValue.increment(200),
+          'earnings.week': FieldValue.increment(200),
+          'earnings.total': FieldValue.increment(200),
+        });
+      }
+    }
+
+    // 📍 الموقع المتعلَّم: تأكيد إحداثيات الزبون بعد كل تسليم ناجح
+    const a = after.address;
+    if (a?.lat && a?.lng) {
+      await db().doc(`learnedLocations/${after.customerUid}`).set({
+        lat: a.lat, lng: a.lng, line: a.line ?? '',
+        confirmations: FieldValue.increment(1),
+        updatedAt: Timestamp.now(),
+      }, { merge: true });
+    }
+  }
 
   // تدقيق + إيصال رقمي بعد نجاح الحركة (خارج الـ transaction)
   await logAction({

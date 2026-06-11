@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
 /// مصادقة موحّدة: هاتف/OTP (الأساسي في السوق المحلي) + بريد كاحتياط.
@@ -43,6 +44,14 @@ class AuthService {
     final u = _auth.currentUser;
     if (u == null) return;
     final token = await FirebaseMessaging.instance.getToken();
+    // 🛡️ سجل أمني: حدث تسجيل دخول (يظهر في لوحة السجلات)
+    await _db.collection('logs').add({
+      'category': 'security',
+      'action': 'sign-in',
+      'by': u.uid,
+      'platform': defaultTargetPlatform.name,
+      'createdAt': FieldValue.serverTimestamp(),
+    });
     await _db.collection('users').doc(u.uid).set({
       if (name != null) 'name': name,
       'phone': u.phoneNumber,

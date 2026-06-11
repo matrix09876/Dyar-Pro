@@ -175,6 +175,13 @@ service cloud.firestore {
     }
 
     // ---- support ----
+    // سجلات الأمن: تسجيل دخول/أجهزة — كتابة العميل لنفسه فقط، قراءة إدارة
+    match /logs/{logId} {
+      allow read: if isAdmin() || isStaff();
+      allow create: if isSignedIn()
+        && request.resource.data.category == 'security'
+        && request.resource.data.by == uid();
+    }
     match /support/{ticketId}/messages/{msgId} {
       // محادثة الدعم: صاحب التذكرة يقرأ ويرسل؛ ردود الـ AI تُكتب بالخادم
       allow read: if isAdmin() || (isSignedIn() && ticketId == uid());

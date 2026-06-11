@@ -57,6 +57,7 @@ export interface Order {
     paidAt?: FirebaseFirestore.Timestamp;
   };
   timeline: { status: OrderStatus; at: FirebaseFirestore.Timestamp; by: string }[];
+  etaMins?: number; // ETA متعلَّم (دقائق) — يُحدَّد عند الإنشاء
   eta?: FirebaseFirestore.Timestamp;
   rating?: { stars: number; comment?: string };
   createdAt: FirebaseFirestore.Timestamp;
