@@ -11,6 +11,9 @@ class AppUser {
   final List<Map<String, dynamic>> addresses;
   final bool blocked;
 
+  /// حساب تاجر B2B — تفعّله الإدارة من اللوحة، يُظهر فئة تجار الجملة.
+  final bool merchant;
+
   const AppUser({
     required this.uid,
     this.role = UserRole.customer,
@@ -19,6 +22,7 @@ class AppUser {
     this.allergies = const [],
     this.addresses = const [],
     this.blocked = false,
+    this.merchant = false,
   });
 
   factory AppUser.fromDoc(DocumentSnapshot<Map<String, dynamic>> doc) {
@@ -37,6 +41,7 @@ class AppUser {
       addresses: List<Map<String, dynamic>>.from(
           (d['addresses'] ?? const []).map((e) => Map<String, dynamic>.from(e))),
       blocked: d['status'] == 'blocked',
+      merchant: d['merchant'] == true,
     );
   }
 }

@@ -4,7 +4,7 @@ class Store {
   final String id;
   final String ownerUid;
   final String name;
-  final String type; // restaurant|grocery|pharmacy|flowers|service|store
+  final String type; // restaurant|grocery|pharmacy|flowers|service|store|wholesale
   final String? serviceCategory; // مهنة المزوّد عند type=='service' (عقد kServiceCategories)
   final String? phone; // هاتف المتجر/المزوّد (زر الاتصال)
   final String? logoUrl, coverUrl, description;
@@ -17,6 +17,10 @@ class Store {
   final Map<String, dynamic>? location;
   final Map<String, dynamic>? dineOut; // reservationCost, cancellationPolicy..
   final Map<String, dynamic>? brand; // هوية المينيو: { template, accent? }
+
+  /// إحداثيات المتجر (location.lat/lng) — لفرز "الأقرب إليك".
+  double? get lat => (location?['lat'] as num?)?.toDouble();
+  double? get lng => (location?['lng'] as num?)?.toDouble();
 
   const Store({
     required this.id, required this.ownerUid, required this.name,

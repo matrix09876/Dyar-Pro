@@ -35,6 +35,9 @@ class _BookingSheetState extends ConsumerState<_BookingSheet> {
   bool _sending = false;
   final _notes = TextEditingController();
 
+  /// نوع الاستشارة للمهن (محامٍ/محاسب/طبيب...): مكتب أو هاتف.
+  String _mode = 'office';
+
   @override
   void dispose() {
     _notes.dispose();
@@ -59,6 +62,15 @@ class _BookingSheetState extends ConsumerState<_BookingSheet> {
       '${(minutes ~/ 60).toString().padLeft(2, '0')}:'
       '${(minutes % 60).toString().padLeft(2, '0')}';
 
+  String? _buildNotes(S s) {
+    final parts = [
+      if (!_isTable)
+        _mode == 'phone' ? s('consultPhone') : s('consultOffice'),
+      if (_notes.text.trim().isNotEmpty) _notes.text.trim(),
+    ];
+    return parts.isEmpty ? null : parts.join(' · ');
+  }
+
   Future<void> _submit() async {
     final s = ref.read(stringsProvider);
     final user = FirebaseAuth.instance.currentUser;
@@ -77,7 +89,8 @@ class _BookingSheetState extends ConsumerState<_BookingSheet> {
             type: _isTable ? 'table' : 'service',
             slot: _slotFor(_day, minutes).millisecondsSinceEpoch,
             partySize: _party,
-            notes: _notes.text.trim().isEmpty ? null : _notes.text.trim(),
+            // للخدمات: نوع الاستشارة يسبق الملاحظات ليظهر للمزوّد واللوحة
+            notes: _buildNotes(s),
             reminder: _reminder,
           );
       if (mounted) {
@@ -230,6 +243,39 @@ class _BookingSheetState extends ConsumerState<_BookingSheet> {
                     ),
                   ]),
                   const SizedBox(height: 12),
+
+                  // نوع الاستشارة — للمهن فقط (محامٍ/محاسب/طبيب...)
+                  if (!_isTable) ...[
+                    Text(s('consultType'),
+                        style: const TextStyle(
+                            fontWeight: FontWeight.w800, fontSize: 13.5)),
+                    const SizedBox(height: 8),
+                    Row(children: [
+                      for (final opt in [
+                        ('office', s('consultOffice')),
+                        ('phone', s('consultPhone')),
+                      ]) ...[
+                        ChoiceChip(
+                          label: Text(opt.$2,
+                              style: TextStyle(
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w800,
+                                  color: _mode == opt.$1
+                                      ? Colors.white
+                                      : DyarTokens.inkMuted)),
+                          selected: _mode == opt.$1,
+                          selectedColor: DyarTokens.brand,
+                          showCheckmark: false,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(999)),
+                          onSelected: (_) =>
+                              setState(() => _mode = opt.$1),
+                        ),
+                        const SizedBox(width: 8),
+                      ],
+                    ]),
+                    const SizedBox(height: 12),
+                  ],
 
                   // ملاحظات
                   TextField(

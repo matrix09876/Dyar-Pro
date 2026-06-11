@@ -34,7 +34,8 @@ class _ItemSheet extends ConsumerStatefulWidget {
 }
 
 class _ItemSheetState extends ConsumerState<_ItemSheet> {
-  int _qty = 1;
+  // متاجر الجملة B2B: الكمية تبدأ من الحد الأدنى ولا تنزل تحته
+  late int _qty = widget.item.minQty;
   final Set<String> _picked = {}; // أسماء الخيارات المختارة
   List<Map<String, dynamic>> _choices = []; // كل الخيارات المتاحة
   bool _loading = true;
@@ -121,9 +122,27 @@ class _ItemSheetState extends ConsumerState<_ItemSheet> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(item.name,
-                      style: const TextStyle(
-                          fontSize: 19, fontWeight: FontWeight.w900)),
+                  Row(children: [
+                    Expanded(
+                      child: Text(item.name,
+                          style: const TextStyle(
+                              fontSize: 19, fontWeight: FontWeight.w900)),
+                    ),
+                    if (item.minQty > 1)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 9, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFEF3C7),
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Text('${s('minQty')} ${item.minQty}',
+                            style: const TextStyle(
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w800,
+                                color: Color(0xFFB45309))),
+                      ),
+                  ]),
                   if (item.description != null) ...[
                     const SizedBox(height: 4),
                     Text(item.description!,
@@ -187,7 +206,7 @@ class _ItemSheetState extends ConsumerState<_ItemSheet> {
                   ),
                   child: Row(children: [
                     IconButton(
-                        onPressed: _qty > 1
+                        onPressed: _qty > widget.item.minQty
                             ? () => setState(() => _qty--)
                             : null,
                         icon: const Icon(LucideIcons.minus, size: 18)),

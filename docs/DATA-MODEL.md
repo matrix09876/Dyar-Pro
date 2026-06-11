@@ -20,6 +20,9 @@ favorites: { stores: string[], services: string[] }
 walletBalance: number          // أغورة
 fcmTokens: string[]
 status: 'active' | 'blocked'
+merchant?: boolean             // حساب تاجر B2B — تمنحه الإدارة فقط من
+                               // اللوحة (Users)؛ يرى فئة تجار الجملة.
+                               // محمي في القواعد ضد الكتابة الذاتية.
 createdAt, updatedAt
 ```
 
@@ -27,7 +30,9 @@ createdAt, updatedAt
 ```
 ownerUid: string               // → users (role=partner)
 name, description, logoUrl, coverUrl
-type: 'restaurant'|'grocery'|'pharmacy'|'flowers'|'service'|'store'
+type: 'restaurant'|'grocery'|'pharmacy'|'flowers'|'service'|'store'|'wholesale'
+                               // wholesale = متجر جملة B2B: يظهر فقط في فئة
+                               // التجار لحسابات users.merchant==true
 serviceCategory?: string       // عند type=='service' فقط — مهنة المزوّد:
                                // 'plumber'|'electrician'|'painter'|'mechanic'
                                // |'carpenter'|'accountant'|'lawyer'|'doctor'
@@ -126,6 +131,8 @@ available: boolean, sortOrder: number
 extraDeliveryFee?: number          // رسوم توصيل إضافية للصنف
 flags: { vegan, allergens, spicy, spillHazard }   // وسوم الصنف
 maxQty?: number, featured?: boolean
+minQty?: number                    // حد أدنى للكمية (افتراضي 1) —
+                                   // لمتاجر الجملة B2B؛ يفرضه الـUI
 ```
 
 ### `stores/{storeId}/options/{groupId}`  (مجموعات الإضافات)

@@ -27,19 +27,32 @@ export default function Users() {
   const toggleBlock = (u: AppUser) =>
     updateDoc(doc(db, 'users', u.id), { status: u.status === 'blocked' ? 'active' : 'blocked' });
 
+  // حساب تاجر B2B: يُظهر له فئة تجار الجملة وأسعارها في تطبيق الزبون
+  const toggleMerchant = (u: AppUser) =>
+    updateDoc(doc(db, 'users', u.id), { merchant: !u.merchant });
+
   return (
     <>
       <PageHeader title={t('users')} />
       <input className="input max-w-sm mb-4" placeholder={t('search')} value={q} onChange={(e) => setQ(e.target.value)} />
 
       {loading ? <Spinner /> : filtered.length === 0 ? <EmptyState /> : (
-        <Table headers={[t('name'), t('phone'), t('email'), 'Role', t('wallet'), t('status'), t('actions')]}>
+        <Table headers={[t('name'), t('phone'), t('email'), 'Role', 'B2B', t('wallet'), t('status'), t('actions')]}>
           {filtered.map((u) => (
             <tr key={u.id} className="table-row">
               <td className="td font-bold">{u.name ?? '—'}</td>
               <td className="td" dir="ltr">{u.phone ?? '—'}</td>
               <td className="td" dir="ltr">{u.email ?? '—'}</td>
               <td className="td"><span className={`badge ${ROLE_CLS[u.role] ?? ROLE_CLS.customer}`}>{u.role}</span></td>
+              <td className="td">
+                <button
+                  className={`badge ${u.merchant ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-400'}`}
+                  title="تاجر جملة B2B"
+                  onClick={() => toggleMerchant(u)}
+                >
+                  🏪 B2B
+                </button>
+              </td>
               <td className="td tabular-nums">{money(u.walletBalance)}</td>
               <td className="td">
                 <span className={`badge ${u.status === 'blocked' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>

@@ -16,6 +16,8 @@ export interface AppUser {
   photoUrl?: string;
   walletBalance?: number;
   status?: 'active' | 'blocked';
+  /** حساب تاجر B2B — يرى فئة تجار الجملة في تطبيق الزبون */
+  merchant?: boolean;
   createdAt?: Timestamp;
 }
 

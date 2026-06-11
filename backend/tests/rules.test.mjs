@@ -53,6 +53,10 @@ await t('الزبون لا يرقّي دوره إلى admin', () =>
   assertFails(updateDoc(doc(as('alice', 'customer'), 'users/alice'),
     { role: 'admin' })));
 
+await t('الزبون لا يمنح نفسه حساب تاجر B2B (merchant)', () =>
+  assertFails(updateDoc(doc(as('alice', 'customer'), 'users/alice'),
+    { merchant: true })));
+
 await t('الزبون يحدّث اسمه بحرية', () =>
   assertSucceeds(updateDoc(doc(as('alice', 'customer'), 'users/alice'),
     { name: 'Alice' })));

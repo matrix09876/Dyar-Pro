@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'i18n/strings.dart';
+import 'models/app_user.dart';
 import 'services/auth_service.dart';
 import 'services/order_service.dart';
 import 'services/store_service.dart';
@@ -42,6 +43,13 @@ final langProvider = StateProvider<DyarLang>((_) => DyarLang.ar);
 final darkModeProvider = StateProvider<bool>((_) => false);
 
 final stringsProvider = Provider<S>((ref) => S(ref.watch(langProvider)));
+
+/// وثيقة المستخدم الحالي لحظيًا (المحفظة، التاجر B2B، العناوين...).
+final appUserProvider = StreamProvider<AppUser?>((ref) {
+  final auth = ref.watch(authStateProvider).value;
+  if (auth == null) return Stream.value(null);
+  return ref.watch(userServiceProvider).watch(auth.uid);
+});
 
 /// قواعد الرؤية لكل مدينة — `cities/{id}.categories` من اللوحة.
 /// الافتراضي الآمن: كل فئة غير مذكورة تُعتبر ظاهرة (true).

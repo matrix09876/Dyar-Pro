@@ -12,6 +12,7 @@ import 'parcel_screen.dart';
 import 'marketplace_screen.dart';
 import 'jobs_screen.dart';
 import 'services_screen.dart';
+import 'wholesale_screen.dart';
 
 final approvedStoresProvider = StreamProvider.family<List<Store>, String?>(
     (ref, type) => ref.watch(storeServiceProvider).watchApproved(type: type));
@@ -49,6 +50,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     // قواعد الرؤية لكل مدينة (cities.categories من اللوحة) — افتراضي آمن:
     // كل شيء ظاهر إن لم تُضبط الوثيقة.
     final city = ref.watch(cityConfigProvider).value ?? const CityConfig({});
+    // حساب تاجر B2B؟ تظهر له فئة تجار الجملة (تفعّلها الإدارة من اللوحة)
+    final isMerchant = ref.watch(appUserProvider).value?.merchant == true;
     final storesAsync = ref.watch(approvedStoresProvider(_type));
     final allStores = storesAsync.value ?? [];
     // بحث وظيفي: بالاسم أو الوصف (غير حسّاس لحالة الأحرف)
@@ -332,6 +335,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           MaterialPageRoute(
                               builder: (_) => const JobsScreen())),
                     ),
+                  // فئة B2B — لحسابات التجار فقط (users.merchant من اللوحة)
+                  if (isMerchant && city.shows('wholesale')) ...[
+                    const SizedBox(height: 12),
+                    _ActionCard(
+                      emoji: '🏪',
+                      label: s('wholesale'),
+                      sub: s('wholesaleSub'),
+                      colors: const [Color(0xFF0F172A), Color(0xFF1D4ED8)],
+                      onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                              builder: (_) => const WholesaleScreen())),
+                    ),
+                  ],
                 ]),
               ),
             ),

@@ -154,26 +154,58 @@ class ServicesScreen extends ConsumerWidget {
   }
 }
 
-/// مقدمو مهنة واحدة — بطاقات ببادج المهنة + "حجز موعد" + اتصال.
-class ProvidersScreen extends ConsumerWidget {
+/// مقدمو مهنة واحدة — "بالقرب منك": فرز بالمسافة من موقع المستخدم
+/// (صالون أظافر قريب → حجز موعد في 3 شاشات) أو بالأعلى تقييمًا.
+class ProvidersScreen extends ConsumerStatefulWidget {
   const ProvidersScreen({super.key, required this.category});
   final ServiceCategory category;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ProvidersScreen> createState() => _ProvidersScreenState();
+}
+
+class _ProvidersScreenState extends ConsumerState<ProvidersScreen> {
+  ({double lat, double lng})? _pos;
+  String _sort = 'nearest';
+
+  @override
+  void initState() {
+    super.initState();
+    // موقع المستخدم لفرز الأقرب — بصمت؛ بدون إذن نفرز بالتقييم.
+    ref.read(locationServiceProvider).current().then((p) {
+      if (p != null && mounted) {
+        setState(() => _pos = (lat: p.latitude, lng: p.longitude));
+      }
+    }).catchError((_) {});
+  }
+
+  double? _km(Store st) {
+    final pos = _pos;
+    if (pos == null || st.lat == null || st.lng == null) return null;
+    return distanceKm(pos.lat, pos.lng, st.lat!, st.lng!);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final s = ref.watch(stringsProvider);
     final lang = ref.watch(langProvider);
     final storesAsync = ref.watch(approvedStoresProvider('service'));
     final providers = (storesAsync.value ?? [])
-        .where((st) => st.serviceCategory == category.key)
+        .where((st) => st.serviceCategory == widget.category.key)
         .toList();
+    if (_sort == 'nearest' && _pos != null) {
+      providers.sort((a, b) =>
+          (_km(a) ?? double.infinity).compareTo(_km(b) ?? double.infinity));
+    } else {
+      providers.sort((a, b) => b.rating.compareTo(a.rating));
+    }
 
     return Scaffold(
       backgroundColor: const Color(0xFFF6F7FB),
       appBar: AppBar(
         backgroundColor: Colors.white,
         surfaceTintColor: Colors.white,
-        title: Text('${category.emoji} ${category.label(lang)}',
+        title: Text('${widget.category.emoji} ${widget.category.label(lang)}',
             style: const TextStyle(
                 fontSize: 17, fontWeight: FontWeight.w900)),
       ),
@@ -181,21 +213,58 @@ class ProvidersScreen extends ConsumerWidget {
           ? const Center(child: CircularProgressIndicator())
           : providers.isEmpty
               ? EmptyState(message: s('noProviders'), icon: LucideIcons.wrench)
-              : ListView.separated(
-                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 110),
-                  itemCount: providers.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 14),
-                  itemBuilder: (context, i) =>
-                      _ProviderCard(store: providers[i], category: category),
-                ),
+              : Column(children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+                    child: Row(children: [
+                      for (final opt in [
+                        ('nearest', s('nearestFirst')),
+                        ('rating', s('topRated')),
+                      ]) ...[
+                        ChoiceChip(
+                          label: Text(opt.$2,
+                              style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w800,
+                                  color: _sort == opt.$1
+                                      ? Colors.white
+                                      : DyarTokens.inkMuted)),
+                          selected: _sort == opt.$1,
+                          selectedColor: DyarTokens.brand,
+                          backgroundColor: Colors.white,
+                          showCheckmark: false,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(999)),
+                          onSelected: (_) =>
+                              setState(() => _sort = opt.$1),
+                        ),
+                        const SizedBox(width: 8),
+                      ],
+                    ]),
+                  ),
+                  Expanded(
+                    child: ListView.separated(
+                      padding: const EdgeInsets.fromLTRB(20, 12, 20, 110),
+                      itemCount: providers.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 14),
+                      itemBuilder: (context, i) => _ProviderCard(
+                          store: providers[i],
+                          category: widget.category,
+                          km: _km(providers[i])),
+                    ),
+                  ),
+                ]),
     );
   }
 }
 
 class _ProviderCard extends ConsumerWidget {
-  const _ProviderCard({required this.store, required this.category});
+  const _ProviderCard({required this.store, required this.category, this.km});
   final Store store;
   final ServiceCategory category;
+
+  /// المسافة من موقع المستخدم (إن توفر الإذن وإحداثيات المتجر).
+  final double? km;
 
   Future<void> _call(BuildContext context, String snackText) async {
     final phone = store.phone;
@@ -278,6 +347,22 @@ class _ProviderCard extends ConsumerWidget {
                     Text('${store.rating} (${store.ratingCount})',
                         style: const TextStyle(
                             fontWeight: FontWeight.w800, fontSize: 12)),
+                    if (km != null) ...[
+                      const SizedBox(width: 10),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFD1FAE5),
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Text('📍 ${formatKm(km!)}',
+                            style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                                color: Color(0xFF047857))),
+                      ),
+                    ],
                   ]),
                   const SizedBox(height: 12),
                   Row(children: [
