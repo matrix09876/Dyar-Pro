@@ -105,6 +105,29 @@ class S {
     'parcel': ['شحن طرد', 'משלוח חבילה', 'Send parcel'],
     'whereTo': ['إلى أين تريد الذهاب؟', '?לאן נוסעים', 'Where to?'],
     'bookTable': ['حجز طاولة', 'הזמנת שולחן', 'Book a table'],
+    'bookAppointment': ['حجز موعد', 'קביעת תור', 'Book appointment'],
+    'bookNow': ['احجز الآن', 'הזמן עכשיו', 'Book now'],
+    'myBookings': ['حجوزاتي', 'ההזמנות שלי למקום', 'My bookings'],
+    'chooseDay': ['اختر اليوم', 'בחר יום', 'Choose a day'],
+    'chooseTime': ['اختر الوقت', 'בחר שעה', 'Choose a time'],
+    'today': ['اليوم', 'היום', 'Today'],
+    'tomorrow': ['غدًا', 'מחר', 'Tomorrow'],
+    'dayAfter': ['بعد غد', 'מחרתיים', 'Day after'],
+    'partySize': ['عدد الأشخاص', 'מספר סועדים', 'Party size'],
+    'bookingNotes': ['ملاحظات', 'הערות', 'Notes'],
+    'remindMe': ['تذكير قبل 30 دقيقة', 'תזכורת 30 דקות לפני', 'Remind me 30 min before'],
+    'reservationFee': ['رسوم الحجز', 'דמי הזמנה', 'Reservation fee'],
+    'free': ['مجانًا', 'חינם', 'Free'],
+    'bookingPlaced': ['تم إرسال حجزك!', 'ההזמנה נשלחה!', 'Booking placed!'],
+    'confirm': ['تأكيد', 'אישור', 'Confirm'],
+    'cancel': ['إلغاء', 'ביטול', 'Cancel'],
+    'save': ['حفظ', 'שמירה', 'Save'],
+    'confirmed': ['مؤكد', 'מאושר', 'Confirmed'],
+    'seated': ['تم الإجلاس', 'הושבו', 'Seated'],
+    'completed': ['مكتمل', 'הושלם', 'Completed'],
+    'noShow': ['لم يحضر', 'לא הגיע', 'No-show'],
+    'seatGuests': ['إجلاس', 'הושבה', 'Seat'],
+    'complete': ['إكمال', 'סיום', 'Complete'],
     'inviteEarn': ['ادعُ واربح', 'הזמן והרווח', 'Invite & earn'],
     'giftCards': ['بطاقات الهدايا', 'כרטיסי מתנה', 'Gift cards'],
     'name': ['الاسم', 'שם', 'Name'],
@@ -143,10 +166,11 @@ class S {
     return v[lang.index];
   }
 
-  /// تسمية حالة الطلب
+  /// تسمية حالة الطلب/الحجز
   String status(String key) => call(switch (key) {
         'picked_up' => 'pickedUp',
         'on_the_way' => 'onTheWay',
+        'no_show' => 'noShow',
         _ => key,
       });
 }

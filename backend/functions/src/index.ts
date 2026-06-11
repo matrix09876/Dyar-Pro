@@ -12,5 +12,6 @@ export { createEasycardPayment, easycardWebhook } from './payments/easycard';
 export { onOrderStatusNotify } from './notifications/fcm';
 export { requestRide, acceptRide } from './rides/taxi';
 export { createParcel, confirmParcelDelivery } from './parcels/shipping';
+export { createBooking, updateBookingStatus } from './bookings/booking';
 export { aiEta, aiSupportReply } from './ai/assistant';
 export { resetDriverEarnings, bookingReminders, monthlySettlement } from './ops/scheduled';

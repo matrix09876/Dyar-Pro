@@ -19,6 +19,9 @@ class StatusChip extends StatelessWidget {
     'completed': (Color(0xFFDCFCE7), Color(0xFF15803D)),
     'cancelled': (Color(0xFFF3F4F6), Color(0xFF4B5563)),
     'rejected': (Color(0xFFFEE2E2), Color(0xFFB91C1C)),
+    'confirmed': (Color(0xFFDBEAFE), Color(0xFF1D4ED8)),
+    'seated': (Color(0xFFE0E7FF), Color(0xFF4338CA)),
+    'no_show': (Color(0xFFFEE2E2), Color(0xFFB91C1C)),
   };
 
   @override

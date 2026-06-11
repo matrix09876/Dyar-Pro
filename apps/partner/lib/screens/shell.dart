@@ -7,6 +7,7 @@ import 'package:dyar_ui/dyar_ui.dart';
 import 'login_screen.dart';
 import 'orders_screen.dart';
 import 'menu_screen.dart';
+import 'bookings_screen.dart';
 import 'more_screen.dart';
 
 /// متجر التاجر الحالي (حسب المالك المسجّل).
@@ -71,6 +72,7 @@ class _PartnerShellState extends ConsumerState<PartnerShell> {
           body: switch (_tab) {
             0 => const OrdersScreen(),
             1 => const MenuScreen(),
+            2 => const BookingsScreen(),
             _ => const MoreScreen(),
           },
           bottomNavigationBar: NavigationBar(
@@ -82,6 +84,9 @@ class _PartnerShellState extends ConsumerState<PartnerShell> {
                   label: s('orders')),
               NavigationDestination(
                   icon: const Icon(LucideIcons.utensils), label: s('menu')),
+              NavigationDestination(
+                  icon: const Icon(LucideIcons.calendarDays),
+                  label: s('bookings')),
               NavigationDestination(
                   icon: const Icon(LucideIcons.settings), label: s('more')),
             ],

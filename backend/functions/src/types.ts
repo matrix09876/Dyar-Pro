@@ -63,6 +63,37 @@ export interface Order {
   updatedAt: FirebaseFirestore.Timestamp;
 }
 
+// ---- الحجوزات (طاولة مطعم / موعد خدمة) — مرآة bookings في DATA-MODEL ----
+export type BookingStatus =
+  | 'pending' | 'confirmed' | 'seated' | 'completed' | 'cancelled' | 'no_show';
+
+export type BookingType = 'table' | 'service';
+
+export interface Booking {
+  customerUid: string;
+  storeId: string;
+  type: BookingType;
+  partySize?: number;
+  tableId?: string;
+  slot: FirebaseFirestore.Timestamp;
+  notes?: string;
+  reminder: boolean;
+  fee: number;
+  status: BookingStatus;
+  createdAt: FirebaseFirestore.Timestamp;
+  updatedAt: FirebaseFirestore.Timestamp;
+}
+
+// تحوّلات حالة الحجز المسموح بها (state machine)
+export const BOOKING_TRANSITIONS: Record<BookingStatus, BookingStatus[]> = {
+  pending: ['confirmed', 'cancelled'],
+  confirmed: ['seated', 'completed', 'cancelled', 'no_show'],
+  seated: ['completed', 'cancelled'],
+  completed: [],
+  cancelled: [],
+  no_show: [],
+};
+
 // تحوّلات الحالة المسموح بها (state machine)
 export const ORDER_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
   pending: ['accepted', 'rejected', 'cancelled'],

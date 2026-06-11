@@ -6,6 +6,7 @@ import 'package:dyar_ui/dyar_ui.dart';
 
 import 'login_screen.dart';
 import 'addresses_screen.dart';
+import 'bookings_screen.dart';
 import 'notifications_screen.dart';
 
 /// حسابي: المحفظة، العناوين، الإشعارات، اللغة (3 لغات)، الوضع الليلي،
@@ -102,6 +103,13 @@ class UserProfileScreen extends ConsumerWidget {
               label: s('myAddresses'),
               onTap: () => Navigator.of(context).push(MaterialPageRoute(
                   builder: (_) => const AddressesScreen())),
+            ),
+            const SizedBox(height: 10),
+            _Tile(
+              icon: LucideIcons.calendarDays,
+              label: s('myBookings'),
+              onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) => const MyBookingsScreen())),
             ),
             const SizedBox(height: 10),
             _Tile(
