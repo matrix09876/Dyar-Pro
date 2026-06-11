@@ -53,6 +53,11 @@ service cloud.firestore {
         allow write: if isAdmin() ||
           (isPartner() && get(/databases/$(database)/documents/stores/$(storeId)).data.ownerUid == uid());
       }
+      match /tables/{tableId} {
+        allow read: if true;
+        allow write: if isAdmin() ||
+          (isPartner() && get(/databases/$(database)/documents/stores/$(storeId)).data.ownerUid == uid());
+      }
     }
 
     // ---- orders ----
@@ -71,6 +76,14 @@ service cloud.firestore {
           && !request.resource.data.diff(resource.data).affectedKeys()
                .hasAny(['payment','pricing','customerUid','storeId','items']) );
       allow delete: if isAdmin();
+    }
+
+    // ---- bookings (طاولات/مواعيد): الكتابة عبر Functions فقط ----
+    match /bookings/{bookingId} {
+      allow read: if isBackoffice()
+        || isOwner(resource.data.customerUid)
+        || (isPartner() && get(/databases/$(database)/documents/stores/$(resource.data.storeId)).data.ownerUid == uid());
+      allow write: if false; // createBooking/updateBookingStatus عبر Functions
     }
 
     // ---- drivers ----

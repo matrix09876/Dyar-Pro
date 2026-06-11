@@ -5,6 +5,7 @@ import 'package:dyar_core/dyar_core.dart';
 import 'package:dyar_ui/dyar_ui.dart';
 
 import '../state/cart.dart';
+import 'booking_sheet.dart';
 import 'checkout_screen.dart';
 import 'item_sheet.dart';
 
@@ -133,6 +134,36 @@ class StoreScreen extends ConsumerWidget {
                                   label: MoneyText.format(
                                       store?.deliveryFee ?? 0)),
                             ]),
+                            // حجز طاولة (مطعم) / موعد (خدمة: حلاق/طبيب..)
+                            if (store != null &&
+                                (store.type == 'restaurant' ||
+                                    store.type == 'service')) ...[
+                              const SizedBox(height: 12),
+                              SizedBox(
+                                width: double.infinity,
+                                height: 46,
+                                child: OutlinedButton.icon(
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: DyarTokens.brandDark,
+                                    side: const BorderSide(
+                                        color: DyarTokens.brand, width: 1.5),
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(14)),
+                                  ),
+                                  icon: const Icon(LucideIcons.calendarDays,
+                                      size: 18),
+                                  label: Text(
+                                      store.type == 'restaurant'
+                                          ? s('bookTable')
+                                          : s('bookAppointment'),
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.w800)),
+                                  onPressed: () =>
+                                      showBookingSheet(context, ref, store),
+                                ),
+                              ),
+                            ],
                           ],
                         ),
                       ),

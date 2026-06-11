@@ -15,6 +15,7 @@ export 'src/services/store_service.dart';
 export 'src/services/driver_service.dart';
 export 'src/services/ride_service.dart';
 export 'src/services/parcel_service.dart';
+export 'src/services/booking_service.dart';
 export 'src/services/user_service.dart';
 export 'src/services/location_service.dart';
 export 'src/services/tracking_service.dart';
