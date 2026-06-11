@@ -110,7 +110,33 @@ showInKiosk: boolean
 أصناف عامة (طعام، بقالة، خدمات...). `{ name, icon, type, sortOrder, active }`.
 
 ### `cities/{cityId}`
-مناطق التشغيل. `{ name, country, polygon?, active, deliveryZones[] }`.
+مناطق التشغيل — مع إعدادات لكل مدينة (من admin.dyar.app):
+```
+name, country, active
+hours: { open: 'HH:mm', close: 'HH:mm' }
+orderNotifyEmail?: string
+dynamicFare: { enabled, demandLevel: 'normal'|'high'|'very_high' }
+zoneTiers: { basePct: 5, secondPct: 20, thirdPct: 15, fourthPct: 30,
+             baseActive, secondActive, thirdActive, fourthActive }
+saturation: { enabled, delayedTime?, until? }
+commissionDisable: { enabled, vehicleType?, reactivateAt? }
+autoAssignment: boolean              // إسناد آلي لكل مدينة
+cancelIfNotAccepted: boolean
+categories: { restaurants, stores, market, pharmacies, express, pets,
+              services, construction, jobs, driverRequest, taxi, healthy,
+              dineout, local, booking, sharedTransport, parcel,
+              marketplace }          // تفعيل الفئات لكل مدينة
+categoryBadges: { [category]: string }   // نص شارة لكل فئة
+marketplace: { enabled[3], businessIds[], warehouse: { enabled, address,
+               phone, hours } }
+extraSellStore: { businessId, extraDeliveryCost, askDriverStoreData }
+mainDashboardProductsBusinessId?: string
+```
+
+### `drivers` — أعمدة لوحة السائقين (من اللوحة الحالية)
+لكل سائق إضافةً لما سبق: `access: boolean` (دخول)، `loginEnabled: boolean`،
+`prizes[]` (جوائز السائقين: pending_delivery|delivered)،
+وقسم `employeeDrivers` (سائقو رواتب بحساب وقت يومي).
 
 ### `orders/{orderId}`  — قلب النظام
 ```
