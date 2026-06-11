@@ -6,8 +6,8 @@ import 'package:dyar_ui/dyar_ui.dart';
 import '../state/cart.dart';
 import 'checkout_screen.dart';
 
-/// صفحة المتجر: القائمة + إضافة للسلة + شريط CTA لاصق بالمجموع
-/// (StickyCTA وفق الـ Handoff).
+/// صفحة المتجر بمعيار Ultra UI: غلاف كبير بتدرّج + بطاقة معلومات عائمة
+/// (تقييم/وقت/توصيل) + أصناف بصور وعدّادات + شريط سلة لاصق متدرّج.
 class StoreScreen extends ConsumerWidget {
   const StoreScreen({super.key, required this.storeId});
   final String storeId;
@@ -20,25 +20,135 @@ class StoreScreen extends ConsumerWidget {
     final menuStream = ref.read(storeServiceProvider).watchMenu(storeId);
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF6F7FB),
       body: StreamBuilder<Store?>(
         stream: storeStream,
         builder: (context, storeSnap) {
           final store = storeSnap.data;
           return CustomScrollView(
             slivers: [
-              SliverAppBar(
-                expandedHeight: 180,
-                pinned: true,
-                flexibleSpace: FlexibleSpaceBar(
-                  title: Text(store?.name ?? '',
-                      style: const TextStyle(fontWeight: FontWeight.w800)),
-                  background: store?.coverUrl != null
-                      ? Image.network(store!.coverUrl!, fit: BoxFit.cover)
-                      : Container(color: DyarTokens.brandLight),
+              SliverToBoxAdapter(
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    SizedBox(
+                      height: 240, width: double.infinity,
+                      child: store?.coverUrl != null
+                          ? Image.network(store!.coverUrl!, fit: BoxFit.cover)
+                          : Container(color: DyarTokens.brandLight),
+                    ),
+                    Container(
+                      height: 240,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.black.withValues(alpha: 0.25),
+                            Colors.transparent,
+                            Colors.black.withValues(alpha: 0.35),
+                          ],
+                        ),
+                      ),
+                    ),
+                    PositionedDirectional(
+                      top: 48, start: 16,
+                      child: GestureDetector(
+                        onTap: () => Navigator.of(context).pop(),
+                        child: Container(
+                          height: 42, width: 42,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(14),
+                            boxShadow: [
+                              BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.2),
+                                  blurRadius: 10),
+                            ],
+                          ),
+                          child: const Icon(Icons.arrow_forward_rounded),
+                        ),
+                      ),
+                    ),
+                    PositionedDirectional(
+                      start: 20, end: 20, bottom: -56,
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(22),
+                          boxShadow: [
+                            BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.10),
+                                blurRadius: 24,
+                                offset: const Offset(0, 10)),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(children: [
+                              Expanded(
+                                child: Text(store?.name ?? '…',
+                                    style: const TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.w900)),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 9, vertical: 5),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFFFF7E6),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Row(children: [
+                                  const Icon(LucideIcons.star,
+                                      size: 15, color: Color(0xFFF59E0B)),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                      '${store?.rating ?? '-'} (${store?.ratingCount ?? 0})',
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.w800,
+                                          fontSize: 12.5)),
+                                ]),
+                              ),
+                            ]),
+                            if (store?.description != null) ...[
+                              const SizedBox(height: 4),
+                              Text(store!.description!,
+                                  style: const TextStyle(
+                                      color: DyarTokens.inkMuted,
+                                      fontSize: 12.5)),
+                            ],
+                            const SizedBox(height: 12),
+                            Row(children: [
+                              _InfoChip(
+                                  icon: LucideIcons.clock,
+                                  label: '${store?.prepTimeMins ?? 25} دقيقة'),
+                              const SizedBox(width: 8),
+                              _InfoChip(
+                                  icon: LucideIcons.bike,
+                                  label: MoneyText.format(
+                                      store?.deliveryFee ?? 0)),
+                            ]),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SliverToBoxAdapter(child: SizedBox(height: 76)),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+                  child: Text('${s('menu')} 🍽️',
+                      style: const TextStyle(
+                          fontSize: 17, fontWeight: FontWeight.w900)),
                 ),
               ),
               SliverPadding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 130),
                 sliver: StreamBuilder<List<MenuItem>>(
                   stream: menuStream,
                   builder: (context, menuSnap) {
@@ -53,16 +163,13 @@ class StoreScreen extends ConsumerWidget {
                     }
                     return SliverList.separated(
                       itemCount: items.length,
-                      separatorBuilder: (_, __) =>
-                          const SizedBox(height: 10),
-                      itemBuilder: (context, i) => _MenuTile(
-                          storeId: storeId, item: items[i]),
+                      separatorBuilder: (_, __) => const SizedBox(height: 12),
+                      itemBuilder: (context, i) =>
+                          _MenuTile(storeId: storeId, item: items[i]),
                     );
                   },
                 ),
               ),
-              // مساحة للشريط اللاصق
-              const SliverToBoxAdapter(child: SizedBox(height: 90)),
             ],
           );
         },
@@ -70,17 +177,91 @@ class StoreScreen extends ConsumerWidget {
       bottomSheet: cart.isEmpty || cart.storeId != storeId
           ? null
           : Container(
-              padding: const EdgeInsets.all(16),
-              color: Theme.of(context).scaffoldBackgroundColor,
-              child: CtaButton(
-                label: '${s('cart')} (${cart.count})',
-                trailing: MoneyText.format(cart.subtotal),
-                icon: LucideIcons.shoppingCart,
-                onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                        builder: (_) => const CheckoutScreen())),
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 22),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(26)),
+                boxShadow: [
+                  BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.12),
+                      blurRadius: 24,
+                      offset: const Offset(0, -6)),
+                ],
+              ),
+              child: GestureDetector(
+                onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => const CheckoutScreen())),
+                child: Container(
+                  height: 58,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(colors: [
+                      Color(0xFFFF8A3D),
+                      DyarTokens.brandDark,
+                    ]),
+                    borderRadius: BorderRadius.circular(18),
+                    boxShadow: [
+                      BoxShadow(
+                          color: DyarTokens.brand.withValues(alpha: 0.45),
+                          blurRadius: 16,
+                          offset: const Offset(0, 8)),
+                    ],
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 18),
+                  child: Row(children: [
+                    Container(
+                      height: 30, width: 30,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.22),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      alignment: Alignment.center,
+                      child: Text('${cart.count}',
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w900)),
+                    ),
+                    const SizedBox(width: 10),
+                    Text(s('checkout'),
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w900)),
+                    const Spacer(),
+                    Text(MoneyText.format(cart.subtotal),
+                        textDirection: TextDirection.ltr,
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 17,
+                            fontWeight: FontWeight.w900)),
+                  ]),
+                ),
               ),
             ),
+    );
+  }
+}
+
+class _InfoChip extends StatelessWidget {
+  const _InfoChip({required this.icon, required this.label});
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF3F4F6),
+        borderRadius: BorderRadius.circular(11),
+      ),
+      child: Row(mainAxisSize: MainAxisSize.min, children: [
+        Icon(icon, size: 14, color: DyarTokens.brandDark),
+        const SizedBox(width: 5),
+        Text(label,
+            style: const TextStyle(
+                fontSize: 11.5, fontWeight: FontWeight.w700)),
+      ]),
     );
   }
 }
@@ -95,72 +276,108 @@ class _MenuTile extends ConsumerWidget {
     final cart = ref.watch(cartProvider);
     final qty = cart.storeId == storeId ? (cart.lines[item.id]?.qty ?? 0) : 0;
 
-    return DyarCard(
-      child: Row(
-        children: [
-          if (item.imageUrl != null)
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Image.network(item.imageUrl!,
-                  width: 64, height: 64, fit: BoxFit.cover),
-            ),
-          if (item.imageUrl != null) const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(item.name,
-                    style: const TextStyle(fontWeight: FontWeight.w700)),
-                if (item.description != null)
-                  Text(item.description!,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                          fontSize: 12, color: DyarTokens.inkMuted)),
-                const SizedBox(height: 4),
-                MoneyText(item.price,
-                    style: const TextStyle(
-                        color: DyarTokens.brand,
-                        fontWeight: FontWeight.w800)),
-              ],
-            ),
-          ),
-          // عدّاد إضافة/إزالة — أهداف لمس ≥44px
-          if (qty == 0)
-            IconButton.filled(
-              style: IconButton.styleFrom(
-                  backgroundColor: DyarTokens.brand,
-                  minimumSize: const Size(44, 44)),
-              onPressed: () =>
-                  ref.read(cartProvider.notifier).add(storeId, item),
-              icon: const Icon(LucideIcons.plus, color: Colors.white),
-            )
-          else
-            Row(children: [
-              IconButton.outlined(
-                style: IconButton.styleFrom(
-                    minimumSize: const Size(44, 44)),
-                onPressed: () =>
-                    ref.read(cartProvider.notifier).remove(item),
-                icon: const Icon(LucideIcons.minus),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Text('$qty',
-                    style: const TextStyle(
-                        fontWeight: FontWeight.w800, fontSize: 16)),
-              ),
-              IconButton.filled(
-                style: IconButton.styleFrom(
-                    backgroundColor: DyarTokens.brand,
-                    minimumSize: const Size(44, 44)),
-                onPressed: () =>
-                    ref.read(cartProvider.notifier).add(storeId, item),
-                icon: const Icon(LucideIcons.plus, color: Colors.white),
-              ),
-            ]),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 14,
+              offset: const Offset(0, 6)),
         ],
       ),
+      padding: const EdgeInsets.all(12),
+      child: Row(children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(14),
+          child: SizedBox(
+            height: 78, width: 78,
+            child: item.imageUrl != null
+                ? Image.network(item.imageUrl!, fit: BoxFit.cover)
+                : Container(
+                    color: DyarTokens.brandLight,
+                    child: const Center(
+                        child: Text('🍜', style: TextStyle(fontSize: 30))),
+                  ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(item.name,
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w800, fontSize: 14.5)),
+              if (item.description != null) ...[
+                const SizedBox(height: 3),
+                Text(item.description!,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                        fontSize: 11.5, color: DyarTokens.inkMuted)),
+              ],
+              const SizedBox(height: 6),
+              Text(MoneyText.format(item.price),
+                  textDirection: TextDirection.ltr,
+                  style: const TextStyle(
+                      color: DyarTokens.brandDark,
+                      fontWeight: FontWeight.w900,
+                      fontSize: 15)),
+            ],
+          ),
+        ),
+        const SizedBox(width: 8),
+        qty == 0
+            ? GestureDetector(
+                onTap: () =>
+                    ref.read(cartProvider.notifier).add(storeId, item),
+                child: Container(
+                  height: 42, width: 42,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(colors: [
+                      Color(0xFFFF8A3D),
+                      DyarTokens.brandDark,
+                    ]),
+                    borderRadius: BorderRadius.circular(14),
+                    boxShadow: [
+                      BoxShadow(
+                          color: DyarTokens.brand.withValues(alpha: 0.4),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4)),
+                    ],
+                  ),
+                  child: const Icon(LucideIcons.plus,
+                      color: Colors.white, size: 22),
+                ),
+              )
+            : Container(
+                decoration: BoxDecoration(
+                  color: DyarTokens.brandLight,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Row(children: [
+                  IconButton(
+                    visualDensity: VisualDensity.compact,
+                    onPressed: () =>
+                        ref.read(cartProvider.notifier).remove(item),
+                    icon: const Icon(LucideIcons.minus,
+                        size: 18, color: DyarTokens.brandDark),
+                  ),
+                  Text('$qty',
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w900, fontSize: 15)),
+                  IconButton(
+                    visualDensity: VisualDensity.compact,
+                    onPressed: () =>
+                        ref.read(cartProvider.notifier).add(storeId, item),
+                    icon: const Icon(LucideIcons.plus,
+                        size: 18, color: DyarTokens.brandDark),
+                  ),
+                ]),
+              ),
+      ]),
     );
   }
 }
