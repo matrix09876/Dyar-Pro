@@ -183,6 +183,24 @@ rates: { base: 50, perKg: 100, perM3: 100 }
 active: boolean
 ```
 
+### Extras لكل مدينة — `cities/{id}.extras`
+```
+games: {
+  roulette: { enabled, endsAt,
+    prizes: [{ discountPct, probabilityPct }] },   // المجموع 100%
+  jackpot: { enabled, endsAt },
+  scratchAndWin: { enabled, endsAt },
+}
+donation: { enabled, name, description, htmlUrl?, logoUrl?,
+            amounts: [n1..n5], total }
+quickRepliesUsers: string[], quickRepliesSupport: string[]
+quickOffer: {...}
+marketingPopups: [{ image, target: 'none'|'business'|'url', active }]
+```
+`donationLogs/{id}`: `{ orderId, name, email, amount, at }`.
+جوائز السائقين (`driverPrizes`): `{ title, ordersRequired, prize, active }`
+— تُمنح حسب عدد الطلبات المكتملة.
+
 ### البانرات والفلاتر لكل مدينة — `cities/{id}/banners` + `/filters`
 ```
 banner: { image, title, placement: 'stories'|'main'|'lower'|'driver'
