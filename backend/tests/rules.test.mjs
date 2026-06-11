@@ -38,6 +38,12 @@ await env.withSecurityRulesDisabled(async (ctx) => {
     payment: { method: 'cash', status: 'pending' },
     pricing: { total: 1000 }, items: [],
   });
+  await setDoc(doc(db, 'blockedAddresses/b1'),
+    { line: 'fake street 1', reason: 'fraud' });
+  await setDoc(doc(db, 'broadcasts/bc1'),
+    { title: 'hello', body: 'world', audience: 'customers' });
+  await setDoc(doc(db, 'driverPrizes/pr1'),
+    { title: '100 توصيلة', targetDeliveries: 100, bonus: 5000, active: true });
 });
 
 console.log('🔐 Firestore rules tests');
@@ -79,6 +85,26 @@ await t('لا أحد يكتب transactions من العميل', () =>
 
 await t('الأدمن يقرأ أي مستخدم', () =>
   assertSucceeds(getDoc(doc(as('admin1', 'admin'), 'users/bob'))));
+
+await t('الزبون لا يقرأ العناوين المحظورة', () =>
+  assertFails(getDoc(doc(as('alice', 'customer'), 'blockedAddresses/b1'))));
+
+await t('الأدمن يقرأ ويدير العناوين المحظورة', () =>
+  assertSucceeds(getDoc(doc(as('admin1', 'admin'), 'blockedAddresses/b1'))));
+
+await t('الزبون لا يقرأ سجل البث (broadcasts)', () =>
+  assertFails(getDoc(doc(as('alice', 'customer'), 'broadcasts/bc1'))));
+
+await t('حتى الأدمن لا يكتب broadcasts من العميل (Functions فقط)', () =>
+  assertFails(setDoc(doc(as('admin1', 'admin'), 'broadcasts/bc2'),
+    { title: 'x', body: 'y', audience: 'drivers' })));
+
+await t('السائق يقرأ جوائز المندوبين', () =>
+  assertSucceeds(getDoc(doc(as('d1', 'driver'), 'driverPrizes/pr1'))));
+
+await t('السائق لا يعدّل جوائز المندوبين', () =>
+  assertFails(updateDoc(doc(as('d1', 'driver'), 'driverPrizes/pr1'),
+    { bonus: 999999 })));
 
 await env.cleanup();
 console.log(`\n${passed} passed${process.exitCode ? ' — مع إخفاقات!' : ' — كلها ناجحة ✅'}`);

@@ -18,6 +18,8 @@ export interface AppUser {
   status?: 'active' | 'blocked';
   /** حساب تاجر B2B — يرى فئة تجار الجملة في تطبيق الزبون */
   merchant?: boolean;
+  /** نقاط الولاء — تُمنح من الخادم عند delivered (config/loyalty) */
+  points?: number;
   createdAt?: Timestamp;
 }
 
@@ -46,6 +48,18 @@ export interface Driver {
   activeOrderId?: string;
   rating?: number;
   earnings?: { today: number; week: number; total: number };
+  /** إحصاءات تشغيلية — deliveredCount يحرّك جوائز المندوبين */
+  stats?: { avgDeliveryMins?: number; deliveries?: number; deliveredCount?: number };
+}
+
+/** جائزة مندوبين — driverPrizes (هدف توصيلات → مكافأة بالأغورة). */
+export interface DriverPrize {
+  id: string;
+  title: string;
+  targetDeliveries: number;
+  bonus: number; // أغورة
+  active: boolean;
+  createdAt?: Timestamp;
 }
 
 export interface OrderItem {

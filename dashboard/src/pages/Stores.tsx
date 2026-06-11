@@ -1,9 +1,12 @@
-import { orderBy, doc, updateDoc } from 'firebase/firestore';
-import { Star } from 'lucide-react';
-import { db } from '../lib/firebase';
+import {
+  orderBy, doc, updateDoc, addDoc, collection, serverTimestamp,
+} from 'firebase/firestore';
+import { Copy, Download, Star } from 'lucide-react';
+import { auth, db } from '../lib/firebase';
 import { useCol } from '../hooks/useCol';
 import { useI18n } from '../lib/i18n';
 import { money } from '../lib/format';
+import { exportCsv } from '../lib/csv';
 import { PageHeader, Table, EmptyState, Spinner } from '../components/ui';
 import type { Store } from '../types';
 
@@ -33,9 +36,46 @@ export default function Stores() {
     pending: t('pendingApproval'), approved: t('approved'), suspended: t('suspended'),
   };
 
+  // نسخ النشاط: متجر جديد بنفس البيانات بحالة pending + سجل تدقيق
+  const duplicate = async (s: Store) => {
+    const { id: _id, ...rest } = s;
+    void _id;
+    const copy = await addDoc(collection(db, 'stores'), {
+      ...rest,
+      name: `${s.name} (نسخة)`,
+      status: 'pending',
+      rating: 0,
+      ratingCount: 0,
+      createdAt: serverTimestamp(),
+    });
+    const by = auth.currentUser?.uid;
+    if (by) {
+      await addDoc(collection(db, 'logs'), {
+        category: 'business',
+        action: `duplicate store ${s.id} → ${copy.id}`,
+        entity: copy.id, by, until: null, createdAt: serverTimestamp(),
+      });
+    }
+  };
+
+  const downloadCsv = () =>
+    exportCsv('stores',
+      [t('name'), t('storeType'), t('city'), t('rating'), t('commission'), t('status')],
+      stores.map((s) => [
+        s.name, s.type, s.cityId ?? '', s.rating ?? '',
+        s.commissionPct ?? 10, s.status,
+      ]));
+
   return (
     <>
-      <PageHeader title={t('stores')} />
+      <PageHeader
+        title={t('stores')}
+        action={
+          <button className="btn-ghost" onClick={downloadCsv}>
+            <Download size={18} /> CSV
+          </button>
+        }
+      />
       {loading ? <Spinner /> : stores.length === 0 ? <EmptyState /> : (
         <Table headers={[t('name'), t('storeType'), t('rating'), t('price'), t('commission'), t('status'), t('actions')]}>
           {stores.map((s) => (
@@ -79,6 +119,10 @@ export default function Stores() {
                       {t('suspend')}
                     </button>
                   )}
+                  <button className="btn-ghost !py-1.5 !px-3 !text-xs" title={t('duplicate')}
+                    onClick={() => duplicate(s)}>
+                    <Copy size={14} /> {t('duplicate')}
+                  </button>
                 </div>
               </td>
             </tr>

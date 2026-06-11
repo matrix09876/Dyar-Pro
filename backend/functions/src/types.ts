@@ -9,7 +9,8 @@ export type StaffPermission =
   | 'stores.view' | 'stores.approve'
   | 'drivers.view' | 'drivers.approve'
   | 'users.view' | 'users.block'
-  | 'marketing.manage' | 'finance.view' | 'support.manage';
+  | 'marketing.manage' | 'finance.view' | 'support.manage'
+  | 'broadcast'; // إرسال بث إشعارات (sendBroadcast)
 
 export type OrderStatus =
   | 'pending' | 'accepted' | 'preparing' | 'ready' | 'assigned'

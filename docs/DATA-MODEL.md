@@ -18,6 +18,8 @@ addresses: [{ id, label, line, lat, lng, notes }]
 allergies: string[]            // قسم الحساسية (ميزة من تطبيق ديار الحالي)
 favorites: { stores: string[], services: string[] }
 walletBalance: number          // أغورة
+points: number                 // نقاط الولاء — يمنحها الخادم عند delivered
+                               // وفق config/loyalty (لا تُكتب من العميل)
 fcmTokens: string[]
 status: 'active' | 'blocked'
 merchant?: boolean             // حساب تاجر B2B — تمنحه الإدارة فقط من
@@ -309,6 +311,8 @@ status: 'pending'|'approved'|'suspended'
 activeOrderId?: string
 earnings: { today, week, total }            // أغورة
 rating: number, ratingCount: number
+stats: { avgDeliveryMins, deliveries,
+         deliveredCount }       // deliveredCount يحرّك جوائز driverPrizes
 ```
 
 ### `coupons/{couponId}`
@@ -321,10 +325,53 @@ rating: number, ratingCount: number
 `{ orderId, customerUid, storeId, driverUid?, stars, comment, createdAt }`
 
 ### `transactions/{txId}`  — السجل المالي
-`{ orderId?, uid, type:'order'|'payout'|'topup'|'refund'|'commission', amount, balanceAfter, createdAt }`
+`{ orderId?, uid, type:'order'|'payout'|'topup'|'refund'|'commission'|'prize_bonus', amount, balanceAfter, createdAt }`
+`prize_bonus`: مكافأة جائزة مندوبين (driverPrizes) — يكتبها الخادم فقط.
 
 ### `notifications/{id}`
 `{ uid, title, body, data, read, createdAt }`
+
+### `broadcasts/{id}`  — بث الإشعارات (لوحة التحكم → FCM topics)
+```
+title, body: string
+audience: 'customers' | 'drivers' | 'partners' | 'uid'
+uid?: string                   // عند audience='uid' (مستخدم واحد)
+sentBy: string                 // uid المُرسِل من اللوحة
+sentCount: number
+createdAt: Timestamp
+```
+تُرسل عبر callable **`sendBroadcast`** (admin أو staff بصلاحية
+`broadcast` في claims.perms): إلى موضوع FCM `role-{audience}` — تشترك
+التطبيقات بموضوع دورها عند الإقلاع (موبايل فقط، انظر
+`initDyarFirebase(broadcastTopic:)`) — أو إلى fcmTokens مستخدم واحد.
+الصلاحيات: قراءة backoffice؛ الكتابة عبر Functions فقط.
+
+### `blockedAddresses/{id}`  — عناوين محظورة (مكافحة الاحتيال)
+`{ line: string, reason: string, createdAt }`
+`createOrder` يرفض أي طلب يحتوي `address.line` (بعد trim+lowercase) على
+سطر محظور — `HttpsError('failed-precondition','blocked-address')`.
+الصلاحيات: قراءة/كتابة admin فقط.
+
+### `config/loyalty`  — نظام النقاط (الولاء)
+```
+enabled: boolean
+earnPerShekel: number          // نقاط لكل ₪1 من إجمالي الطلب
+redeemRate: number             // أغورة لكل نقطة عند الاستبدال
+```
+عند `delivered`: الخادم يزيد `users/{customerUid}.points` بمقدار
+`round(total/100 * earnPerShekel)`. الكتابة admin (من بطاقة الإعدادات).
+
+### `driverPrizes/{id}`  — جوائز المندوبين 🏆
+```
+title: string
+targetDeliveries: number       // هدف عدد التوصيلات
+bonus: number                  // أغورة
+active: boolean
+createdAt: Timestamp
+```
+عند بلوغ `drivers/{uid}.stats.deliveredCount` هدف جائزة نشطة: حركة
+`transactions` بنوع `prize_bonus` + زيادة `earnings.total` (خادم فقط).
+الصلاحيات: قراءة للجميع (تحفيز السائقين)، كتابة admin.
 
 ### `support/{ticketId}`
 `{ uid, subject, messages[], status:'open'|'closed', createdAt }`
@@ -349,7 +396,12 @@ createdAt: Timestamp           // (+ soldAt عند البيع)
 `price * config/app.marketplaceCommissionPct (افتراضي 5) / 100`.
 
 ### `config/app`  (وثيقة إعدادات مفردة)
-`{ serviceFee, defaultCommissionPct, marketplaceCommissionPct, commissionTiers, serviceProvidersPct, commissionRules, currency, supportPhone, minAppVersion, maintenanceMode, referralReward, surgeEnabled }`
+`{ serviceFee, defaultCommissionPct, marketplaceCommissionPct, commissionTiers, serviceProvidersPct, commissionRules, currency, supportPhone, minAppVersion, maintenanceMode, referralReward, surgeEnabled, platformName, brandColor, phoneCode, mapsEnabled, newUserGift }`
+
+إعدادات الهوية والعموميات (تدقيق v5.2.001):
+`platformName` اسم المنصة المعروض؛ `brandColor` لون الهوية (hex)؛
+`currency` (افتراضي ILS)؛ `phoneCode` رمز الهاتف الدولي (افتراضي +972)؛
+`mapsEnabled` تفعيل الخرائط؛ `newUserGift` هدية المستخدم الجديد (أغورة).
 
 `commissionTiers` و`serviceProvidersPct` و`commissionRules` موثّقة أعلاه
 في قسم «العمولة المتدرجة» و«قواعد العمولة الذكية».

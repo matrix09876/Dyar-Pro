@@ -13,7 +13,21 @@ interface AppConfig {
   referralReward: number;
   maintenanceMode: boolean;
   surgeEnabled: boolean;
+  platformName: string;
+  brandColor: string;
+  phoneCode: string;
+  mapsEnabled: boolean;
+  newUserGift: number; // أغورة — هدية المستخدم الجديد
 }
+
+/** نظام النقاط — config/loyalty (انظر docs/DATA-MODEL.md). */
+interface LoyaltyCfg {
+  enabled: boolean;
+  earnPerShekel: number; // نقاط لكل ₪1
+  redeemRate: number;    // أغورة لكل نقطة عند الاستبدال
+}
+
+const LOYALTY_DEFAULTS: LoyaltyCfg = { enabled: false, earnPerShekel: 1, redeemRate: 10 };
 
 /** قاعدة عمولة ذكية — انظر docs/DATA-MODEL.md (config/app.commissionRules).
  *  قائمة مرتبة بالأولوية: أول قاعدة مطابقة تفوز، والشرائح تبقى الافتراضي. */
@@ -36,8 +50,10 @@ interface RuleRow {
 }
 
 const DEFAULTS: AppConfig = {
-  serviceFee: 200, defaultCommissionPct: 10, currency: 'ils',
+  serviceFee: 200, defaultCommissionPct: 10, currency: 'ILS',
   supportPhone: '', referralReward: 0, maintenanceMode: false, surgeEnabled: true,
+  platformName: 'Dyar', brandColor: '#0ea5e9', phoneCode: '+972',
+  mapsEnabled: true, newUserGift: 0,
 };
 
 const SCOPES: { value: RuleRow['scope']; label: string }[] = [
@@ -66,6 +82,8 @@ export default function Settings() {
   const [rules, setRules] = useState<RuleRow[]>([]);
   const [saved, setSaved] = useState(false);
   const [rulesSaved, setRulesSaved] = useState(false);
+  const [loyalty, setLoyalty] = useState<LoyaltyCfg>(LOYALTY_DEFAULTS);
+  const [loyaltySaved, setLoyaltySaved] = useState(false);
 
   useEffect(() => {
     if (!isConfigured) { setCfg(DEFAULTS); return; }
@@ -75,6 +93,9 @@ export default function Settings() {
       setCfg({ ...DEFAULTS, ...data });
       setRules((data?.commissionRules ?? []).map(toRow));
     });
+    getDoc(doc(db, 'config', 'loyalty')).then((snap) => {
+      setLoyalty({ ...LOYALTY_DEFAULTS, ...(snap.data() as Partial<LoyaltyCfg> | undefined) });
+    });
   }, []);
 
   const save = async (e: FormEvent) => {
@@ -83,6 +104,12 @@ export default function Settings() {
     await setDoc(doc(db, 'config', 'app'), cfg, { merge: true });
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
+  };
+
+  const saveLoyalty = async () => {
+    await setDoc(doc(db, 'config', 'loyalty'), loyalty, { merge: true });
+    setLoyaltySaved(true);
+    setTimeout(() => setLoyaltySaved(false), 2000);
   };
 
   const saveRules = async () => {
@@ -104,6 +131,41 @@ export default function Settings() {
     <>
       <PageHeader title={t('settings')} />
       <form onSubmit={save} className="card p-6 max-w-xl space-y-5">
+        <label className="block">
+          <span className="text-sm font-bold">{t('platformName')}</span>
+          <input className="input mt-1" value={cfg.platformName}
+            onChange={(e) => set('platformName', e.target.value)} />
+        </label>
+        <div className="grid grid-cols-2 gap-4">
+          <label className="block">
+            <span className="text-sm font-bold">{t('brandColor')}</span>
+            <input className="input mt-1 h-11 p-1 cursor-pointer" type="color"
+              value={cfg.brandColor}
+              onChange={(e) => set('brandColor', e.target.value)} />
+          </label>
+          <label className="block">
+            <span className="text-sm font-bold">{t('currency')}</span>
+            <input className="input mt-1" dir="ltr" value={cfg.currency}
+              placeholder="ILS"
+              onChange={(e) => set('currency', e.target.value.toUpperCase())} />
+          </label>
+        </div>
+        <label className="block">
+          <span className="text-sm font-bold">{t('phoneCode')}</span>
+          <input className="input mt-1" dir="ltr" value={cfg.phoneCode}
+            placeholder="+972"
+            onChange={(e) => set('phoneCode', e.target.value)} />
+        </label>
+        <label className="block">
+          <span className="text-sm font-bold">{t('newUserGift')}</span>
+          <input className="input mt-1" type="number" min={0} value={cfg.newUserGift}
+            onChange={(e) => set('newUserGift', Number(e.target.value))} />
+        </label>
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-bold">{t('mapsEnabled')}</span>
+          <input type="checkbox" className="h-5 w-5 accent-brand-600" checked={cfg.mapsEnabled}
+            onChange={(e) => set('mapsEnabled', e.target.checked)} />
+        </div>
         <label className="block">
           <span className="text-sm font-bold">{t('serviceFee')}</span>
           <input className="input mt-1" type="number" value={cfg.serviceFee}
@@ -138,6 +200,32 @@ export default function Settings() {
 
         <button className="btn-cta">{saved ? '✓' : t('save')}</button>
       </form>
+
+      {/* نظام النقاط — config/loyalty: كسب عند delivered + معدل استبدال */}
+      <div className="card p-6 mt-5 max-w-xl space-y-5">
+        <h2 className="font-extrabold">{t('loyalty')}</h2>
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-bold">{t('loyaltyEnabled')}</span>
+          <input type="checkbox" className="h-5 w-5 accent-brand-600"
+            checked={loyalty.enabled}
+            onChange={(e) => setLoyalty({ ...loyalty, enabled: e.target.checked })} />
+        </div>
+        <label className="block">
+          <span className="text-sm font-bold">{t('earnPerShekel')}</span>
+          <input className="input mt-1" type="number" min={0} step="0.1"
+            value={loyalty.earnPerShekel}
+            onChange={(e) => setLoyalty({ ...loyalty, earnPerShekel: Number(e.target.value) })} />
+        </label>
+        <label className="block">
+          <span className="text-sm font-bold">{t('redeemRate')}</span>
+          <input className="input mt-1" type="number" min={0}
+            value={loyalty.redeemRate}
+            onChange={(e) => setLoyalty({ ...loyalty, redeemRate: Number(e.target.value) })} />
+        </label>
+        <button type="button" className="btn-primary" onClick={saveLoyalty}>
+          {loyaltySaved ? '✓' : t('save')}
+        </button>
+      </div>
 
       {/* قواعد العمولة الذكية — مرتبة بالأولوية، أول قاعدة مطابقة تفوز،
           والشرائح (commissionTiers) تبقى الافتراضي الأخير */}

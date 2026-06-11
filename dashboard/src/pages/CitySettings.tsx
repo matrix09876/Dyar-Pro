@@ -18,8 +18,10 @@ interface CityCfg {
 }
 
 /** الفئات الرئيسية الظاهرة في تطبيق المستخدم — تُكتب في
- *  cities/{id}.categories.{key}=bool (عقد docs/DATA-MODEL.md). */
-const CATEGORY_KEYS = [
+ *  cities/{id}.categories.{key}=bool (عقد docs/DATA-MODEL.md).
+ *  تُستورد أيضًا في صفحة المدن للتبديل الجماعي. */
+// eslint-disable-next-line react-refresh/only-export-components
+export const CATEGORY_KEYS = [
   'restaurants', 'groceries', 'pharmacies', 'flowers', 'services',
   'stores', 'taxi', 'parcel', 'marketplace', 'bookings', 'jobs',
 ] as const;

@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { orderBy, limit, doc, updateDoc } from 'firebase/firestore';
+import { Download } from 'lucide-react';
 import { db } from '../lib/firebase';
 import { useCol } from '../hooks/useCol';
 import { useI18n } from '../lib/i18n';
 import { money } from '../lib/format';
+import { exportCsv } from '../lib/csv';
 import { PageHeader, Table, EmptyState, Spinner } from '../components/ui';
 import type { AppUser } from '../types';
 
@@ -31,13 +33,28 @@ export default function Users() {
   const toggleMerchant = (u: AppUser) =>
     updateDoc(doc(db, 'users', u.id), { merchant: !u.merchant });
 
+  const downloadCsv = () =>
+    exportCsv('users',
+      [t('name'), t('phone'), t('email'), 'Role', t('wallet'), t('points'), t('status')],
+      filtered.map((u) => [
+        u.name, u.phone, u.email, u.role,
+        ((u.walletBalance ?? 0) / 100).toFixed(2), u.points ?? 0, u.status ?? 'active',
+      ]));
+
   return (
     <>
-      <PageHeader title={t('users')} />
+      <PageHeader
+        title={t('users')}
+        action={
+          <button className="btn-ghost" onClick={downloadCsv}>
+            <Download size={18} /> CSV
+          </button>
+        }
+      />
       <input className="input max-w-sm mb-4" placeholder={t('search')} value={q} onChange={(e) => setQ(e.target.value)} />
 
       {loading ? <Spinner /> : filtered.length === 0 ? <EmptyState /> : (
-        <Table headers={[t('name'), t('phone'), t('email'), 'Role', 'B2B', t('wallet'), t('status'), t('actions')]}>
+        <Table headers={[t('name'), t('phone'), t('email'), 'Role', 'B2B', t('wallet'), t('points'), t('status'), t('actions')]}>
           {filtered.map((u) => (
             <tr key={u.id} className="table-row">
               <td className="td font-bold">{u.name ?? '—'}</td>
@@ -54,6 +71,7 @@ export default function Users() {
                 </button>
               </td>
               <td className="td tabular-nums">{money(u.walletBalance)}</td>
+              <td className="td tabular-nums">⭐ {u.points ?? 0}</td>
               <td className="td">
                 <span className={`badge ${u.status === 'blocked' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
                   {u.status === 'blocked' ? t('block') : t('active')}

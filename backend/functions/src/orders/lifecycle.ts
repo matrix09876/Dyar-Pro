@@ -31,6 +31,20 @@ export const createOrder = onCall(async (req) => {
     throw new HttpsError('resource-exhausted', 'too many orders, slow down');
   }
 
+  // 🚫 عناوين محظورة (مكافحة الاحتيال) — blockedAddresses من اللوحة:
+  // أي عنوان يحتوي سطرًا محظورًا (بعد trim+lowercase) يُرفض فورًا.
+  const addrLine = String(
+    (address as { line?: string } | undefined)?.line ?? ''
+  ).trim().toLowerCase();
+  if (addrLine) {
+    const blockedSnap = await db().collection('blockedAddresses').get();
+    const blocked = blockedSnap.docs.some((d) => {
+      const line = String(d.data().line ?? '').trim().toLowerCase();
+      return line !== '' && addrLine.includes(line);
+    });
+    if (blocked) throw new HttpsError('failed-precondition', 'blocked-address');
+  }
+
   const storeSnap = await db().doc(`stores/${storeId}`).get();
   if (!storeSnap.exists) throw new HttpsError('not-found', 'store not found');
   const store = storeSnap.data()!;
@@ -227,16 +241,53 @@ export const updateOrderStatus = onCall(async (req) => {
       },
     }, { merge: true });
 
+    // 🎁 نظام النقاط (config/loyalty): نقاط ولاء للزبون عند كل تسليم
+    const loyalty = (await db().doc('config/loyalty').get()).data();
+    if (loyalty?.enabled) {
+      const pts = Math.round(
+        (after.pricing.total / 100) * (loyalty.earnPerShekel ?? 0));
+      if (pts > 0) {
+        await db().doc(`users/${after.customerUid}`).set(
+          { points: FieldValue.increment(pts) }, { merge: true });
+      }
+    }
+
     if (after.driverUid) {
       const drRef = db().doc(`drivers/${after.driverUid}`);
       const dr = (await drRef.get()).data();
       const dAvg = dr?.stats?.avgDeliveryMins ?? actualMins;
+      const deliveredCount = (dr?.stats?.deliveredCount ?? 0) + 1;
       await drRef.set({
         stats: {
           avgDeliveryMins: Math.round(dAvg * 0.8 + actualMins * 0.2),
           deliveries: (dr?.stats?.deliveries ?? 0) + 1,
+          deliveredCount,
         },
       }, { merge: true });
+
+      // 🏆 جوائز المندوبين (driverPrizes): بلوغ هدف جائزة نشطة → مكافأة
+      const prizesSnap = await db().collection('driverPrizes')
+        .where('active', '==', true).get();
+      for (const p of prizesSnap.docs) {
+        const prize = p.data();
+        const bonus = Number(prize.bonus) || 0;
+        if (Number(prize.targetDeliveries) === deliveredCount && bonus > 0) {
+          await db().collection('transactions').add({
+            uid: after.driverUid, type: 'prize_bonus', amount: bonus,
+            meta: { prizeId: p.id, title: prize.title ?? '', deliveredCount },
+            createdAt: Timestamp.now(),
+          });
+          await drRef.update({
+            'earnings.total': FieldValue.increment(bonus),
+          });
+          await logAction({
+            category: 'business',
+            action: `prize "${prize.title}" (${prize.targetDeliveries} deliveries) → driver ${after.driverUid}`,
+            by: 'system',
+            entity: p.id,
+          });
+        }
+      }
 
       // 🏆 مكافأة سرعة: التسليم ضمن الـ ETA الموعود → ₪2 تحفيز
       if (after.etaMins && actualMins <= after.etaMins) {

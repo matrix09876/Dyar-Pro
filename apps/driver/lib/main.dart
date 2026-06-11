@@ -10,7 +10,8 @@ import 'screens/auth_gate.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // إعدادات Firebase تُولَّد لاحقًا بـ flutterfire configure (firebase_options.dart)
-  await initDyarFirebase();
+  // اشتراك بث الإشعارات: تطبيق السائق = جمهور drivers
+  await initDyarFirebase(broadcastTopic: 'role-drivers');
   runApp(const ProviderScope(child: DriverApp()));
 }
 
