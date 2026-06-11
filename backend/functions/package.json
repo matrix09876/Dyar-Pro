@@ -7,6 +7,7 @@
   "scripts": {
     "build": "tsc",
     "build:watch": "tsc --watch",
+    "test:commission": "tsc && node ../tests/commission.test.mjs",
     "serve": "npm run build && firebase emulators:start --only functions",
     "deploy": "firebase deploy --only functions",
     "lint": "eslint --ext .ts src"

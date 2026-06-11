@@ -2,6 +2,7 @@
 import { getFirestore, FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import { ORDER_TRANSITIONS, type Order, type OrderStatus } from '../types';
+import { resolveCommissionPct } from '../ops/commission';
 import { distanceKm, logAction, queueMail } from '../ops/utils';
 
 const db = () => getFirestore();
@@ -131,16 +132,46 @@ export const updateOrderStatus = onCall(async (req) => {
       (status === 'cancelled' && order.customerUid === uid && order.status === 'pending');
     if (!ok) throw new HttpsError('permission-denied', 'not allowed for this transition');
 
+    // قراءات العمولة قبل أي كتابة (قيود الـ transaction): المتجر +
+    // config/app + مدينة المتجر لمحرك العمولات الذكية.
+    let store: FirebaseFirestore.DocumentData | undefined;
+    let cfg: FirebaseFirestore.DocumentData = {};
+    let cityCountry: string | undefined;
+    if (status === 'delivered' && order.driverUid) {
+      store = (await tx.get(db().doc(`stores/${order.storeId}`))).data();
+      cfg = (await tx.get(db().doc('config/app'))).data() ?? {};
+      if (store?.cityId) {
+        cityCountry = (await tx.get(db().doc(`cities/${store.cityId}`)))
+          .data()?.country;
+      }
+    }
+
     tx.update(ref, {
       status,
       timeline: FieldValue.arrayUnion({ status, at: Timestamp.now(), by: uid }),
       updatedAt: FieldValue.serverTimestamp(),
     });
 
-    // عند التسليم: احتساب أرباح السائق والعمولة
+    // عند التسليم: احتساب أرباح السائق والعمولة (محرك العمولات الذكية —
+    // override المتجر ← خدمات ← قواعد commissionRules/الذروة ← الافتراضي)
     if (status === 'delivered' && order.driverUid) {
-      const store = (await tx.get(db().doc(`stores/${order.storeId}`))).data();
-      const commission = Math.round(order.pricing.subtotal * (store?.commissionPct ?? 0) / 100);
+      const pct = resolveCommissionPct({
+        store: {
+          id: order.storeId,
+          type: store?.type,
+          cityId: store?.cityId,
+          commissionPct: typeof store?.commissionPct === 'number'
+            ? store.commissionPct : undefined,
+        },
+        city: store?.cityId
+          ? { id: store.cityId, country: cityCountry } : null,
+        at: new Date(),
+        rules: cfg.commissionRules ?? [],
+        tiers: cfg.commissionTiers,
+        servicePct: cfg.serviceProvidersPct,
+        defaultPct: cfg.defaultCommissionPct,
+      });
+      const commission = Math.round(order.pricing.subtotal * pct / 100);
       const driverEarn = order.pricing.deliveryFee + order.pricing.tip;
       tx.update(db().doc(`drivers/${order.driverUid}`), {
         'earnings.today': FieldValue.increment(driverEarn),

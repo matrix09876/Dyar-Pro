@@ -87,6 +87,25 @@ serviceProvidersPct: 6     // حلاق/طبيب/ميكانيكي/محامي...
 التسوية الشهرية تحتسب العمولة من عدد طلبات الشهر وفق هذه الشرائح،
 مع إمكانية override لكل متجر عبر `commissionPct`.
 
+### قواعد العمولة الذكية — `config/app.commissionRules`
+قائمة قواعد **مرتبة بالأولوية** (أول قاعدة مطابقة تفوز) لتحديد العمولة
+حسب البلد/المدينة/المتجر/نوع الخدمة مع دعم نسبة ذروة زمنية:
+```
+commissionRules: [{
+  scope: 'store'|'city'|'country'|'storeType'
+  match: string            // storeId | cityId | country | store.type
+  pct: number              // النسبة الأساسية للقاعدة
+  peakPct?: number         // نسبة الذروة (تتجاوز pct داخل النافذة)
+  peakHours?: { from: 'HH:mm', to: 'HH:mm' }   // Asia/Jerusalem،
+}]                         // النافذة تدعم عبور منتصف الليل (from > to)
+```
+ترتيب الحسم الكامل (`resolveCommissionPct` في
+`backend/functions/src/ops/commission.ts`):
+1. `stores/{id}.commissionPct` — override المتجر (الأعلى).
+2. `type === 'service'` → `serviceProvidersPct` (افتراضي 6%).
+3. أول قاعدة مطابقة من `commissionRules` (مع `peakPct` داخل النافذة).
+4. `commissionTiers` حسب حجم الطلبات الشهري — **الافتراضي الأخير**.
+
 ### `stores/{storeId}/menu/{itemId}`
 ```
 name, description, imageUrl, price: number
@@ -308,7 +327,10 @@ createdAt: Timestamp           // (+ soldAt عند البيع)
 `price * config/app.marketplaceCommissionPct (افتراضي 5) / 100`.
 
 ### `config/app`  (وثيقة إعدادات مفردة)
-`{ serviceFee, defaultCommissionPct, marketplaceCommissionPct, currency, supportPhone, minAppVersion, maintenanceMode, referralReward, surgeEnabled }`
+`{ serviceFee, defaultCommissionPct, marketplaceCommissionPct, commissionTiers, serviceProvidersPct, commissionRules, currency, supportPhone, minAppVersion, maintenanceMode, referralReward, surgeEnabled }`
+
+`commissionTiers` و`serviceProvidersPct` و`commissionRules` موثّقة أعلاه
+في قسم «العمولة المتدرجة» و«قواعد العمولة الذكية».
 
 ---
 ## وحدات السوبر آب (من دراسة تطبيق ديار الحالي + المنافسين)

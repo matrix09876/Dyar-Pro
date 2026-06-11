@@ -1,8 +1,13 @@
 // المهام المجدولة: تصفير أرباح السائقين، تذكير الحجوزات قبل 30 دقيقة،
-// والتسوية الشهرية بالعمولات المتدرجة (سياسة العقد: 15/13.5/12% و6% خدمات).
+// والتسوية الشهرية عبر محرك العمولات الذكية (ops/commission.ts):
+// override المتجر ← خدمات 6% ← قواعد commissionRules ← شرائح 15/13.5/12%.
 import { getFirestore, Timestamp } from 'firebase-admin/firestore';
 import { getMessaging } from 'firebase-admin/messaging';
 import { onSchedule } from 'firebase-functions/v2/scheduler';
+import {
+  DEFAULT_SERVICE_PCT, DEFAULT_TIERS, resolveCommissionPct,
+  type CommissionCity, type CommissionRule, type CommissionTier,
+} from './commission';
 import { logAction } from './utils';
 
 const db = () => getFirestore();
@@ -69,13 +74,14 @@ export const monthlySettlement = onSchedule(
     const monthEnd = new Date(nowD.getFullYear(), nowD.getMonth(), 1);
 
     const cfg = (await db().doc('config/app').get()).data() ?? {};
-    const tiers: { maxMonthlyOrders: number | null; pct: number }[] =
-      cfg.commissionTiers ?? [
-        { maxMonthlyOrders: 299, pct: 15 },
-        { maxMonthlyOrders: 500, pct: 13.5 },
-        { maxMonthlyOrders: null, pct: 12 },
-      ];
-    const servicePct: number = cfg.serviceProvidersPct ?? 6;
+    const tiers: CommissionTier[] = cfg.commissionTiers ?? DEFAULT_TIERS;
+    const servicePct: number = cfg.serviceProvidersPct ?? DEFAULT_SERVICE_PCT;
+    const rules: CommissionRule[] = cfg.commissionRules ?? [];
+
+    // خريطة المدن لمطابقة قواعد city/country في محرك العمولات
+    const citiesSnap = await db().collection('cities').get();
+    const cities = new Map<string, CommissionCity>(citiesSnap.docs.map((c) =>
+      [c.id, { id: c.id, country: c.data().country as string | undefined }]));
 
     const stores = await db().collection('stores')
       .where('status', '==', 'approved').get();
@@ -94,17 +100,20 @@ export const monthlySettlement = onSchedule(
       const gross = orders.docs
         .reduce((sum, o) => sum + (o.data().pricing?.subtotal ?? 0), 0);
 
-      // الأولوية: override المتجر ← خدمات 6% ← الشرائح حسب الحجم
-      let pct: number;
-      if (typeof s.commissionPct === 'number') {
-        pct = s.commissionPct;
-      } else if (s.type === 'service') {
-        pct = servicePct;
-      } else {
-        pct = (tiers.find((t) =>
-          t.maxMonthlyOrders === null || count <= t.maxMonthlyOrders,
-        ) ?? tiers[tiers.length - 1]).pct;
-      }
+      // محرك العمولات الذكية: override ← خدمات ← قواعد ← شرائح الحجم
+      const pct = resolveCommissionPct({
+        store: {
+          id: st.id,
+          type: s.type,
+          cityId: s.cityId,
+          commissionPct:
+            typeof s.commissionPct === 'number' ? s.commissionPct : undefined,
+        },
+        city: s.cityId ? cities.get(s.cityId) ?? null : null,
+        at: nowD,
+        rules, tiers, servicePct,
+        monthlyOrders: count,
+      });
       const commission = Math.round((gross * pct) / 100);
 
       await db().collection('transactions').add({
