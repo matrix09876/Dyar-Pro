@@ -9,7 +9,8 @@ import 'screens/shell.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await initDyarFirebase();
+  // اشتراك بث الإشعارات: تطبيق التاجر = جمهور partners
+  await initDyarFirebase(broadcastTopic: 'role-partners');
   runApp(const ProviderScope(child: PartnerApp()));
 }
 

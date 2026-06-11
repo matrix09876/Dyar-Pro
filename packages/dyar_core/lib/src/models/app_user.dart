@@ -7,6 +7,9 @@ class AppUser {
   final UserRole role;
   final String? name, phone, email, photoUrl;
   final int walletBalance; // أغورة
+
+  /// نقاط الولاء — يمنحها الخادم عند كل تسليم وفق config/loyalty.
+  final int points;
   final List<String> allergies;
   final List<Map<String, dynamic>> addresses;
   final bool blocked;
@@ -19,6 +22,7 @@ class AppUser {
     this.role = UserRole.customer,
     this.name, this.phone, this.email, this.photoUrl,
     this.walletBalance = 0,
+    this.points = 0,
     this.allergies = const [],
     this.addresses = const [],
     this.blocked = false,
@@ -37,6 +41,7 @@ class AppUser {
       email: d['email'],
       photoUrl: d['photoUrl'],
       walletBalance: (d['walletBalance'] ?? 0) as int,
+      points: (d['points'] ?? 0) as int,
       allergies: List<String>.from(d['allergies'] ?? const []),
       addresses: List<Map<String, dynamic>>.from(
           (d['addresses'] ?? const []).map((e) => Map<String, dynamic>.from(e))),
