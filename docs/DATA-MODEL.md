@@ -166,6 +166,33 @@ taxiService / sharedTransport / parcelDelivery: نفس النمط (أساس + ك
 `prizes[]` (جوائز السائقين: pending_delivery|delivered)،
 وقسم `employeeDrivers` (سائقو رواتب بحساب وقت يومي).
 
+### حوافز السائقين لكل مدينة — `cities/{id}.driverIncentives`
+```
+speedBonus, connectionBonus, fuelCostSupport, deliveryProfit,
+saveSpot, physicalPrizes: { enabled, ...params }
+quickReplies: string[]            // ردود سريعة جاهزة للسائقين
+paymentGateway: 'EasycardNG' | ...   // بوابة دفع السائقين
+```
+`newslettersDrivers/{id}`: نشرات موجهة للسائقين.
+
+### `packageRoutes/{routeId}` — مسارات شحن الطرود (Package Delivery Services)
+```
+name: 'إسرائيل', pickupPoint, deliveryPoint, notes
+maxWeightKg: 1000, maxVolumeM3: 6
+rates: { base: 50, perKg: 100, perM3: 100 }
+active: boolean
+```
+
+### البانرات والفلاتر لكل مدينة — `cities/{id}/banners` + `/filters`
+```
+banner: { image, title, placement: 'stories'|'main'|'lower'|'driver'
+          |'<category>', target: { type: 'business'|'discount'|'search',
+          businessId?, query? }, active, sortOrder }
+filter: { category: 'services'|'restaurants'|..., name, icon, active }
+// فلاتر الخدمات: خدمات منزلية، تنظيف، سباكة، تصليح سيارات، نجارة،
+// كهربائي، إلكترونيات، تجميل، حلاق، غسيل... (شبكة أيقونات)
+```
+
 ### `orders/{orderId}`  — قلب النظام
 ```
 code: string                   // رقم قصير للعرض
