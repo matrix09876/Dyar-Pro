@@ -17,7 +17,30 @@
 | `packages/dyar_ui` | نظام تصميم Dyar Ultra UI (ثيم/ويدجتس) |
 | `docs/` | عقد البيانات + خارطة الطريق |
 
-## التشغيل السريع
+## ⚡ وضع الديمو — تشغيل كامل فورًا بلا أي مفاتيح
+
+المنظومة تعمل محليًا 100% عبر محاكيات Firebase (مُجرَّب ومُتحقق منه):
+
+```bash
+# 1) المحاكيات (Java 11+ مطلوب)
+npm i -g firebase-tools
+cd backend && firebase emulators:start --only auth,firestore --project demo-dyar
+
+# 2) بيانات تجريبية كاملة (نافذة ثانية): مدير+تاجر+سائق+زبون+متجر+قائمة+طلب حي
+cd backend/seed && npm install && cd .. && \
+FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099 \
+node seed/seed.mjs
+
+# 3) لوحة التحكم على المحاكي
+cd dashboard && cp .env.demo .env && npm install && npm run dev
+```
+
+**حسابات الديمو:** `admin@dyar.app/admin1234` (اللوحة) · `partner@dyar.app/partner1234`
+(تطبيق التاجر) · `driver@dyar.app/driver1234` · `customer@dyar.app/customer1234`.
+ستجد طلبًا حيًا `#DYDEMO` بانتظار القبول، متجر "نودلز 33" بثلاثة أصناف، سائقًا
+متصلًا، وكوبون `DYAR10`.
+
+## التشغيل السريع (إنتاج)
 
 ### 1) لوحة التحكم
 ```bash
