@@ -28,6 +28,13 @@ createdAt, updatedAt
 ownerUid: string               // → users (role=partner)
 name, description, logoUrl, coverUrl
 type: 'restaurant'|'grocery'|'pharmacy'|'flowers'|'service'|'store'
+serviceCategory?: string       // عند type=='service' فقط — مهنة المزوّد:
+                               // 'plumber'|'electrician'|'painter'|'mechanic'
+                               // |'carpenter'|'accountant'|'lawyer'|'doctor'
+                               // |'dentist'|'barber'|'salon'|'cleaning'
+                               // |'electronics'|'ac'
+                               // العقد الثابت: kServiceCategories في
+                               // packages/dyar_core (key+emoji+labelAr/He/En)
 categoryIds: string[]          // → categories
 cityId: string                 // → cities
 location: { lat, lng, address }
@@ -122,10 +129,14 @@ saturation: { enabled, delayedTime?, until? }
 commissionDisable: { enabled, vehicleType?, reactivateAt? }
 autoAssignment: boolean              // إسناد آلي لكل مدينة
 cancelIfNotAccepted: boolean
-categories: { restaurants, stores, market, pharmacies, express, pets,
-              services, construction, jobs, driverRequest, taxi, healthy,
-              dineout, local, booking, sharedTransport, parcel,
-              marketplace }          // تفعيل الفئات لكل مدينة
+categories: { restaurants, groceries, pharmacies, flowers, services,
+              stores, taxi, parcel, marketplace, bookings, jobs,
+              market, express, pets, construction, driverRequest,
+              healthy, dineout, local, sharedTransport }
+              // تفعيل الفئات لكل مدينة — `categories.{key}=bool`.
+              // المفاتيح الـ11 الأولى هي ما تتحكم به لوحة CitySettings
+              // وما يقرأه تطبيق المستخدم (cityConfigProvider) لإخفاء
+              // بلاطات الرئيسية. الافتراضي الآمن: غير المضبوط = ظاهر.
 categoryBadges: { [category]: string }   // نص شارة لكل فئة
 marketplace: { enabled[3], businessIds[], warehouse: { enabled, address,
                phone, hours } }
@@ -308,7 +319,11 @@ createdAt: Timestamp           // (+ soldAt عند البيع)
 `price * config/app.marketplaceCommissionPct (افتراضي 5) / 100`.
 
 ### `config/app`  (وثيقة إعدادات مفردة)
-`{ serviceFee, defaultCommissionPct, marketplaceCommissionPct, currency, supportPhone, minAppVersion, maintenanceMode, referralReward, surgeEnabled }`
+`{ serviceFee, defaultCommissionPct, marketplaceCommissionPct, currency, supportPhone, minAppVersion, maintenanceMode, referralReward, surgeEnabled, defaultCityId? }`
+
+`defaultCityId`: المدينة التي يقرأ منها تطبيق المستخدم قواعد الرؤية
+(`cities/{id}.categories`) عبر `cityConfigProvider` — وإن غاب، تُؤخذ أول
+مدينة `active`، وإن لم توجد فكل الفئات ظاهرة (افتراضي آمن).
 
 ---
 ## وحدات السوبر آب (من دراسة تطبيق ديار الحالي + المنافسين)

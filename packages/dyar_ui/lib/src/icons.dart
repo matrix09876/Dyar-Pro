@@ -52,4 +52,5 @@ abstract final class LucideIcons {
   static const IconData sunrise = Icons.wb_twilight_rounded;
   static const IconData calendarDays = Icons.calendar_month_rounded;
   static const IconData badgeCheck = Icons.verified_rounded;
+  static const IconData phone = Icons.call_rounded;
 }

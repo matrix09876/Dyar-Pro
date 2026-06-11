@@ -180,6 +180,11 @@ class S {
     'sold': ['مُباع', 'נמכר', 'Sold'],
     'searchProducts': ['ابحث عن منتج...', 'חפש מוצר...', 'Search products...'],
     'productPending': ['أُرسل منتجك وسيظهر بعد موافقة الإدارة', 'המוצר נשלח ויופיע לאחר אישור ההנהלה', 'Submitted — visible once approved'],
+    // مقدمو الخدمات (شاشة المهن)
+    'serviceProviders': ['مقدمو الخدمات', 'נותני שירות', 'Service providers'],
+    'chooseProfession': ['اختر المهنة المطلوبة', 'בחר את המקצוע', 'Choose a profession'],
+    'call': ['اتصال', 'התקשר', 'Call'],
+    'noProviders': ['لا يوجد مقدمو خدمة بعد', 'אין נותני שירות עדיין', 'No providers yet'],
     'catElectronics': ['إلكترونيات', 'אלקטרוניקה', 'Electronics'],
     'catFashion': ['أزياء', 'אופנה', 'Fashion'],
     'catHome': ['منزل', 'בית', 'Home'],

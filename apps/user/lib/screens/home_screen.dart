@@ -10,6 +10,7 @@ import 'store_screen.dart';
 import 'taxi_screen.dart';
 import 'parcel_screen.dart';
 import 'marketplace_screen.dart';
+import 'services_screen.dart';
 
 final approvedStoresProvider = StreamProvider.family<List<Store>, String?>(
     (ref, type) => ref.watch(storeServiceProvider).watchApproved(type: type));
@@ -44,6 +45,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final s = ref.watch(stringsProvider);
+    // قواعد الرؤية لكل مدينة (cities.categories من اللوحة) — افتراضي آمن:
+    // كل شيء ظاهر إن لم تُضبط الوثيقة.
+    final city = ref.watch(cityConfigProvider).value ?? const CityConfig({});
     final storesAsync = ref.watch(approvedStoresProvider(_type));
     final allStores = storesAsync.value ?? [];
     // بحث وظيفي: بالاسم أو الوصف (غير حسّاس لحالة الأحرف)
@@ -226,71 +230,97 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   _ServiceTile(null, s('home'), LucideIcons.layoutGrid,
                       const [Color(0xFFF4691E), Color(0xFFBA3A11)],
                       _type, _select),
-                  _ServiceTile('restaurant', s('restaurants'),
-                      LucideIcons.utensils,
-                      const [Color(0xFFEF4444), Color(0xFF991B1B)],
-                      _type, _select),
-                  _ServiceTile('grocery', s('groceries'),
-                      LucideIcons.shoppingBag,
-                      const [Color(0xFF22C55E), Color(0xFF15803D)],
-                      _type, _select),
-                  _ServiceTile('pharmacy', s('pharmacies'), LucideIcons.pill,
-                      const [Color(0xFF06B6D4), Color(0xFF0E7490)],
-                      _type, _select),
-                  _ServiceTile('flowers', s('flowers'), LucideIcons.flower2,
-                      const [Color(0xFFEC4899), Color(0xFF9D174D)],
-                      _type, _select),
-                  _ServiceTile('service', s('services'), LucideIcons.wrench,
-                      const [Color(0xFF8B5CF6), Color(0xFF5B21B6)],
-                      _type, _select),
+                  if (city.shows('restaurants'))
+                    _ServiceTile('restaurant', s('restaurants'),
+                        LucideIcons.utensils,
+                        const [Color(0xFFEF4444), Color(0xFF991B1B)],
+                        _type, _select),
+                  if (city.shows('groceries'))
+                    _ServiceTile('grocery', s('groceries'),
+                        LucideIcons.shoppingBag,
+                        const [Color(0xFF22C55E), Color(0xFF15803D)],
+                        _type, _select),
+                  if (city.shows('pharmacies'))
+                    _ServiceTile('pharmacy', s('pharmacies'),
+                        LucideIcons.pill,
+                        const [Color(0xFF06B6D4), Color(0xFF0E7490)],
+                        _type, _select),
+                  if (city.shows('flowers'))
+                    _ServiceTile('flowers', s('flowers'), LucideIcons.flower2,
+                        const [Color(0xFFEC4899), Color(0xFF9D174D)],
+                        _type, _select),
+                  if (city.shows('services'))
+                    // بلاطة "خدمات" تفتح شاشة مهن مقدمي الخدمات
+                    _ServiceTile('service', s('services'), LucideIcons.wrench,
+                        const [Color(0xFF8B5CF6), Color(0xFF5B21B6)],
+                        _type,
+                        (_) => Navigator.of(context).push(MaterialPageRoute(
+                            builder: (_) => const ServicesScreen()))),
                 ],
               ),
             ),
           ),
           const SliverToBoxAdapter(child: SizedBox(height: 18)),
 
-          // ===== تاكسي + طرود + بيع وشراء =====
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Column(children: [
-                Row(children: [
-                  Expanded(
-                    child: _ActionCard(
-                      emoji: '🚕',
-                      label: s('taxi'),
-                      sub: s('whereTo'),
-                      colors: const [Color(0xFF111827), Color(0xFF374151)],
+          // ===== تاكسي + طرود + بيع وشراء (حسب رؤية المدينة) =====
+          if (city.shows('taxi') ||
+              city.shows('parcel') ||
+              city.shows('marketplace'))
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(children: [
+                  if (city.shows('taxi') || city.shows('parcel'))
+                    Row(children: [
+                      if (city.shows('taxi'))
+                        Expanded(
+                          child: _ActionCard(
+                            emoji: '🚕',
+                            label: s('taxi'),
+                            sub: s('whereTo'),
+                            colors: const [
+                              Color(0xFF111827),
+                              Color(0xFF374151)
+                            ],
+                            onTap: () => Navigator.of(context).push(
+                                MaterialPageRoute(
+                                    builder: (_) => const TaxiScreen())),
+                          ),
+                        ),
+                      if (city.shows('taxi') && city.shows('parcel'))
+                        const SizedBox(width: 12),
+                      if (city.shows('parcel'))
+                        Expanded(
+                          child: _ActionCard(
+                            emoji: '📦',
+                            label: s('parcel'),
+                            sub: 'OTP · حماية ديار',
+                            colors: const [
+                              Color(0xFFF59E0B),
+                              Color(0xFFB45309)
+                            ],
+                            onTap: () => Navigator.of(context).push(
+                                MaterialPageRoute(
+                                    builder: (_) => const ParcelScreen())),
+                          ),
+                        ),
+                    ]),
+                  if ((city.shows('taxi') || city.shows('parcel')) &&
+                      city.shows('marketplace'))
+                    const SizedBox(height: 12),
+                  if (city.shows('marketplace'))
+                    _ActionCard(
+                      emoji: '🛍️',
+                      label: s('marketplace'),
+                      sub: s('marketplaceSub'),
+                      colors: const [Color(0xFF8B5CF6), Color(0xFF5B21B6)],
                       onTap: () => Navigator.of(context).push(
                           MaterialPageRoute(
-                              builder: (_) => const TaxiScreen())),
+                              builder: (_) => const MarketplaceScreen())),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _ActionCard(
-                      emoji: '📦',
-                      label: s('parcel'),
-                      sub: 'OTP · حماية ديار',
-                      colors: const [Color(0xFFF59E0B), Color(0xFFB45309)],
-                      onTap: () => Navigator.of(context).push(
-                          MaterialPageRoute(
-                              builder: (_) => const ParcelScreen())),
-                    ),
-                  ),
                 ]),
-                const SizedBox(height: 12),
-                _ActionCard(
-                  emoji: '🛍️',
-                  label: s('marketplace'),
-                  sub: s('marketplaceSub'),
-                  colors: const [Color(0xFF8B5CF6), Color(0xFF5B21B6)],
-                  onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                      builder: (_) => const MarketplaceScreen())),
-                ),
-              ]),
+              ),
             ),
-          ),
           const SliverToBoxAdapter(child: SizedBox(height: 24)),
 
           // ===== عنوان قسم المتاجر =====

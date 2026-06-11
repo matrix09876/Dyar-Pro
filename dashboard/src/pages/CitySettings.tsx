@@ -14,7 +14,15 @@ interface CityCfg {
   dynamicFareEnabled: boolean; demandLevel: string;
   basePct: number; secondPct: number; thirdPct: number; fourthPct: number;
   autoAssignment: boolean; cancelIfNotAccepted: boolean;
+  categories: Record<string, boolean>;
 }
+
+/** الفئات الرئيسية الظاهرة في تطبيق المستخدم — تُكتب في
+ *  cities/{id}.categories.{key}=bool (عقد docs/DATA-MODEL.md). */
+const CATEGORY_KEYS = [
+  'restaurants', 'groceries', 'pharmacies', 'flowers', 'services',
+  'stores', 'taxi', 'parcel', 'marketplace', 'bookings', 'jobs',
+] as const;
 
 const DEFAULTS: CityCfg = {
   hoursOpen: '08:00', hoursClose: '23:59',
@@ -22,6 +30,7 @@ const DEFAULTS: CityCfg = {
   dynamicFareEnabled: false, demandLevel: 'high',
   basePct: 5, secondPct: 20, thirdPct: 15, fourthPct: 30,
   autoAssignment: true, cancelIfNotAccepted: true,
+  categories: Object.fromEntries(CATEGORY_KEYS.map((k) => [k, true])),
 };
 
 export default function CitySettings() {
@@ -49,6 +58,8 @@ export default function CitySettings() {
         fourthPct: d.zoneTiers?.fourthPct ?? 30,
         autoAssignment: d.autoAssignment ?? true,
         cancelIfNotAccepted: d.cancelIfNotAccepted ?? true,
+        categories: Object.fromEntries(
+          CATEGORY_KEYS.map((k) => [k, d.categories?.[k] ?? true])),
       });
     });
   }, [id]);
@@ -68,6 +79,7 @@ export default function CitySettings() {
       },
       autoAssignment: cfg.autoAssignment,
       cancelIfNotAccepted: cfg.cancelIfNotAccepted,
+      categories: cfg.categories,
     }, { merge: true });
     setSaved(true); setTimeout(() => setSaved(false), 2000);
   };
@@ -128,6 +140,27 @@ export default function CitySettings() {
           </div>
         </div>
       </div>
+
+      {/* الفئات الظاهرة في هذه المدينة — تتحكم برؤية بلاطات تطبيق المستخدم */}
+      <div className="card p-6 space-y-4 max-w-4xl mt-5">
+        <div>
+          <h2 className="font-extrabold">{t('visibleCategories')}</h2>
+          <p className="text-xs text-ink-muted mt-1">{t('visibleCategoriesHint')}</p>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+          {CATEGORY_KEYS.map((k) => (
+            <label key={k}
+              className="flex items-center gap-2 rounded-xl border border-line px-3 py-2 cursor-pointer">
+              <input type="checkbox" className="h-5 w-5 accent-brand-600"
+                checked={cfg.categories[k] ?? true}
+                onChange={(e) => set('categories',
+                  { ...cfg.categories, [k]: e.target.checked })} />
+              <span className="text-sm font-bold">{t(`cat_${k}`)}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
       <button className="btn-primary mt-5" onClick={save}>
         {saved ? '✓' : t('save')}
       </button>
