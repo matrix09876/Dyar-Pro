@@ -23,6 +23,10 @@ export const autoAssignNearestDriver = onDocumentUpdated('orders/{orderId}', asy
   // فقط عند الانتقال إلى ready وبدون سائق معيّن
   if (!(before.status !== 'ready' && after.status === 'ready' && !after.driverUid)) return;
 
+  // مفتاح "Assignment" من لوحة التحكم — إيقافه يحوّل للإسناد اليدوي
+  const cfg = await db().doc('config/app').get();
+  if (cfg.data()?.autoAssign === false) return;
+
   const storeSnap = await db().doc(`stores/${after.storeId}`).get();
   const storeLoc = storeSnap.data()?.location as GeoPoint | undefined;
   if (!storeLoc) return;

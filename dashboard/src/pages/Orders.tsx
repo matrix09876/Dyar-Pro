@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import { orderBy, limit, where, doc, updateDoc } from 'firebase/firestore';
+import { useEffect, useState } from 'react';
+import { orderBy, limit, where, doc, updateDoc, getDoc, setDoc } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
 import { X } from 'lucide-react';
-import { db, functions } from '../lib/firebase';
+import { db, functions, isConfigured } from '../lib/firebase';
 import { useCol } from '../hooks/useCol';
 import { useI18n } from '../lib/i18n';
 import { money, dateTime } from '../lib/format';
@@ -51,9 +51,42 @@ export default function Orders() {
     setSelected(null);
   };
 
+  // مفاتيح الترويسة (مثل اللوحة الحالية): التسعير الديناميكي + الإسناد الآلي
+  const [cfg, setCfg] = useState<{ surgeEnabled: boolean; autoAssign: boolean }>({
+    surgeEnabled: true, autoAssign: true,
+  });
+  useEffect(() => {
+    if (!isConfigured) return;
+    getDoc(doc(db, 'config', 'app')).then((s) => {
+      const d = s.data();
+      if (d) setCfg({ surgeEnabled: d.surgeEnabled ?? true, autoAssign: d.autoAssign ?? true });
+    });
+  }, []);
+  const toggleCfg = async (k: 'surgeEnabled' | 'autoAssign') => {
+    const next = { ...cfg, [k]: !cfg[k] };
+    setCfg(next);
+    await setDoc(doc(db, 'config', 'app'), { [k]: next[k] }, { merge: true });
+  };
+
   return (
     <>
-      <PageHeader title={t('orders')} />
+      <PageHeader
+        title={t('orders')}
+        action={
+          <div className="flex items-center gap-5 text-sm font-semibold">
+            <label className="flex items-center gap-2 cursor-pointer">
+              Dynamic fare
+              <input type="checkbox" className="h-4 w-4 accent-brand-600"
+                checked={cfg.surgeEnabled} onChange={() => toggleCfg('surgeEnabled')} />
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              Assignment
+              <input type="checkbox" className="h-4 w-4 accent-brand-600"
+                checked={cfg.autoAssign} onChange={() => toggleCfg('autoAssign')} />
+            </label>
+          </div>
+        }
+      />
 
       <div className="flex gap-2 mb-4 flex-wrap">
         {FILTERS.map((f) => (

@@ -42,11 +42,42 @@ createdAt, updatedAt
 ```
 فرعية: `stores/{id}/menu/{itemId}` و `stores/{id}/options/{groupId}`.
 
+حقول إضافية (من لوحة admin.dyar.app الحالية — تفاصيل المتجر):
+```
+fees: { serviceFeeFix, serviceFeePct, smallOrderFee, smallOrderUnder,
+        bagFee, extraDeliveryFee, extraDeliveryAfterNProducts }
+logistics: { commission, costPerKm, baseDeliveryFee, extraFee,
+             fleet: boolean, fleetAccessToDyarDrivers: boolean }
+whiteLabel: { showPaymentMethods, requireOtp, pickupOnly, showClientsOnApp }
+advanced: { editDeliveryZones, createStaff, chargeSmallOrder,
+            costPerBag, editBrandImage, editAddress }
+dineOut: { active, description, cuisine, phone, menuPdfUrl, coverUrl,
+           homeDeliveries, reservationCost, cancellationPolicy }
+kiosk: { enabled, increasePrice }
+webhooks: { menuCatalogUrl }
+isPartner: boolean            // شارة شريك
+searchKeywords: string[]
+```
+فرعية إضافية: `stores/{id}/tables/{tableId}` (Dine Out) و
+`stores/{id}/staff/{uid}` (طاقم المتجر).
+
 ### `stores/{storeId}/menu/{itemId}`
 ```
 name, description, imageUrl, price: number
+nameL2?, descriptionL2?            // لغة ثانية اختيارية (من اللوحة الحالية)
 categoryId, optionGroupIds: string[]
 available: boolean, sortOrder: number
+extraDeliveryFee?: number          // رسوم توصيل إضافية للصنف
+flags: { vegan, allergens, spicy, spillHazard }   // وسوم الصنف
+maxQty?: number, featured?: boolean
+```
+
+### `stores/{storeId}/options/{groupId}`  (مجموعات الإضافات)
+```
+name: string                       // مثل "كاري اصفر"، "صدر دجاج"
+active: boolean, sortOrder: number
+choices: [{ name, price, active }]
+showInKiosk: boolean
 ```
 
 ### `categories/{categoryId}`
