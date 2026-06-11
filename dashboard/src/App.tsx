@@ -21,6 +21,8 @@ import Cities from './pages/Cities';
 import Notes from './pages/Notes';
 import Logs from './pages/Logs';
 import Training from './pages/Training';
+import CitySettings from './pages/CitySettings';
+import Banners from './pages/Banners';
 import Settings from './pages/Settings';
 import { Spinner } from './components/ui';
 
@@ -55,6 +57,8 @@ export default function App() {
                 <Route path="/support" element={<Support />} />
                 <Route path="/team" element={<Team />} />
                 <Route path="/cities" element={<Cities />} />
+                <Route path="/cities/:id" element={<CitySettings />} />
+                <Route path="/banners" element={<Banners />} />
                 <Route path="/notes" element={<Notes />} />
                 <Route path="/logs" element={<Logs />} />
                 <Route path="/training" element={<Training />} />

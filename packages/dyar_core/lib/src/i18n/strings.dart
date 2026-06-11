@@ -125,6 +125,8 @@ class S {
     'redeemGift': ['استرداد بطاقة هدية', 'מימוש כרטיס מתנה', 'Redeem gift card'],
     'shareCode': ['رمز المشاركة', 'קוד שיתוף', 'Your code'],
     'noData': ['لا توجد بيانات بعد', 'אין נתונים עדיין', 'Nothing here yet'],
+    'driverRegister': ['تسجيل سائق جديد', 'רישום נהג חדש', 'Driver registration'],
+    'pendingApprovalNote': ['طلبك قيد المراجعة — ستصلك الموافقة من الإدارة', 'הבקשה בבדיקה — תקבל אישור מההנהלה', 'Your application is under review'],
     'error': ['حدث خطأ، حاول مجددًا', 'אירעה שגיאה, נסה שוב', 'Something went wrong, try again'],
   };
 

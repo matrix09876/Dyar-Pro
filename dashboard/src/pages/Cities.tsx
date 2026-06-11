@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { addDoc, collection, deleteDoc, doc, updateDoc } from 'firebase/firestore';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, Settings as SettingsIcon } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { db } from '../lib/firebase';
 import { useCol } from '../hooks/useCol';
 import { useI18n } from '../lib/i18n';
@@ -53,7 +54,8 @@ export default function Cities() {
                   </button>
                 </td>
                 <td className="td">
-                  <button className="btn-ghost !px-2 text-red-500" onClick={() => deleteDoc(doc(db, 'cities', c.id))}>
+                  <Link to={`/cities/${c.id}`} className="btn-ghost !px-2"><SettingsIcon size={18} /></Link>
+                  <button className="btn-ghost !px-2 text-red-500" onClick={() => deleteDoc(doc(db, "cities", c.id))}>
                     <Trash2 size={18} />
                   </button>
                 </td>

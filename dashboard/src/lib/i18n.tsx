@@ -27,6 +27,7 @@ export const T: Dict = {
   notes:        { ar: 'الملاحظات', he: 'הערות', en: 'Notes' },
   training:     { ar: 'التدريب', he: 'הדרכה', en: 'Training' },
   logs:         { ar: 'سجل العمليات', he: 'יומן פעולות', en: 'Logs' },
+  banners:      { ar: 'البانرات', he: 'באנרים', en: 'Banners' },
   settings:     { ar: 'الإعدادات', he: 'הגדרות', en: 'Settings' },
   logout:       { ar: 'تسجيل الخروج', he: 'התנתקות', en: 'Log out' },
 

@@ -8,6 +8,7 @@ export { setUserRole, onUserCreate } from './auth/roles';
 export { createOrder, updateOrderStatus, assignDriver, rateOrder } from './orders/lifecycle';
 export { autoAssignNearestDriver } from './drivers/assignment';
 export { createPaymentIntent, stripeWebhook } from './payments/stripe';
+export { createEasycardPayment, easycardWebhook } from './payments/easycard';
 export { onOrderStatusNotify } from './notifications/fcm';
 export { requestRide, acceptRide } from './rides/taxi';
 export { createParcel, confirmParcelDelivery } from './parcels/shipping';

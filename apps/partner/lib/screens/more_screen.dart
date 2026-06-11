@@ -4,6 +4,9 @@ import 'package:dyar_core/dyar_core.dart';
 import 'package:dyar_ui/dyar_ui.dart';
 
 import 'shell.dart';
+import 'hours_screen.dart';
+import 'promotions_screen.dart';
+import 'balance_screen.dart';
 
 /// "المزيد": تقييم المتجر + اللغة + الوضع الليلي + الخروج.
 /// (مواعيد العمل، مناطق التوصيل، الطابعة... تُضاف تباعًا بنفس النمط.)
@@ -33,6 +36,42 @@ class MoreScreen extends ConsumerWidget {
             ),
           ),
         const SizedBox(height: 10),
+        // إدارة المتجر — مواعيد العمل، العروض، الرصيد
+        if (store != null) ...[
+          DyarCard(
+            onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => HoursScreen(storeId: store.id))),
+            child: Row(children: [
+              const Icon(LucideIcons.clock, color: DyarTokens.brand),
+              const SizedBox(width: 10),
+              Expanded(child: Text(s('workHours'))),
+              const Icon(Icons.chevron_left, color: DyarTokens.inkMuted),
+            ]),
+          ),
+          const SizedBox(height: 10),
+          DyarCard(
+            onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => PromotionsScreen(storeId: store.id))),
+            child: Row(children: [
+              const Icon(LucideIcons.gift, color: DyarTokens.brand),
+              const SizedBox(width: 10),
+              Expanded(child: Text(s('offers'))),
+              const Icon(Icons.chevron_left, color: DyarTokens.inkMuted),
+            ]),
+          ),
+          const SizedBox(height: 10),
+          DyarCard(
+            onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => const BalanceScreen())),
+            child: Row(children: [
+              const Icon(LucideIcons.wallet, color: DyarTokens.brand),
+              const SizedBox(width: 10),
+              Expanded(child: Text(s('wallet'))),
+              const Icon(Icons.chevron_left, color: DyarTokens.inkMuted),
+            ]),
+          ),
+          const SizedBox(height: 10),
+        ],
         DyarCard(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

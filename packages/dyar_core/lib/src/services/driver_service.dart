@@ -53,3 +53,12 @@ class DriverService {
     });
   }
 }
+
+extension DriverKyc on DriverService {
+  /// تحديث بيانات وثائق السائق (KYC) — تتحقق منها الإدارة من اللوحة.
+  Future<void> updateDocuments(String uid, Map<String, dynamic> docs) =>
+      FirebaseFirestore.instance
+          .collection('drivers')
+          .doc(uid)
+          .set({'documents': docs}, SetOptions(merge: true));
+}

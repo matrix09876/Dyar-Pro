@@ -9,6 +9,7 @@ import 'package:dyar_ui/dyar_ui.dart';
 import 'active_task_screen.dart';
 import 'earnings_screen.dart';
 import 'profile_screen.dart';
+import 'register_screen.dart';
 
 final myDriverProvider = StreamProvider<DriverProfile?>((ref) {
   final uid = FirebaseAuth.instance.currentUser?.uid;
@@ -66,6 +67,37 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final s = ref.watch(stringsProvider);
+
+    // بوابة KYC: لا ملف سائق → التسجيل؛ pending → شاشة انتظار الموافقة
+    final driverAsync = ref.watch(myDriverProvider);
+    final driver = driverAsync.value;
+    if (!driverAsync.isLoading && driver == null) {
+      return const DriverRegisterScreen();
+    }
+    if (driver != null && driver.status == 'pending') {
+      return Scaffold(
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+              const Text('⏳', style: TextStyle(fontSize: 56)),
+              const SizedBox(height: 12),
+              Text(s('pendingApprovalNote'),
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w700, fontSize: 15)),
+              const SizedBox(height: 20),
+              TextButton(
+                onPressed: () => ref.read(authServiceProvider).signOut(),
+                child: Text(s('logout'),
+                    style: const TextStyle(color: DyarTokens.danger)),
+              ),
+            ]),
+          ),
+        ),
+      );
+    }
+
     final pages = [
       _DashboardTab(onToggle: _toggleOnline),
       const EarningsScreen(),
