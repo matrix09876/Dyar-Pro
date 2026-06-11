@@ -61,6 +61,32 @@ searchKeywords: string[]
 فرعية إضافية: `stores/{id}/tables/{tableId}` (Dine Out) و
 `stores/{id}/staff/{uid}` (طاقم المتجر).
 
+### `stores/{id}/zones/{zoneId}`  — مناطق التوصيل (من اللوحة الحالية)
+```
+name, center: { lat, lng }, radiusM: number
+deliveryFee: number, active: boolean
+```
+المنطقة المعطّلة (`active=false`) تمنع الطلب منها. الرسوم لكل منطقة
+تتجاوز رسوم المتجر الافتراضية.
+
+### `stores/{id}/legal/contract`  — القانوني والتعاقدي
+```
+accepted: boolean, acceptedAt, signatureUrl   // توقيع رقمي (Storage)
+termsVersion: string, requiresInvoice: boolean
+bank: { bankName, iban, accountHolder }
+personInCharge: { name, phone, email, idNumber }
+```
+
+### العمولة المتدرجة (السياسة الافتراضية — config/app.commissionTiers)
+```
+[{ maxMonthlyOrders: 299, pct: 15 },
+ { maxMonthlyOrders: 500, pct: 13.5 },
+ { maxMonthlyOrders: null, pct: 12 }]
+serviceProvidersPct: 6     // حلاق/طبيب/ميكانيكي/محامي...
+```
+التسوية الشهرية تحتسب العمولة من عدد طلبات الشهر وفق هذه الشرائح،
+مع إمكانية override لكل متجر عبر `commissionPct`.
+
 ### `stores/{storeId}/menu/{itemId}`
 ```
 name, description, imageUrl, price: number
