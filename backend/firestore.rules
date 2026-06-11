@@ -91,6 +91,24 @@ service cloud.firestore {
     match /promotions/{id}   { allow read: if true; allow write: if isAdmin(); }
     match /config/{id}       { allow read: if true; allow write: if isAdmin(); }
 
+    // ---- marketProducts (سوق C2C: بيع وشراء) ----
+    match /marketProducts/{productId} {
+      // المنتجات المعتمدة عامة للتصفّح؛ البائع يقرأ منتجاته بكل الحالات
+      allow read: if resource.data.status == 'approved'
+        || isOwner(resource.data.sellerUid) || isBackoffice();
+      // أي مسجّل ينشئ منتجًا باسمه بحالة pending فقط (الاعتماد من الإدارة)
+      allow create: if isSignedIn()
+        && request.resource.data.sellerUid == uid()
+        && request.resource.data.status == 'pending';
+      // البائع يعدّل منتجه دون المساس بالحالة/الملكية؛ admin كل شيء
+      // (البيع النهائي sold عبر markProductSold في Functions)
+      allow update: if isAdmin() ||
+        (isOwner(resource.data.sellerUid)
+         && !request.resource.data.diff(resource.data).affectedKeys()
+              .hasAny(['status','sellerUid']));
+      allow delete: if isAdmin() || isOwner(resource.data.sellerUid);
+    }
+
     // ---- reviews ----
     match /reviews/{id} {
       allow read: if true;

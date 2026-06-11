@@ -64,6 +64,20 @@ export interface Order {
   createdAt?: Timestamp;
 }
 
+/** منتج سوق C2C (بيع وشراء) — السعر بالأغورة. */
+export interface MarketProduct {
+  id: string;
+  sellerUid: string;
+  title: string;
+  description?: string;
+  price: number;
+  imageUrl?: string;
+  category: 'electronics' | 'fashion' | 'home' | 'cars' | 'other';
+  city?: string;
+  status: 'pending' | 'approved' | 'rejected' | 'sold';
+  createdAt?: Timestamp;
+}
+
 export const STATUS_LABELS: Record<OrderStatus, string> = {
   pending: 'بانتظار', accepted: 'مقبول', preparing: 'قيد التحضير', ready: 'جاهز',
   assigned: 'مُعيَّن', picked_up: 'مُستلَم', on_the_way: 'في الطريق',

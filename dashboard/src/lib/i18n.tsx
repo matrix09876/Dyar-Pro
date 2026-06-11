@@ -28,6 +28,8 @@ export const T: Dict = {
   training:     { ar: 'التدريب', he: 'הדרכה', en: 'Training' },
   logs:         { ar: 'سجل العمليات', he: 'יומן פעולות', en: 'Logs' },
   banners:      { ar: 'البانرات', he: 'באנרים', en: 'Banners' },
+  marketplace:  { ar: 'بيع وشراء', he: 'קנייה ומכירה', en: 'Marketplace' },
+  marketplaceCommission: { ar: 'عمولة السوق %', he: 'עמלת השוק %', en: 'Market commission %' },
   settings:     { ar: 'الإعدادات', he: 'הגדרות', en: 'Settings' },
   logout:       { ar: 'تسجيل الخروج', he: 'התנתקות', en: 'Log out' },
 
@@ -43,6 +45,7 @@ export const T: Dict = {
   total:        { ar: 'الإجمالي', he: 'סה״כ', en: 'Total' },
   details:      { ar: 'التفاصيل', he: 'פרטים', en: 'Details' },
   approve:      { ar: 'موافقة', he: 'אישור', en: 'Approve' },
+  reject:       { ar: 'رفض', he: 'דחייה', en: 'Reject' },
   suspend:      { ar: 'تعليق', he: 'השעיה', en: 'Suspend' },
   block:        { ar: 'حظر', he: 'חסימה', en: 'Block' },
   unblock:      { ar: 'إلغاء الحظر', he: 'ביטול חסימה', en: 'Unblock' },
@@ -133,6 +136,8 @@ export const T: Dict = {
   st_delivered: { ar: 'تم التوصيل', he: 'נמסר', en: 'Delivered' },
   st_cancelled: { ar: 'ملغي', he: 'בוטל', en: 'Cancelled' },
   st_rejected:  { ar: 'مرفوض', he: 'נדחה', en: 'Rejected' },
+  st_approved:  { ar: 'معتمد', he: 'מאושר', en: 'Approved' },
+  st_sold:      { ar: 'مُباع', he: 'נמכר', en: 'Sold' },
 };
 
 interface I18nState {

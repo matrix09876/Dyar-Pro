@@ -13,4 +13,5 @@ export { onOrderStatusNotify } from './notifications/fcm';
 export { requestRide, acceptRide } from './rides/taxi';
 export { createParcel, confirmParcelDelivery } from './parcels/shipping';
 export { aiEta, aiSupportReply } from './ai/assistant';
+export { markProductSold } from './marketplace/market';
 export { resetDriverEarnings, bookingReminders, monthlySettlement } from './ops/scheduled';

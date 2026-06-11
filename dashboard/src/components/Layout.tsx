@@ -3,7 +3,7 @@ import {
   LayoutDashboard, ReceiptText, CarTaxiFront, Package, CalendarCheck,
   Store, Bike, Users, BadgePercent, Wallet, Briefcase, Headset, Settings,
   Moon, Sun, LogOut, Globe, ShieldCheck, Building2, StickyNote, ScrollText,
-  GraduationCap, Image,
+  GraduationCap, Image, ShoppingBag,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useI18n, type Lang } from '../lib/i18n';
@@ -16,6 +16,7 @@ const NAV = [
   { to: '/parcels', key: 'parcels', icon: Package },
   { to: '/bookings', key: 'bookings', icon: CalendarCheck },
   { to: '/stores', key: 'stores', icon: Store },
+  { to: '/marketplace', key: 'marketplace', icon: ShoppingBag },
   { to: '/drivers', key: 'drivers', icon: Bike },
   { to: '/users', key: 'users', icon: Users },
   { to: '/marketing', key: 'marketing', icon: BadgePercent },
