@@ -9,3 +9,5 @@ export { createOrder, updateOrderStatus, assignDriver, rateOrder } from './order
 export { autoAssignNearestDriver } from './drivers/assignment';
 export { createPaymentIntent, stripeWebhook } from './payments/stripe';
 export { onOrderStatusNotify } from './notifications/fcm';
+export { requestRide, acceptRide } from './rides/taxi';
+export { createParcel, confirmParcelDelivery } from './parcels/shipping';
