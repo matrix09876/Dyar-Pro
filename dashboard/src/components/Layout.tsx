@@ -2,7 +2,7 @@ import { NavLink, Outlet } from 'react-router-dom';
 import {
   LayoutDashboard, ReceiptText, CarTaxiFront, Package, CalendarCheck,
   Store, Bike, Users, BadgePercent, Wallet, Briefcase, Headset, Settings,
-  Moon, Sun, LogOut, Globe,
+  Moon, Sun, LogOut, Globe, ShieldCheck,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useI18n, type Lang } from '../lib/i18n';
@@ -21,6 +21,7 @@ const NAV = [
   { to: '/finance', key: 'finance', icon: Wallet },
   { to: '/jobs', key: 'jobs', icon: Briefcase },
   { to: '/support', key: 'support', icon: Headset },
+  { to: '/team', key: 'team', icon: ShieldCheck },
   { to: '/settings', key: 'settings', icon: Settings },
 ];
 

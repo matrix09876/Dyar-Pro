@@ -101,6 +101,8 @@ class S {
     'giftCards': ['بطاقات الهدايا', 'כרטיסי מתנה', 'Gift cards'],
     'name': ['الاسم', 'שם', 'Name'],
     'moreServices': ['خدمات أخرى', 'שירותים נוספים', 'More services'],
+    'driver': ['السائق', 'נהג', 'Driver'],
+    'liveTracking': ['تتبّع حي', 'מעקב חי', 'Live tracking'],
     'pickupLocation': ['نقطة الانطلاق', 'נקודת איסוף', 'Pickup'],
     'dropoffLocation': ['الوجهة', 'יעד', 'Destination'],
     'requestRide': ['اطلب مشوار', 'הזמן נסיעה', 'Request ride'],

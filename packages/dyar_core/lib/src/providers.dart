@@ -8,6 +8,8 @@ import 'services/driver_service.dart';
 import 'services/ride_service.dart';
 import 'services/parcel_service.dart';
 import 'services/user_service.dart';
+import 'services/location_service.dart';
+import 'services/tracking_service.dart';
 
 /// مزوّدات Riverpod المشتركة بين التطبيقات الثلاثة.
 
@@ -18,6 +20,8 @@ final driverServiceProvider = Provider((_) => DriverService());
 final rideServiceProvider = Provider((_) => RideService());
 final parcelServiceProvider = Provider((_) => ParcelService());
 final userServiceProvider = Provider((_) => UserService());
+final locationServiceProvider = Provider((_) => LocationService());
+final trackingServiceProvider = Provider((_) => TrackingService());
 
 final authStateProvider = StreamProvider<User?>(
     (ref) => ref.watch(authServiceProvider).authState);

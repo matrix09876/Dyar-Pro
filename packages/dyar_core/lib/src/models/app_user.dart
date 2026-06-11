@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-enum UserRole { customer, driver, partner, admin }
+enum UserRole { customer, driver, partner, staff, admin }
 
 class AppUser {
   final String uid;

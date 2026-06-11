@@ -107,6 +107,39 @@ class TrackingScreen extends ConsumerWidget {
                   );
                 }),
 
+              // البث الحي لموقع السائق (مثل المنافسين)
+              if (order.driverUid != null &&
+                  !order.status.isTerminal &&
+                  idx >= 3) ...[
+                const SizedBox(height: 16),
+                StreamBuilder<Map<String, dynamic>?>(
+                  stream: ref
+                      .read(trackingServiceProvider)
+                      .watchDriverLocation(order.driverUid!),
+                  builder: (context, locSnap) {
+                    final loc = locSnap.data;
+                    return DyarCard(
+                      child: Row(children: [
+                        const Icon(LucideIcons.navigation,
+                            color: DyarTokens.brand),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            loc == null
+                                ? s('searchingDriver')
+                                : '${s('driver')} • ${loc['lat']?.toStringAsFixed(4)}, ${loc['lng']?.toStringAsFixed(4)}',
+                            style: const TextStyle(
+                                fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                        const Icon(LucideIcons.radio,
+                            color: DyarTokens.success, size: 18),
+                      ]),
+                    );
+                  },
+                ),
+              ],
+
               const SizedBox(height: 24),
               if (order.status == OrderStatus.delivered)
                 _RateCard(orderId: order.id),

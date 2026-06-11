@@ -6,23 +6,27 @@ import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import { beforeUserCreated } from 'firebase-functions/v2/identity';
 import type { Role } from '../types';
 
-const VALID_ROLES: Role[] = ['customer', 'driver', 'partner', 'admin'];
+const VALID_ROLES: Role[] = ['customer', 'driver', 'partner', 'staff', 'admin'];
 
-// الإدارة فقط تستطيع ترقية/تغيير دور مستخدم آخر.
+// الإدارة فقط تستطيع ترقية/تغيير دور مستخدم آخر + ضبط صلاحيات عامل المكتب.
 export const setUserRole = onCall(async (req) => {
   if (req.auth?.token.role !== 'admin') {
     throw new HttpsError('permission-denied', 'admin only');
   }
-  const { uid, role } = req.data as { uid: string; role: Role };
+  const { uid, role, permissions } = req.data as {
+    uid: string; role: Role; permissions?: string[];
+  };
   if (!uid || !VALID_ROLES.includes(role)) {
     throw new HttpsError('invalid-argument', 'uid and valid role required');
   }
-  await getAuth().setCustomUserClaims(uid, { role });
+  // صلاحيات staff الدقيقة تُحقن في الـ claims ليفرضها الخادم
+  const perms = role === 'staff' ? permissions ?? [] : [];
+  await getAuth().setCustomUserClaims(uid, { role, perms });
   await getFirestore().doc(`users/${uid}`).set(
-    { role, updatedAt: FieldValue.serverTimestamp() },
+    { role, permissions: perms, updatedAt: FieldValue.serverTimestamp() },
     { merge: true }
   );
-  return { ok: true, uid, role };
+  return { ok: true, uid, role, permissions: perms };
 });
 
 // كل مستخدم جديد يبدأ كـ customer افتراضيًا.

@@ -1,7 +1,15 @@
 // Dyar — الأنواع المشتركة (مرآة لـ docs/DATA-MODEL.md).
 // كل المبالغ بأصغر وحدة عملة (أغورة) كأعداد صحيحة.
 
-export type Role = 'customer' | 'driver' | 'partner' | 'admin';
+export type Role = 'customer' | 'driver' | 'partner' | 'staff' | 'admin';
+
+// صلاحيات عامل المكتب الدقيقة — يضبطها المسؤول فقط
+export type StaffPermission =
+  | 'orders.view' | 'orders.manage' | 'orders.assignDriver'
+  | 'stores.view' | 'stores.approve'
+  | 'drivers.view' | 'drivers.approve'
+  | 'users.view' | 'users.block'
+  | 'marketing.manage' | 'finance.view' | 'support.manage';
 
 export type OrderStatus =
   | 'pending' | 'accepted' | 'preparing' | 'ready' | 'assigned'

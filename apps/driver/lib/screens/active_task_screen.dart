@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:dyar_core/dyar_core.dart';
 import 'package:dyar_ui/dyar_ui.dart';
 
@@ -91,8 +90,9 @@ class ActiveTaskScreen extends ConsumerWidget {
                   onTap: () {
                     final lat = order.address!['lat'], lng = order.address!['lng'];
                     if (lat != null && lng != null) {
-                      launchUrl(Uri.parse(
-                          'https://www.google.com/maps/dir/?api=1&destination=$lat,$lng'));
+                      // يفضّل Waze ثم Google Maps (حسب المتوفر على الجهاز)
+                      ref.read(locationServiceProvider).navigate(
+                          (lat as num).toDouble(), (lng as num).toDouble());
                     }
                   },
                   child: Row(

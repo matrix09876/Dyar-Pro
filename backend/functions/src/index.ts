@@ -11,3 +11,4 @@ export { createPaymentIntent, stripeWebhook } from './payments/stripe';
 export { onOrderStatusNotify } from './notifications/fcm';
 export { requestRide, acceptRide } from './rides/taxi';
 export { createParcel, confirmParcelDelivery } from './parcels/shipping';
+export { aiEta, aiSupportReply } from './ai/assistant';

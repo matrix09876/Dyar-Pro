@@ -1,7 +1,7 @@
 // أنواع لوحة التحكم — مرآة لـ docs/DATA-MODEL.md. المبالغ بالأغورة (عدد صحيح).
 import type { Timestamp } from 'firebase/firestore';
 
-export type Role = 'customer' | 'driver' | 'partner' | 'admin';
+export type Role = 'customer' | 'driver' | 'partner' | 'staff' | 'admin';
 
 export type OrderStatus =
   | 'pending' | 'accepted' | 'preparing' | 'ready' | 'assigned'

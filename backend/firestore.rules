@@ -10,6 +10,11 @@ service cloud.firestore {
     // الأدوار من Custom Claims (تُضبط عبر Cloud Functions)
     function role() { return request.auth.token.role; }
     function isAdmin() { return isSignedIn() && role() == 'admin'; }
+    function isStaff() { return isSignedIn() && role() == 'staff'; }
+    // staff لديه صلاحية معينة إن كانت ضمن claims.perms (يضبطها admin)
+    function staffCan(p) { return isStaff() && request.auth.token.perms.hasAny([p]); }
+    // قراءة لوحة التحكم: admin أو staff
+    function isBackoffice() { return isAdmin() || isStaff(); }
     function isDriver() { return isSignedIn() && role() == 'driver'; }
     function isPartner() { return isSignedIn() && role() == 'partner'; }
     function isOwner(resourceUid) { return isSignedIn() && uid() == resourceUid; }
@@ -52,7 +57,7 @@ service cloud.firestore {
 
     // ---- orders ----
     match /orders/{orderId} {
-      allow read: if isAdmin()
+      allow read: if isBackoffice()
         || isOwner(resource.data.customerUid)
         || (isDriver() && resource.data.driverUid == uid())
         || (isPartner() && get(/databases/$(database)/documents/stores/$(resource.data.storeId)).data.ownerUid == uid());

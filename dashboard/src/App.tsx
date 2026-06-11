@@ -16,6 +16,7 @@ import Marketing from './pages/Marketing';
 import Finance from './pages/Finance';
 import Jobs from './pages/Jobs';
 import Support from './pages/Support';
+import Team from './pages/Team';
 import Settings from './pages/Settings';
 import { Spinner } from './components/ui';
 
@@ -48,6 +49,7 @@ export default function App() {
                 <Route path="/finance" element={<Finance />} />
                 <Route path="/jobs" element={<Jobs />} />
                 <Route path="/support" element={<Support />} />
+                <Route path="/team" element={<Team />} />
                 <Route path="/settings" element={<Settings />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Route>

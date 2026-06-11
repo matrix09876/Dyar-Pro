@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -31,21 +32,36 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   int _tab = 0;
 
+  StreamSubscription<Position>? _locSub;
+
   Future<void> _toggleOnline(bool v) async {
     final uid = FirebaseAuth.instance.currentUser!.uid;
     final svc = ref.read(driverServiceProvider);
+    final loc = ref.read(locationServiceProvider);
+    final tracking = ref.read(trackingServiceProvider);
     await svc.setOnline(uid, v);
+
     if (v) {
-      // إرسال الموقع الحالي عند الاتصال (التتبع الدوري عبر geolocator stream)
-      try {
-        final perm = await Geolocator.requestPermission();
-        if (perm != LocationPermission.denied &&
-            perm != LocationPermission.deniedForever) {
-          final pos = await Geolocator.getCurrentPosition();
+      // بثّ حيّ مستمر لموقع السائق (بموافقته) — يظهر في تطبيق المستخدم
+      if (await loc.ensurePermission()) {
+        final pos = await loc.current();
+        if (pos != null) {
           await svc.updateLocation(uid, pos.latitude, pos.longitude);
         }
-      } catch (_) {/* الموقع اختياري في المحاكي */}
+        _locSub?.cancel();
+        _locSub = loc.stream().listen((p) =>
+            tracking.pushLocation(uid, p.latitude, p.longitude, p.heading));
+      }
+    } else {
+      _locSub?.cancel();
+      _locSub = null;
     }
+  }
+
+  @override
+  void dispose() {
+    _locSub?.cancel();
+    super.dispose();
   }
 
   @override

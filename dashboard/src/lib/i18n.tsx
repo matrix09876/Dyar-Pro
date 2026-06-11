@@ -23,6 +23,7 @@ export const T: Dict = {
   finance:      { ar: 'المالية', he: 'כספים', en: 'Finance' },
   jobs:         { ar: 'الوظائف', he: 'משרות', en: 'Jobs' },
   support:      { ar: 'الدعم', he: 'תמיכה', en: 'Support' },
+  team:         { ar: 'الفريق والصلاحيات', he: 'צוות והרשאות', en: 'Team & roles' },
   settings:     { ar: 'الإعدادات', he: 'הגדרות', en: 'Settings' },
   logout:       { ar: 'تسجيل الخروج', he: 'התנתקות', en: 'Log out' },
 
