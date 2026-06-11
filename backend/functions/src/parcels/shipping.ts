@@ -8,23 +8,51 @@ function otp(): string {
   return Math.floor(1000 + Math.random() * 9000).toString();
 }
 
-// تعرفة بسيطة: أساس 1500 أغورة + 30 لكل كغم (تُضبط من config لاحقًا)
+// التعرفة حسب المسار (packageRoutes): أساس + لكل كغ + لكل م³ —
+// مطابق للوحة الحالية (مسار إسرائيل: 1000كغ/6م³، Base 50 /kg 100 /m³ 100).
 export const createParcel = onCall(async (req) => {
   const uid = req.auth?.uid;
   if (!uid) throw new HttpsError('unauthenticated', 'login required');
-  const { sender, recipient, weightKg = 1 } = req.data;
+  const { sender, recipient, weightKg = 1, volumeM3 = 0, routeId } = req.data;
   if (!sender?.name || !recipient?.name) {
     throw new HttpsError('invalid-argument', 'sender/recipient required');
   }
-  if (weightKg > 1000) {
-    throw new HttpsError('invalid-argument', 'max 1000kg');
+
+  let total: number;
+  let routeName: string | null = null;
+  let route: FirebaseFirestore.DocumentData | undefined;
+  if (routeId) {
+    const snap = await db().doc(`packageRoutes/${routeId}`).get();
+    route = snap.exists ? snap.data() : undefined;
+  } else {
+    const snap = await db().collection('packageRoutes')
+      .where('active', '==', true).limit(1).get();
+    route = snap.docs[0]?.data();
   }
-  const total = 1500 + Math.round(weightKg * 30);
+
+  if (route) {
+    if (weightKg > (route.maxWeightKg ?? 1000)) {
+      throw new HttpsError('invalid-argument', `max ${route.maxWeightKg}kg`);
+    }
+    if (volumeM3 > (route.maxVolumeM3 ?? 6)) {
+      throw new HttpsError('invalid-argument', `max ${route.maxVolumeM3}m3`);
+    }
+    const r = route.rates ?? {};
+    total = Math.round(
+      (r.base ?? 0) + weightKg * (r.perKg ?? 0) + volumeM3 * (r.perM3 ?? 0),
+    );
+    routeName = route.name ?? null;
+  } else {
+    // لا مسارات مضبوطة بعد — تعرفة افتراضية
+    if (weightKg > 1000) throw new HttpsError('invalid-argument', 'max 1000kg');
+    total = 1500 + Math.round(weightKg * 30);
+  }
   const code = otp();
   const now = Timestamp.now();
   const ref = await db().collection('parcels').add({
     senderUid: uid, sender, recipient,
-    size: { weightKg },
+    route: routeName,
+    size: { weightKg, volumeM3 },
     status: 'pending',
     pricing: { total },
     deliveryOtp: code, // يُعرض للمستلم فقط عبر تطبيق المرسل

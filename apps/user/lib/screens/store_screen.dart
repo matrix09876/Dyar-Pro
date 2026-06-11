@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dyar_core/dyar_core.dart';
@@ -34,7 +35,7 @@ class StoreScreen extends ConsumerWidget {
                     SizedBox(
                       height: 240, width: double.infinity,
                       child: store?.coverUrl != null
-                          ? Image.network(store!.coverUrl!, fit: BoxFit.cover)
+                          ? CachedNetworkImage(imageUrl: store!.coverUrl!, fit: BoxFit.cover)
                           : Container(color: DyarTokens.brandLight),
                     ),
                     Container(
@@ -294,7 +295,7 @@ class _MenuTile extends ConsumerWidget {
           child: SizedBox(
             height: 78, width: 78,
             child: item.imageUrl != null
-                ? Image.network(item.imageUrl!, fit: BoxFit.cover)
+                ? CachedNetworkImage(imageUrl: item.imageUrl!, fit: BoxFit.cover)
                 : Container(
                     color: DyarTokens.brandLight,
                     child: const Center(

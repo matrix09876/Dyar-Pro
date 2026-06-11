@@ -2,6 +2,7 @@
 import { getFirestore, FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import { ORDER_TRANSITIONS, type Order, type OrderStatus } from '../types';
+import { distanceKm, logAction, queueMail } from '../ops/utils';
 
 const db = () => getFirestore();
 
@@ -46,7 +47,35 @@ export const createOrder = onCall(async (req) => {
 
   const configSnap = await db().doc('config/app').get();
   const serviceFee = configSnap.data()?.serviceFee ?? 0;
-  const deliveryFee = type === 'pickup' ? 0 : (store.deliveryFee || 0);
+
+  // رسوم التوصيل حسب منطقة المتجر (zones: مركز/نصف قطر/رسوم) —
+  // أقرب منطقة مطابقة تفوز؛ وإلا رسوم المتجر الافتراضية.
+  let deliveryFee = type === 'pickup' ? 0 : (store.deliveryFee || 0);
+  const dest = address as { lat?: number; lng?: number } | undefined;
+  if (type !== 'pickup' && dest?.lat && dest?.lng && store.location?.lat) {
+    const zonesSnap = await db()
+      .collection(`stores/${storeId}/zones`)
+      .where('active', '==', true)
+      .get();
+    let bestRadius = Infinity;
+    for (const z of zonesSnap.docs) {
+      const zd = z.data();
+      const center = zd.center ?? store.location;
+      const dKm = distanceKm(
+        { lat: center.lat, lng: center.lng },
+        { lat: dest.lat, lng: dest.lng },
+      );
+      const radiusM = zd.radiusM ?? 0;
+      if (dKm * 1000 <= radiusM && radiusM < bestRadius) {
+        bestRadius = radiusM;
+        deliveryFee = zd.deliveryFee ?? deliveryFee;
+      }
+    }
+    // خارج كل المناطق المفعّلة؟ المتجر لا يوصّل إلى هذا العنوان
+    if (zonesSnap.size > 0 && bestRadius === Infinity) {
+      throw new HttpsError('failed-precondition', 'address outside delivery zones');
+    }
+  }
 
   let discount = 0;
   if (couponCode) {
@@ -129,6 +158,26 @@ export const updateOrderStatus = onCall(async (req) => {
       });
     }
   });
+
+  // تدقيق + إيصال رقمي بعد نجاح الحركة (خارج الـ transaction)
+  await logAction({
+    category: 'orders',
+    action: `order ${orderId} → ${status}`,
+    by: uid,
+    entity: orderId,
+  });
+  if (status === 'delivered') {
+    const after = (await ref.get()).data() as Order & { customerUid: string };
+    const customer = await db().doc(`users/${after.customerUid}`).get();
+    const email = customer.data()?.email as string | undefined;
+    if (email) {
+      await queueMail(email, 'orderReceipt', {
+        userName: customer.data()?.name ?? '',
+        orderCode: after.code,
+        total: (after.pricing.total / 100).toFixed(2),
+      });
+    }
+  }
   return { ok: true };
 });
 

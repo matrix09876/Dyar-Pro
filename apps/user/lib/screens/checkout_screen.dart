@@ -20,6 +20,101 @@ class CheckoutScreen extends ConsumerStatefulWidget {
 class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   String _method = 'cash';
   bool _busy = false;
+  Map<String, dynamic>? _address;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDefaultAddress();
+  }
+
+  Future<void> _loadDefaultAddress() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+    final u = await ref.read(userServiceProvider).watch(uid).first;
+    if (mounted && u != null && u.addresses.isNotEmpty) {
+      setState(() => _address = u.addresses.first);
+    }
+  }
+
+  /// اختيار عنوان محفوظ أو إضافة جديد — العنوان إلزامي قبل الطلب.
+  Future<void> _pickAddress() async {
+    final s = ref.read(stringsProvider);
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) {
+      await Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const UserLoginScreen()));
+      if (FirebaseAuth.instance.currentUser == null) return;
+    }
+    final u = await ref
+        .read(userServiceProvider)
+        .watch(FirebaseAuth.instance.currentUser!.uid)
+        .first;
+    if (!mounted) return;
+    final picked = await showModalBottomSheet<Map<String, dynamic>>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      builder: (ctx) => SafeArea(
+        child: ListView(
+          shrinkWrap: true,
+          padding: const EdgeInsets.all(16),
+          children: [
+            Text(s('myAddresses'),
+                style: const TextStyle(
+                    fontWeight: FontWeight.w900, fontSize: 16)),
+            const SizedBox(height: 8),
+            for (final a in u?.addresses ?? const <Map<String, dynamic>>[])
+              ListTile(
+                leading: const Icon(LucideIcons.mapPin,
+                    color: DyarTokens.brand),
+                title: Text(a['label']?.toString() ?? ''),
+                subtitle: Text(a['line']?.toString() ?? ''),
+                onTap: () => Navigator.pop(ctx, a),
+              ),
+            ListTile(
+              leading: const Icon(LucideIcons.plus),
+              title: Text(s('addAddress')),
+              onTap: () => Navigator.pop(ctx, {'__add': true}),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (picked == null || !mounted) return;
+    if (picked['__add'] == true) {
+      final line = TextEditingController();
+      final ok = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text(s('addAddress')),
+          content: TextField(
+              controller: line,
+              decoration: InputDecoration(labelText: s('myAddresses'))),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: Text(s('cancel'))),
+            FilledButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                child: Text(s('save'))),
+          ],
+        ),
+      );
+      if (ok == true && line.text.trim().isNotEmpty) {
+        final addr = {
+          'label': s('home'),
+          'line': line.text.trim(),
+          'lat': 0.0, 'lng': 0.0,
+        };
+        await ref.read(userServiceProvider).addAddress(
+            FirebaseAuth.instance.currentUser!.uid, addr);
+        setState(() => _address = addr);
+      }
+    } else {
+      setState(() => _address = picked);
+    }
+  }
 
   Future<void> _placeOrder() async {
     final s = ref.read(stringsProvider);
@@ -27,6 +122,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       await Navigator.of(context).push(
           MaterialPageRoute(builder: (_) => const UserLoginScreen()));
       if (FirebaseAuth.instance.currentUser == null) return;
+    }
+    if (_address == null) {
+      await _pickAddress();
+      if (_address == null) return; // العنوان شرط للتوصيل
     }
     final cart = ref.read(cartProvider);
     if (cart.isEmpty || cart.storeId == null) return;
@@ -38,8 +137,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             items: ref.read(cartProvider.notifier).toOrderItems(),
             type: 'delivery',
             paymentMethod: _method,
-            // العنوان: يُستبدل بعناوين المستخدم المحفوظة
-            address: {'line': '', 'lat': 0.0, 'lng': 0.0},
+            address: _address,
           );
       ref.read(cartProvider.notifier).clear();
       if (mounted) {
@@ -104,6 +202,31 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           Text(s('payment'),
               style: const TextStyle(fontWeight: FontWeight.w800)),
           const SizedBox(height: 8),
+          // عنوان التوصيل — إلزامي
+          DyarCard(
+            onTap: _pickAddress,
+            child: Row(children: [
+              const Icon(LucideIcons.mapPin, color: DyarTokens.brand),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  _address == null
+                      ? s('addAddress')
+                      : '${_address!['label'] ?? ''} · ${_address!['line'] ?? ''}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      color: _address == null
+                          ? DyarTokens.brand
+                          : null),
+                ),
+              ),
+              const Icon(Icons.chevron_left, color: DyarTokens.inkMuted),
+            ]),
+          ),
+          const SizedBox(height: 16),
+
           // طرق الدفع المعتمدة: VISA · CASH · BIT (قرار المالك)
           _PayOption(
             icon: LucideIcons.creditCard,

@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dyar_core/dyar_core.dart';
@@ -21,6 +22,7 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   String? _type;
+  String _query = '';
 
   static const _grad = LinearGradient(
     begin: Alignment.topCenter,
@@ -31,7 +33,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final s = ref.watch(stringsProvider);
-    final stores = ref.watch(approvedStoresProvider(_type)).value ?? [];
+    final storesAsync = ref.watch(approvedStoresProvider(_type));
+    final allStores = storesAsync.value ?? [];
+    // بحث وظيفي: بالاسم أو الوصف (غير حسّاس لحالة الأحرف)
+    final q = _query.trim().toLowerCase();
+    final stores = q.isEmpty
+        ? allStores
+        : allStores
+            .where((st) =>
+                st.name.toLowerCase().contains(q) ||
+                (st.description ?? '').toLowerCase().contains(q))
+            .toList();
 
     return Scaffold(
       backgroundColor: const Color(0xFFF6F7FB),
@@ -105,10 +117,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       const Icon(LucideIcons.search, color: DyarTokens.brand),
                       const SizedBox(width: 10),
                       Expanded(
-                        child: Text(s('searchHint'),
-                            style: const TextStyle(
-                                color: DyarTokens.inkMuted, fontSize: 14)),
+                        child: TextField(
+                          onChanged: (v) => setState(() => _query = v),
+                          decoration: InputDecoration(
+                            hintText: s('searchHint'),
+                            hintStyle: const TextStyle(
+                                color: DyarTokens.inkMuted, fontSize: 14),
+                            border: InputBorder.none,
+                            enabledBorder: InputBorder.none,
+                            focusedBorder: InputBorder.none,
+                            filled: false,
+                            isDense: true,
+                          ),
+                          style: const TextStyle(fontSize: 14),
+                        ),
                       ),
+                      if (_query.isNotEmpty)
+                        IconButton(
+                          icon: const Icon(Icons.close_rounded, size: 18),
+                          onPressed: () => setState(() => _query = ''),
+                        ),
                     ]),
                   ),
                 ),
@@ -264,7 +292,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           const SliverToBoxAdapter(child: SizedBox(height: 12)),
 
           // ===== بطاقات المتاجر =====
-          if (stores.isEmpty)
+          if (storesAsync.isLoading)
+            // Skeletons أثناء التحميل بدل المؤشر الدوّار
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 110),
+              sliver: SliverList.separated(
+                itemCount: 2,
+                separatorBuilder: (_, __) => const SizedBox(height: 16),
+                itemBuilder: (_, __) => const _StoreSkeleton(),
+              ),
+            )
+          else if (stores.isEmpty)
             SliverToBoxAdapter(
                 child:
                     EmptyState(message: s('noData'), icon: LucideIcons.store))
@@ -319,7 +357,7 @@ class _StoryRing extends StatelessWidget {
                   color: Colors.white, shape: BoxShape.circle),
               child: ClipOval(
                 child: imageUrl != null
-                    ? Image.network(imageUrl!, fit: BoxFit.cover)
+                    ? CachedNetworkImage(imageUrl: imageUrl!, fit: BoxFit.cover)
                     : Container(
                         color: DyarTokens.brandLight,
                         child: const Center(child: Text('🍜'))),
@@ -531,7 +569,7 @@ class _StoreCard extends ConsumerWidget {
               SizedBox(
                 height: 150, width: double.infinity,
                 child: store.coverUrl != null
-                    ? Image.network(store.coverUrl!, fit: BoxFit.cover)
+                    ? CachedNetworkImage(imageUrl: store.coverUrl!, fit: BoxFit.cover)
                     : Container(
                         decoration: const BoxDecoration(
                           gradient: LinearGradient(colors: [
@@ -657,6 +695,49 @@ class _Chip extends StatelessWidget {
             style:
                 const TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
       ]),
+    );
+  }
+}
+
+class _StoreSkeleton extends StatelessWidget {
+  const _StoreSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    Widget box(double h, double w, [double r = 12]) => Container(
+          height: h, width: w,
+          decoration: BoxDecoration(
+            color: const Color(0xFFE9EAEE),
+            borderRadius: BorderRadius.circular(r),
+          ),
+        );
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          box(150, double.infinity, 0),
+          Padding(
+            padding: const EdgeInsets.all(14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                box(16, 140),
+                const SizedBox(height: 8),
+                box(12, 220),
+                const SizedBox(height: 12),
+                Row(children: [
+                  box(24, 70), const SizedBox(width: 8), box(24, 70),
+                ]),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
