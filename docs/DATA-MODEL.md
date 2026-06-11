@@ -378,6 +378,21 @@ salary?: string, contact: { phone?, email? }
 status: 'open'|'closed', createdAt
 ```
 
+### `jobApplications/{id}`  — طلبات التوظيف (تقديم + سيرة ذاتية)
+```
+jobId: string                            // الوظيفة المتقدَّم لها
+jobTitle?: string                        // denormalized لعرض "طلباتي"
+applicantUid: string
+name: string, phone: string
+cvText: string                           // نبذة/سيرة ذاتية نصية
+cvUrl?: string                           // ملف CV في Storage (اختياري)
+status: 'new'|'shortlisted'|'rejected'|'hired'
+createdAt
+```
+الصلاحيات: المتقدم ينشئ لنفسه بحالة `new` ويقرأ طلباته؛ admin/staff
+وpartner صاحب الوظيفة (عبر `jobs.storeId → stores.ownerUid`) يقرآن
+ويحدّثان `status` فقط. فهارس: `jobId+createdAt`، `applicantUid+createdAt`.
+
 ### `chats/{chatId}` + `chats/{id}/messages/{msgId}`  — دردشة الطلب
 ```
 chat: { orderId|rideId|parcelId, participants: uid[], lastMessage, updatedAt }
