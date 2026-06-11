@@ -175,6 +175,12 @@ service cloud.firestore {
     }
 
     // ---- support ----
+    match /support/{ticketId}/messages/{msgId} {
+      // محادثة الدعم: صاحب التذكرة يقرأ ويرسل؛ ردود الـ AI تُكتب بالخادم
+      allow read: if isAdmin() || (isSignedIn() && ticketId == uid());
+      allow create: if isSignedIn() && ticketId == uid()
+        && request.resource.data.senderUid == uid();
+    }
     match /support/{ticketId} {
       allow read, create: if isSignedIn() &&
         (isAdmin() || request.resource.data.uid == uid() || resource.data.uid == uid());

@@ -85,3 +85,47 @@ export const acceptRide = onCall(async (req) => {
   });
   return { ok: true };
 });
+
+// تدفق المشوار بيد السائق: accepted → arriving → in_progress → completed
+// (الإلغاء للزبون قبل القبول فقط). الأرباح عند الإكمال: 85% للسائق.
+const RIDE_FLOW: Record<string, string> = {
+  accepted: 'arriving',
+  arriving: 'in_progress',
+  in_progress: 'completed',
+};
+
+export const updateRideStatus = onCall(async (req) => {
+  const uid = req.auth?.uid;
+  if (!uid) throw new HttpsError('unauthenticated', 'login required');
+  const { rideId, status } = req.data as { rideId: string; status: string };
+
+  await db().runTransaction(async (tx) => {
+    const ref = db().doc(`rides/${rideId}`);
+    const snap = await tx.get(ref);
+    if (!snap.exists) throw new HttpsError('not-found', 'ride not found');
+    const r = snap.data()!;
+    if (r.driverUid !== uid) {
+      throw new HttpsError('permission-denied', 'not your ride');
+    }
+    if (RIDE_FLOW[r.status] !== status) {
+      throw new HttpsError('failed-precondition', `cannot go ${r.status} → ${status}`);
+    }
+    tx.update(ref, { status, updatedAt: Timestamp.now() });
+
+    if (status === 'completed') {
+      const driverEarn = Math.round(((r.pricing?.total ?? 0) as number) * 0.85);
+      const { FieldValue } = require('firebase-admin/firestore');
+      tx.update(db().doc(`drivers/${uid}`), {
+        activeOrderId: null,
+        'earnings.today': FieldValue.increment(driverEarn),
+        'earnings.week': FieldValue.increment(driverEarn),
+        'earnings.total': FieldValue.increment(driverEarn),
+      });
+      tx.set(db().collection('transactions').doc(), {
+        uid, type: 'payout', amount: driverEarn,
+        meta: { rideId }, createdAt: Timestamp.now(),
+      });
+    }
+  });
+  return { ok: true };
+});

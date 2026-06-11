@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dyar_core/dyar_core.dart';
 import 'package:dyar_ui/dyar_ui.dart';
 
+import 'home_screen.dart';
+import 'support_screen.dart';
+
 /// حساب السائق: اللغة (3 لغات)، الوضع الليلي، الخروج.
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -17,6 +20,51 @@ class ProfileScreen extends ConsumerWidget {
       child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          // بطاقة السائق: المركبة + التقييم
+          Consumer(builder: (context, ref, _) {
+            final d = ref.watch(myDriverProvider).value;
+            if (d == null) return const SizedBox.shrink();
+            final emoji = switch (d.vehicleType) {
+              'motorcycle' => '🏍️',
+              'bicycle' => '🚲',
+              _ => '🚗',
+            };
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: DyarCard(
+                child: Row(children: [
+                  Text(emoji, style: const TextStyle(fontSize: 28)),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(d.plate ?? d.vehicleType,
+                            style: const TextStyle(
+                                fontWeight: FontWeight.w800)),
+                        Text('⭐ ${d.rating}',
+                            style: const TextStyle(
+                                fontSize: 12,
+                                color: DyarTokens.inkMuted)),
+                      ],
+                    ),
+                  ),
+                  StatusChip(label: d.status, statusKey: d.status),
+                ]),
+              ),
+            );
+          }),
+          DyarCard(
+            onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => const SupportScreen())),
+            child: Row(children: [
+              const Text('🤖', style: TextStyle(fontSize: 20)),
+              const SizedBox(width: 10),
+              Expanded(child: Text(s('support'))),
+              const Icon(Icons.chevron_left, color: DyarTokens.inkMuted),
+            ]),
+          ),
+          const SizedBox(height: 10),
           Text(s('profile'),
               style: Theme.of(context)
                   .textTheme

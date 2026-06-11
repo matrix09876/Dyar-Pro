@@ -7,6 +7,7 @@ class DriverProfile {
   final bool isOnline;
   final String status; // pending|approved|suspended
   final String? activeOrderId;
+  final String? activeParcelId;
   final int earningsToday, earningsWeek, earningsTotal; // أغورة
   final double rating;
 
@@ -17,6 +18,7 @@ class DriverProfile {
     this.isOnline = false,
     this.status = 'pending',
     this.activeOrderId,
+    this.activeParcelId,
     this.earningsToday = 0, this.earningsWeek = 0, this.earningsTotal = 0,
     this.rating = 0,
   });
@@ -31,6 +33,7 @@ class DriverProfile {
       isOnline: d['isOnline'] ?? false,
       status: d['status'] ?? 'pending',
       activeOrderId: d['activeOrderId'],
+      activeParcelId: d['activeParcelId'],
       earningsToday: (earnings['today'] ?? 0) as int,
       earningsWeek: (earnings['week'] ?? 0) as int,
       earningsTotal: (earnings['total'] ?? 0) as int,

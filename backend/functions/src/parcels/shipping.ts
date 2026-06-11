@@ -74,6 +74,52 @@ export const confirmParcelDelivery = onCall(async (req) => {
   if (p.driverUid !== uid) throw new HttpsError('permission-denied', 'not your parcel');
   if (p.deliveryOtp !== code) throw new HttpsError('failed-precondition', 'wrong OTP');
   await ref.update({ status: 'delivered', deliveredAt: Timestamp.now() });
-  await db().doc(`drivers/${uid}`).update({ activeOrderId: null });
+  // أرباح السائق من الطرد: 80% من التعرفة (الباقي عمولة المنصة)
+  const driverEarn = Math.round(((p.pricing?.total ?? 0) as number) * 0.8);
+  const { FieldValue } = await import('firebase-admin/firestore');
+  await db().doc(`drivers/${uid}`).update({
+    activeOrderId: null,
+    activeParcelId: FieldValue.delete(),
+    'earnings.today': FieldValue.increment(driverEarn),
+    'earnings.week': FieldValue.increment(driverEarn),
+    'earnings.total': FieldValue.increment(driverEarn),
+  });
+  await db().collection('transactions').add({
+    uid, type: 'payout', amount: driverEarn,
+    meta: { parcelId }, createdAt: Timestamp.now(),
+  });
+  return { ok: true };
+});
+
+// السائق يطالب بطرد متاح (transaction تمنع السباق) ثم يبدأ النقل.
+export const claimParcel = onCall(async (req) => {
+  const uid = req.auth?.uid;
+  if (!uid || req.auth?.token.role !== 'driver') {
+    throw new HttpsError('permission-denied', 'drivers only');
+  }
+  const { parcelId } = req.data;
+  await db().runTransaction(async (tx) => {
+    const ref = db().doc(`parcels/${parcelId}`);
+    const snap = await tx.get(ref);
+    if (!snap.exists || snap.data()!.status !== 'pending' || snap.data()!.driverUid) {
+      throw new HttpsError('failed-precondition', 'parcel unavailable');
+    }
+    tx.update(ref, {
+      driverUid: uid, status: 'pickup', updatedAt: Timestamp.now(),
+    });
+    tx.update(db().doc(`drivers/${uid}`), { activeParcelId: parcelId });
+  });
+  return { ok: true };
+});
+
+export const startParcelTransit = onCall(async (req) => {
+  const uid = req.auth?.uid;
+  if (!uid) throw new HttpsError('unauthenticated', 'login required');
+  const ref = db().doc(`parcels/${req.data.parcelId}`);
+  const snap = await ref.get();
+  if (snap.data()?.driverUid !== uid || snap.data()?.status !== 'pickup') {
+    throw new HttpsError('failed-precondition', 'not your pickup');
+  }
+  await ref.update({ status: 'in_transit', updatedAt: Timestamp.now() });
   return { ok: true };
 });

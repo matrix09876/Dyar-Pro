@@ -22,6 +22,7 @@ export 'src/services/booking_service.dart';
 export 'src/services/user_service.dart';
 export 'src/services/location_service.dart';
 export 'src/services/tracking_service.dart';
+export 'src/services/support_service.dart';
 export 'src/services/market_service.dart';
 export 'src/services/job_service.dart';
 export 'src/i18n/strings.dart';

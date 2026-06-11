@@ -12,6 +12,7 @@ import 'services/booking_service.dart';
 import 'services/user_service.dart';
 import 'services/location_service.dart';
 import 'services/tracking_service.dart';
+import 'services/support_service.dart';
 import 'services/market_service.dart';
 import 'services/job_service.dart';
 
@@ -27,6 +28,7 @@ final bookingServiceProvider = Provider((_) => BookingService());
 final userServiceProvider = Provider((_) => UserService());
 final locationServiceProvider = Provider((_) => LocationService());
 final trackingServiceProvider = Provider((_) => TrackingService());
+final supportServiceProvider = Provider((_) => SupportService());
 final marketServiceProvider = Provider((_) => MarketService());
 final jobServiceProvider = Provider((_) => JobService());
 

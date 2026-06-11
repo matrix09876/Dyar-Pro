@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import '../models/driver_profile.dart';
 
 class DriverService {
@@ -61,4 +62,35 @@ extension DriverKyc on DriverService {
           .collection('drivers')
           .doc(uid)
           .set({'documents': docs}, SetOptions(merge: true));
+}
+
+extension DriverHistoryOps on DriverService {
+  /// طلبات سلّمها هذا السائق (السجل)
+  Stream<List<Map<String, dynamic>>> watchDeliveredOrders(String uid) =>
+      FirebaseFirestore.instance
+          .collection('orders')
+          .where('driverUid', isEqualTo: uid)
+          .where('status', isEqualTo: 'delivered')
+          .orderBy('createdAt', descending: true)
+          .limit(50)
+          .snapshots()
+          .map((s) => s.docs.map((d) => {'id': d.id, ...d.data()}).toList());
+
+  /// حركات أرباح السائق (payout)
+  Stream<List<Map<String, dynamic>>> watchEarningTx(String uid) =>
+      FirebaseFirestore.instance
+          .collection('transactions')
+          .where('uid', isEqualTo: uid)
+          .orderBy('createdAt', descending: true)
+          .limit(50)
+          .snapshots()
+          .map((s) => s.docs.map((d) => {'id': d.id, ...d.data()}).toList());
+
+  /// طلب سحب فوري (حتى 80% من الإجمالي)
+  Future<int> requestPayout(int amount) async {
+    final res = await FirebaseFunctions.instance
+        .httpsCallable('requestPayout')
+        .call({'amount': amount});
+    return (res.data['available'] ?? 0) as int;
+  }
 }

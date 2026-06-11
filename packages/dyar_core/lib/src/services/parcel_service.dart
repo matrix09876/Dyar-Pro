@@ -45,3 +45,25 @@ class ParcelService {
       .snapshots()
       .map((s) => s.docs.map(Parcel.fromDoc).toList());
 }
+
+extension ParcelDriverOps on ParcelService {
+  /// الطرود المتاحة للسائقين (pending بلا سائق)
+  Stream<List<Parcel>> watchAvailable() => FirebaseFirestore.instance
+      .collection('parcels')
+      .where('status', isEqualTo: 'pending')
+      .orderBy('createdAt', descending: true)
+      .limit(20)
+      .snapshots()
+      .map((s) => s.docs
+          .map(Parcel.fromDoc)
+          .where((p) => p.driverUid == null)
+          .toList());
+
+  Future<void> claim(String parcelId) => FirebaseFunctions.instance
+      .httpsCallable('claimParcel')
+      .call({'parcelId': parcelId});
+
+  Future<void> startTransit(String parcelId) => FirebaseFunctions.instance
+      .httpsCallable('startParcelTransit')
+      .call({'parcelId': parcelId});
+}

@@ -46,3 +46,24 @@ class RideService {
       .snapshots()
       .map((s) => s.docs.map(Ride.fromDoc).toList());
 }
+
+extension RideDriverOps on RideService {
+  /// المشاوير الباحثة عن سائق
+  Stream<List<Ride>> watchSearching() => FirebaseFirestore.instance
+      .collection('rides')
+      .where('status', isEqualTo: 'searching')
+      .orderBy('createdAt', descending: true)
+      .limit(20)
+      .snapshots()
+      .map((s) => s.docs.map(Ride.fromDoc).toList());
+
+  Future<void> accept(String rideId) => FirebaseFunctions.instance
+      .httpsCallable('acceptRide')
+      .call({'rideId': rideId});
+
+  /// accepted → arriving → in_progress → completed (الخادم يفرض التسلسل)
+  Future<void> updateStatus(String rideId, String status) =>
+      FirebaseFunctions.instance
+          .httpsCallable('updateRideStatus')
+          .call({'rideId': rideId, 'status': status});
+}
