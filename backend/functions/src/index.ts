@@ -14,6 +14,7 @@ export { requestPayout } from './wallet/payouts';
 export { claimParcel, startParcelTransit } from './parcels/shipping';
 export { updateRideStatus } from './rides/taxi';
 export { onOrderStatusNotify } from './notifications/fcm';
+export { sendBroadcast } from './notifications/broadcast';
 export { requestRide, acceptRide } from './rides/taxi';
 export { createParcel, confirmParcelDelivery } from './parcels/shipping';
 export { createBooking, updateBookingStatus } from './bookings/booking';

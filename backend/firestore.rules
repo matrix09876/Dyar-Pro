@@ -105,6 +105,20 @@ service cloud.firestore {
     match /promotions/{id}   { allow read: if true; allow write: if isAdmin(); }
     match /config/{id}       { allow read: if true; allow write: if isAdmin(); }
 
+    // ---- driverPrizes (جوائز المندوبين): قراءة للجميع، كتابة للإدارة ----
+    match /driverPrizes/{id} { allow read: if true; allow write: if isAdmin(); }
+
+    // ---- blockedAddresses (مكافحة الاحتيال): إدارة فقط ----
+    match /blockedAddresses/{id} {
+      allow read, write: if isAdmin();
+    }
+
+    // ---- broadcasts (بث الإشعارات): قراءة اللوحة، كتابة Functions فقط ----
+    match /broadcasts/{id} {
+      allow read: if isBackoffice();
+      allow write: if false; // sendBroadcast عبر Functions
+    }
+
     // ---- marketProducts (سوق C2C: بيع وشراء) ----
     match /marketProducts/{productId} {
       // المنتجات المعتمدة عامة للتصفّح؛ البائع يقرأ منتجاته بكل الحالات
@@ -179,9 +193,12 @@ service cloud.firestore {
     // سجلات الأمن: تسجيل دخول/أجهزة — كتابة العميل لنفسه فقط، قراءة إدارة
     match /logs/{logId} {
       allow read: if isAdmin() || isStaff();
-      allow create: if isSignedIn()
-        && request.resource.data.category == 'security'
-        && request.resource.data.by == uid();
+      // العميل يسجّل أحداثه الأمنية فقط؛ اللوحة (backoffice) تسجّل
+      // عمليات التدقيق باسمها (مثل نسخ نشاط)
+      allow create: if (isSignedIn()
+          && request.resource.data.category == 'security'
+          && request.resource.data.by == uid())
+        || (isBackoffice() && request.resource.data.by == uid());
     }
     match /support/{ticketId}/messages/{msgId} {
       // محادثة الدعم: صاحب التذكرة يقرأ ويرسل؛ ردود الـ AI تُكتب بالخادم
