@@ -1,0 +1,24 @@
+================================================================================================
+dyar.app — Load / Capacity Test (closed-loop, think-time = 0)
+================================================================================================
+Target           : https://dyar.app/
+Generator        : vm — 4 vCPU, using 4 worker threads
+Stages (conc.)   : 50
+Duration/stage   : 30s   Cooldown: 2s
+Abort if error%  : > 10%
+================================================================================================
+ conc      req/s    ok req/s     err%   p50 ms    p95 ms    p99 ms    max ms      Mbps
+------------------------------------------------------------------------------------------------
+   50      311.2       311.2       0%    141.1       192    1569.9    1610.8       5.6
+------------------------------------------------------------------------------------------------
+PEAK SUSTAINABLE (successful) THROUGHPUT
+  concurrency      : 50
+  successful req/s : 311.2
+  p95 latency      : 192 ms   p99: 1569.9 ms
+  error rate       : 0%
+
+CAPACITY MODEL  (users/hour = peak_ok_req_per_s * 3600 / requests_per_user_session)
+  requests/user    : 8
+  => USERS / HOUR  : ~140,040
+================================================================================================
+Full JSON report written to: /home/user/Dyar-Pro/results/run-1781179649905.json

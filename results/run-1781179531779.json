@@ -1,0 +1,221 @@
+{
+  "target": "https://dyar.app/",
+  "startedAt": "2026-06-11T12:06:55.576Z",
+  "generator": {
+    "host": "vm",
+    "vcpu": 4,
+    "threads": 4
+  },
+  "config": {
+    "stages": [
+      10,
+      25,
+      50,
+      75,
+      100,
+      150,
+      200,
+      300
+    ],
+    "durationSec": 8,
+    "cooldownSec": 2,
+    "reqsPerUser": 8
+  },
+  "stages": [
+    {
+      "concurrency": 10,
+      "threads": 4,
+      "wallSec": 8.22,
+      "total": 2215,
+      "rps": 269.5,
+      "successRps": 269.5,
+      "bytesMB": 4.8,
+      "throughputMbps": 4.9,
+      "networkErrors": 0,
+      "errorRate": 0,
+      "status": {
+        "200": 2215
+      },
+      "latencyMs": {
+        "min": 19.6,
+        "p50": 33,
+        "p90": 47.5,
+        "p95": 55.9,
+        "p99": 94.5,
+        "max": 151.9
+      }
+    },
+    {
+      "concurrency": 25,
+      "threads": 4,
+      "wallSec": 8.16,
+      "total": 2694,
+      "rps": 330,
+      "successRps": 330,
+      "bytesMB": 5.8,
+      "throughputMbps": 5.9,
+      "networkErrors": 0,
+      "errorRate": 0,
+      "status": {
+        "200": 2694
+      },
+      "latencyMs": {
+        "min": 20.8,
+        "p50": 69,
+        "p90": 100.9,
+        "p95": 117.2,
+        "p99": 159.4,
+        "max": 295.9
+      }
+    },
+    {
+      "concurrency": 50,
+      "threads": 4,
+      "wallSec": 8.25,
+      "total": 1910,
+      "rps": 231.5,
+      "successRps": 231.5,
+      "bytesMB": 4.1,
+      "throughputMbps": 4.2,
+      "networkErrors": 0,
+      "errorRate": 0,
+      "status": {
+        "200": 1910
+      },
+      "latencyMs": {
+        "min": 81.5,
+        "p50": 175,
+        "p90": 223.3,
+        "p95": 236.5,
+        "p99": 1580.6,
+        "max": 1606.3
+      }
+    },
+    {
+      "concurrency": 75,
+      "threads": 4,
+      "wallSec": 8.19,
+      "total": 2790,
+      "rps": 340.5,
+      "successRps": 340.5,
+      "bytesMB": 6,
+      "throughputMbps": 6.1,
+      "networkErrors": 0,
+      "errorRate": 0,
+      "status": {
+        "200": 2790
+      },
+      "latencyMs": {
+        "min": 70.8,
+        "p50": 214.2,
+        "p90": 249.6,
+        "p95": 258.8,
+        "p99": 276.9,
+        "max": 314.5
+      }
+    },
+    {
+      "concurrency": 100,
+      "threads": 4,
+      "wallSec": 8.46,
+      "total": 1790,
+      "rps": 211.5,
+      "successRps": 211.5,
+      "bytesMB": 3.8,
+      "throughputMbps": 3.8,
+      "networkErrors": 0,
+      "errorRate": 0,
+      "status": {
+        "200": 1790
+      },
+      "latencyMs": {
+        "min": 100.3,
+        "p50": 389.8,
+        "p90": 479.3,
+        "p95": 1745,
+        "p99": 1803.1,
+        "max": 1824.6
+      }
+    },
+    {
+      "concurrency": 150,
+      "threads": 4,
+      "wallSec": 8.41,
+      "total": 2080,
+      "rps": 247.5,
+      "successRps": 247.5,
+      "bytesMB": 4.5,
+      "throughputMbps": 4.5,
+      "networkErrors": 0,
+      "errorRate": 0,
+      "status": {
+        "200": 2080
+      },
+      "latencyMs": {
+        "min": 262.7,
+        "p50": 485.2,
+        "p90": 596.7,
+        "p95": 1899.9,
+        "p99": 1938.7,
+        "max": 1977.1
+      }
+    },
+    {
+      "concurrency": 200,
+      "threads": 4,
+      "wallSec": 8.6,
+      "total": 1986,
+      "rps": 230.9,
+      "successRps": 230.9,
+      "bytesMB": 4.3,
+      "throughputMbps": 4.2,
+      "networkErrors": 0,
+      "errorRate": 0,
+      "status": {
+        "200": 1986
+      },
+      "latencyMs": {
+        "min": 364,
+        "p50": 677,
+        "p90": 2120.2,
+        "p95": 2243.8,
+        "p99": 2253.4,
+        "max": 2321.9
+      }
+    },
+    {
+      "concurrency": 300,
+      "threads": 4,
+      "wallSec": 9.44,
+      "total": 2051,
+      "rps": 217.3,
+      "successRps": 217.3,
+      "bytesMB": 4.4,
+      "throughputMbps": 3.9,
+      "networkErrors": 0,
+      "errorRate": 0,
+      "status": {
+        "200": 2051
+      },
+      "latencyMs": {
+        "min": 172.5,
+        "p50": 913.8,
+        "p90": 2476.1,
+        "p95": 2495.2,
+        "p99": 8451.3,
+        "max": 8968.9
+      }
+    }
+  ],
+  "peak": {
+    "concurrency": 75,
+    "successRps": 340.5,
+    "p95Ms": 258.8,
+    "p99Ms": 276.9,
+    "errorRate": 0
+  },
+  "capacity": {
+    "reqsPerUser": 8,
+    "usersPerHour": 153225
+  }
+}

@@ -1,0 +1,101 @@
+{
+  "target": "https://dyar.app/",
+  "startedAt": "2026-06-11T12:04:54.830Z",
+  "generator": {
+    "host": "vm",
+    "vcpu": 4,
+    "threads": 4
+  },
+  "config": {
+    "stages": [
+      5,
+      25,
+      100
+    ],
+    "durationSec": 4,
+    "cooldownSec": 1,
+    "reqsPerUser": 8
+  },
+  "stages": [
+    {
+      "concurrency": 5,
+      "threads": 4,
+      "wallSec": 4.23,
+      "total": 614,
+      "rps": 145.1,
+      "successRps": 145.1,
+      "bytesMB": 1.3,
+      "throughputMbps": 2.6,
+      "networkErrors": 0,
+      "errorRate": 0,
+      "status": {
+        "200": 614
+      },
+      "latencyMs": {
+        "min": 18.1,
+        "p50": 23.9,
+        "p90": 38,
+        "p95": 57.1,
+        "p99": 115,
+        "max": 710.9
+      }
+    },
+    {
+      "concurrency": 25,
+      "threads": 4,
+      "wallSec": 4.11,
+      "total": 1350,
+      "rps": 328.1,
+      "successRps": 328.1,
+      "bytesMB": 2.9,
+      "throughputMbps": 5.9,
+      "networkErrors": 0,
+      "errorRate": 0,
+      "status": {
+        "200": 1350
+      },
+      "latencyMs": {
+        "min": 27.7,
+        "p50": 68.2,
+        "p90": 89,
+        "p95": 96,
+        "p99": 318.2,
+        "max": 367.3
+      }
+    },
+    {
+      "concurrency": 100,
+      "threads": 4,
+      "wallSec": 4.34,
+      "total": 1012,
+      "rps": 233.3,
+      "successRps": 233.3,
+      "bytesMB": 2.2,
+      "throughputMbps": 4.2,
+      "networkErrors": 0,
+      "errorRate": 0,
+      "status": {
+        "200": 1012
+      },
+      "latencyMs": {
+        "min": 81.5,
+        "p50": 282.2,
+        "p90": 895.5,
+        "p95": 1516.4,
+        "p99": 1533.6,
+        "max": 1542.7
+      }
+    }
+  ],
+  "peak": {
+    "concurrency": 25,
+    "successRps": 328.1,
+    "p95Ms": 96,
+    "p99Ms": 318.2,
+    "errorRate": 0
+  },
+  "capacity": {
+    "reqsPerUser": 8,
+    "usersPerHour": 147645
+  }
+}

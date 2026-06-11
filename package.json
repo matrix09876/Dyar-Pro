@@ -1,0 +1,14 @@
+{
+  "name": "dyar-load-testing",
+  "version": "1.0.0",
+  "description": "Closed-loop load testing harness for dyar.app — measures sustainable throughput (req/s) and translates it to users/hour.",
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "loadtest": "node src/loadtest.js",
+    "calibrate": "node src/loadtest.js --stages 5,25,100 --duration 5 --target https://dyar.app/"
+  }
+}
