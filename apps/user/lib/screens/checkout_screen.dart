@@ -21,6 +21,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   String _method = 'cash';
   bool _busy = false;
   Map<String, dynamic>? _address;
+  int _tip = 0; // أغورة
+  final _promo = TextEditingController();
+  final _notes = TextEditingController();
+  DateTime? _scheduledFor; // null = الآن
 
   @override
   void initState() {
@@ -137,7 +141,16 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             items: ref.read(cartProvider.notifier).toOrderItems(),
             type: 'delivery',
             paymentMethod: _method,
-            address: _address,
+            address: {
+              ...?_address,
+              if (_notes.text.trim().isNotEmpty)
+                'notes': _notes.text.trim(),
+            },
+            tip: _tip,
+            couponCode: _promo.text.trim().isEmpty
+                ? null
+                : _promo.text.trim().toUpperCase(),
+            scheduledFor: _scheduledFor?.millisecondsSinceEpoch,
           );
       ref.read(cartProvider.notifier).clear();
       if (mounted) {
@@ -225,6 +238,93 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               const Icon(Icons.chevron_left, color: DyarTokens.inkMuted),
             ]),
           ),
+          const SizedBox(height: 16),
+
+          // البقشيش (نمط Wolt) — يذهب كاملًا للسائق
+          Text(s('tip'),
+              style: const TextStyle(fontWeight: FontWeight.w800)),
+          const SizedBox(height: 8),
+          Row(children: [
+            for (final v in const [0, 200, 500, 1000])
+              Padding(
+                padding: const EdgeInsetsDirectional.only(end: 8),
+                child: ChoiceChip(
+                  selected: _tip == v,
+                  selectedColor: DyarTokens.brand,
+                  labelStyle: TextStyle(
+                      fontWeight: FontWeight.w800,
+                      color: _tip == v ? Colors.white : null),
+                  label: Text(v == 0 ? '—' : MoneyText.format(v),
+                      textDirection: TextDirection.ltr),
+                  onSelected: (_) => setState(() => _tip = v),
+                ),
+              ),
+          ]),
+          const SizedBox(height: 16),
+
+          // كود الخصم + ملاحظات التوصيل
+          TextField(
+            controller: _promo,
+            textDirection: TextDirection.ltr,
+            textCapitalization: TextCapitalization.characters,
+            decoration: InputDecoration(
+              labelText: s('promoCode'),
+              prefixIcon: const Icon(LucideIcons.gift, size: 20),
+            ),
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _notes,
+            maxLines: 2,
+            decoration: InputDecoration(
+              labelText: s('deliveryNotes'),
+              prefixIcon: const Icon(LucideIcons.mapPin, size: 20),
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // الآن / جدولة (نمط HAAT scheduled orders)
+          Row(children: [
+            Expanded(
+              child: ChoiceChip(
+                selected: _scheduledFor == null,
+                selectedColor: DyarTokens.brand,
+                labelStyle: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    color: _scheduledFor == null ? Colors.white : null),
+                label: Center(child: Text(s('now'))),
+                onSelected: (_) => setState(() => _scheduledFor = null),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: ChoiceChip(
+                selected: _scheduledFor != null,
+                selectedColor: DyarTokens.brand,
+                labelStyle: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    color: _scheduledFor != null ? Colors.white : null),
+                label: Center(
+                  child: Text(_scheduledFor == null
+                      ? s('scheduleDelivery')
+                      : '${_scheduledFor!.hour.toString().padLeft(2, '0')}:${_scheduledFor!.minute.toString().padLeft(2, '0')}'),
+                ),
+                onSelected: (_) async {
+                  final t = await showTimePicker(
+                      context: context, initialTime: TimeOfDay.now());
+                  if (t != null) {
+                    final now = DateTime.now();
+                    var dt = DateTime(
+                        now.year, now.month, now.day, t.hour, t.minute);
+                    if (dt.isBefore(now)) {
+                      dt = dt.add(const Duration(days: 1));
+                    }
+                    setState(() => _scheduledFor = dt);
+                  }
+                },
+              ),
+            ),
+          ]),
           const SizedBox(height: 16),
 
           // طرق الدفع المعتمدة: VISA · CASH · BIT (قرار المالك)

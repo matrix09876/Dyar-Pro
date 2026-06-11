@@ -1,12 +1,22 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dyar_core/dyar_core.dart';
 
-/// سلة التسوق — متجر واحد لكل سلة (نمط Wolt/HAAT).
+/// سلة التسوق — متجر واحد لكل سلة (نمط Wolt/HAAT)،
+/// مع دعم خيارات الصنف (إضافات/أحجام) لكل سطر.
 class CartLine {
   final MenuItem item;
   final int qty;
-  const CartLine(this.item, this.qty);
-  int get lineTotal => item.price * qty;
+  final List<Map<String, dynamic>> options; // [{name, price}]
+  const CartLine(this.item, this.qty, [this.options = const []]);
+
+  int get optionsTotal =>
+      options.fold(0, (s, o) => s + ((o['price'] ?? 0) as int));
+  int get unitTotal => item.price + optionsTotal;
+  int get lineTotal => unitTotal * qty;
+
+  /// مفتاح السطر: نفس الصنف بخيارات مختلفة = سطر مستقل
+  String get key =>
+      '${item.id}|${options.map((o) => o['name']).join('+')}';
 }
 
 class CartState {
@@ -14,36 +24,54 @@ class CartState {
   final Map<String, CartLine> lines;
   const CartState({this.storeId, this.lines = const {}});
 
-  int get subtotal =>
-      lines.values.fold(0, (sum, l) => sum + l.lineTotal);
+  int get subtotal => lines.values.fold(0, (sum, l) => sum + l.lineTotal);
   int get count => lines.values.fold(0, (sum, l) => sum + l.qty);
   bool get isEmpty => lines.isEmpty;
+
+  /// كمية صنف عبر كل سطوره (لعدّاد البطاقة)
+  int qtyOf(String itemId) => lines.values
+      .where((l) => l.item.id == itemId)
+      .fold(0, (s, l) => s + l.qty);
 }
 
 class CartNotifier extends Notifier<CartState> {
   @override
   CartState build() => const CartState();
 
-  /// إضافة صنف — تبديل المتجر يفرغ السلة (مع تنبيه في الواجهة).
-  void add(String storeId, MenuItem item) {
+  /// إضافة صنف (بخياراته) — تبديل المتجر يفرغ السلة.
+  void add(String storeId, MenuItem item,
+      {List<Map<String, dynamic>> options = const [], int qty = 1}) {
     final sameStore = state.storeId == null || state.storeId == storeId;
     final lines = sameStore
         ? Map<String, CartLine>.from(state.lines)
         : <String, CartLine>{};
-    final existing = lines[item.id];
-    lines[item.id] = CartLine(item, (existing?.qty ?? 0) + 1);
+    final line = CartLine(item, qty, options);
+    final existing = lines[line.key];
+    lines[line.key] =
+        CartLine(item, (existing?.qty ?? 0) + qty, options);
     state = CartState(storeId: storeId, lines: lines);
   }
 
-  void remove(MenuItem item) {
+  /// إنقاص آخر سطر لهذا الصنف (من عدّاد البطاقة)
+  void removeOne(String itemId) {
     final lines = Map<String, CartLine>.from(state.lines);
-    final existing = lines[item.id];
-    if (existing == null) return;
+    final key = lines.values
+        .where((l) => l.item.id == itemId)
+        .map((l) => l.key)
+        .lastOrNull;
+    if (key == null) return;
+    final existing = lines[key]!;
     if (existing.qty <= 1) {
-      lines.remove(item.id);
+      lines.remove(key);
     } else {
-      lines[item.id] = CartLine(item, existing.qty - 1);
+      lines[key] = CartLine(existing.item, existing.qty - 1, existing.options);
     }
+    state = CartState(
+        storeId: lines.isEmpty ? null : state.storeId, lines: lines);
+  }
+
+  void removeLine(String key) {
+    final lines = Map<String, CartLine>.from(state.lines)..remove(key);
     state = CartState(
         storeId: lines.isEmpty ? null : state.storeId, lines: lines);
   }
@@ -51,8 +79,10 @@ class CartNotifier extends Notifier<CartState> {
   void clear() => state = const CartState();
 
   List<Map<String, dynamic>> toOrderItems() => state.lines.values
-      .map((l) => {'itemId': l.item.id, 'qty': l.qty, 'options': []})
+      .map((l) =>
+          {'itemId': l.item.id, 'qty': l.qty, 'options': l.options})
       .toList();
 }
 
-final cartProvider = NotifierProvider<CartNotifier, CartState>(CartNotifier.new);
+final cartProvider =
+    NotifierProvider<CartNotifier, CartState>(CartNotifier.new);

@@ -1,4 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dyar_core/dyar_core.dart';
@@ -10,6 +12,14 @@ import 'parcel_screen.dart';
 
 final approvedStoresProvider = StreamProvider.family<List<Store>, String?>(
     (ref, type) => ref.watch(storeServiceProvider).watchApproved(type: type));
+
+/// متاجر المستخدم المفضلة (♥) — حية من ملفه
+final favoriteStoresProvider = StreamProvider<Set<String>>((ref) {
+  final uid = FirebaseAuth.instance.currentUser?.uid;
+  if (uid == null) return Stream.value(const <String>{});
+  return FirebaseFirestore.instance.doc('users/$uid').snapshots().map((d) =>
+      Set<String>.from(d.data()?['favorites']?['stores'] ?? const []));
+});
 
 /// الرئيسية بمعيار Dyar Ultra UI: ترويسة متدرجة + بحث عائم + بانرات عروض
 /// + شبكة خدمات ملوّنة + بطاقات متاجر غنية بالصور والشارات.
@@ -626,6 +636,46 @@ class _StoreCard extends ConsumerWidget {
                           fontSize: 11.5,
                           fontWeight: FontWeight.w800)),
                 ),
+              ),
+              // المفضلة ♥ — حية لكل مستخدم
+              PositionedDirectional(
+                bottom: 10, end: 12,
+                child: Consumer(builder: (context, ref, _) {
+                  final favs =
+                      ref.watch(favoriteStoresProvider).value ?? const {};
+                  final isFav = favs.contains(store.id);
+                  return GestureDetector(
+                    onTap: () {
+                      final uid = FirebaseAuth.instance.currentUser?.uid;
+                      if (uid != null) {
+                        ref
+                            .read(userServiceProvider)
+                            .toggleFavoriteStore(uid, store.id, !isFav);
+                      }
+                    },
+                    child: Container(
+                      height: 36, width: 36,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.18),
+                              blurRadius: 8),
+                        ],
+                      ),
+                      child: Icon(
+                        isFav
+                            ? Icons.favorite_rounded
+                            : Icons.favorite_outline_rounded,
+                        size: 20,
+                        color: isFav
+                            ? const Color(0xFFE11D48)
+                            : DyarTokens.inkMuted,
+                      ),
+                    ),
+                  );
+                }),
               ),
             ]),
             Padding(

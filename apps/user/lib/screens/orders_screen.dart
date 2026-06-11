@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dyar_core/dyar_core.dart';
 import 'package:dyar_ui/dyar_ui.dart';
 
+import '../state/cart.dart';
+import 'store_screen.dart';
 import 'tracking_screen.dart';
 
 /// طلباتي: قائمة لحظية + فتح التتبع.
@@ -37,32 +39,75 @@ class MyOrdersScreen extends ConsumerWidget {
               return DyarCard(
                 onTap: () => Navigator.of(context).push(MaterialPageRoute(
                     builder: (_) => TrackingScreen(orderId: o.id))),
-                child: Row(
+                child: Column(
                   children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('#${o.code}',
-                              style: const TextStyle(
-                                  fontWeight: FontWeight.w800)),
-                          Text('${o.items.length} · ${o.paymentMethod}',
-                              style: const TextStyle(
-                                  fontSize: 12,
-                                  color: DyarTokens.inkMuted)),
-                        ],
-                      ),
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
+                    Row(
                       children: [
-                        StatusChip(
-                            label: s.status(o.status.key),
-                            statusKey: o.status.key),
-                        const SizedBox(height: 4),
-                        MoneyText(o.pricing.total),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('#${o.code}',
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.w800)),
+                              Text(
+                                  '${o.items.length} · ${o.paymentMethod}',
+                                  style: const TextStyle(
+                                      fontSize: 12,
+                                      color: DyarTokens.inkMuted)),
+                            ],
+                          ),
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            StatusChip(
+                                label: s.status(o.status.key),
+                                statusKey: o.status.key),
+                            const SizedBox(height: 4),
+                            MoneyText(o.pricing.total),
+                          ],
+                        ),
                       ],
                     ),
+                    // اطلب مجددًا (نمط Talabat) — يعيد بناء السلة فورًا
+                    if (o.status == OrderStatus.delivered) ...[
+                      const SizedBox(height: 10),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 42,
+                        child: OutlinedButton.icon(
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: DyarTokens.brandDark,
+                            side: const BorderSide(
+                                color: DyarTokens.brand, width: 1.5),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12)),
+                          ),
+                          icon: const Icon(Icons.replay_rounded, size: 18),
+                          label: Text(s('reorder'),
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.w800)),
+                          onPressed: () {
+                            final cart = ref.read(cartProvider.notifier)
+                              ..clear();
+                            for (final it in o.items) {
+                              cart.add(
+                                o.storeId,
+                                MenuItem(
+                                    id: it.itemId,
+                                    name: it.name,
+                                    price: it.unitPrice),
+                                qty: it.qty,
+                              );
+                            }
+                            Navigator.of(context).push(MaterialPageRoute(
+                                builder: (_) =>
+                                    StoreScreen(storeId: o.storeId)));
+                          },
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               );

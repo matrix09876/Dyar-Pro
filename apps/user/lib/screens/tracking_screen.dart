@@ -42,17 +42,21 @@ class TrackingScreen extends ConsumerWidget {
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              DyarCard(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('#${order.code}',
-                        style:
-                            const TextStyle(fontWeight: FontWeight.w800)),
-                    MoneyText(order.pricing.total),
-                  ],
+              // بطاقة ETA البطلة (نمط Wolt): عدّ تنازلي حي + شريط تقدّم
+              if (!order.status.isTerminal)
+                _EtaHero(order: order)
+              else
+                DyarCard(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('#${order.code}',
+                          style:
+                              const TextStyle(fontWeight: FontWeight.w800)),
+                      MoneyText(order.pricing.total),
+                    ],
+                  ),
                 ),
-              ),
               const SizedBox(height: 20),
 
               if (order.status == OrderStatus.cancelled ||
@@ -146,6 +150,102 @@ class TrackingScreen extends ConsumerWidget {
           );
         },
       ),
+    );
+  }
+}
+
+/// بطاقة الوصول المتوقع: تقدير 35 دقيقة من إنشاء الطلب (يُستبدل بـ eta
+/// الخادم عند توفره) مع عدّ تنازلي يتحدث كل ثانية وشريط تقدّم.
+class _EtaHero extends ConsumerStatefulWidget {
+  const _EtaHero({required this.order});
+  final DyarOrder order;
+
+  @override
+  ConsumerState<_EtaHero> createState() => _EtaHeroState();
+}
+
+class _EtaHeroState extends ConsumerState<_EtaHero> {
+  late final Stream<int> _tick =
+      Stream.periodic(const Duration(seconds: 1), (i) => i);
+
+  @override
+  Widget build(BuildContext context) {
+    final s = ref.watch(stringsProvider);
+    final created = widget.order.createdAt ?? DateTime.now();
+    final eta = created.add(const Duration(minutes: 35));
+
+    return StreamBuilder<int>(
+      stream: _tick,
+      builder: (context, _) {
+        final remaining = eta.difference(DateTime.now());
+        final mins = remaining.inMinutes.clamp(0, 99);
+        final secs = (remaining.inSeconds % 60).clamp(0, 59);
+        final progress = 1 -
+            (remaining.inSeconds / const Duration(minutes: 35).inSeconds)
+                .clamp(0.0, 1.0);
+
+        return Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(colors: [
+              Color(0xFFFF8A3D),
+              DyarTokens.brandDark,
+            ]),
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                  color: DyarTokens.brand.withValues(alpha: 0.4),
+                  blurRadius: 18,
+                  offset: const Offset(0, 8)),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('#${widget.order.code}',
+                      style: const TextStyle(
+                          color: Colors.white70,
+                          fontWeight: FontWeight.w700)),
+                  Text(MoneyText.format(widget.order.pricing.total),
+                      textDirection: TextDirection.ltr,
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w900)),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Text(s('etaArrives'),
+                  style: const TextStyle(
+                      color: Colors.white70, fontSize: 13)),
+              Text(
+                remaining.isNegative
+                    ? '🛵 ${s.status(widget.order.status.key)}'
+                    : '$mins:${secs.toString().padLeft(2, '0')} ${s('minutes')}',
+                textDirection: TextDirection.ltr,
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 34,
+                    fontWeight: FontWeight.w900,
+                    height: 1.1),
+              ),
+              const SizedBox(height: 12),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: LinearProgressIndicator(
+                  value: progress,
+                  minHeight: 8,
+                  backgroundColor: Colors.white.withValues(alpha: 0.25),
+                  valueColor:
+                      const AlwaysStoppedAnimation(Colors.white),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

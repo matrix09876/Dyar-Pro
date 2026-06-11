@@ -23,6 +23,7 @@ class OrderService {
     String paymentMethod = 'cash',
     String? couponCode,
     int tip = 0,
+    int? scheduledFor, // epoch ms — جدولة التوصيل
   }) async {
     final res = await _fns.httpsCallable('createOrder').call({
       'storeId': storeId,
@@ -32,6 +33,7 @@ class OrderService {
       'paymentMethod': paymentMethod,
       'couponCode': couponCode,
       'tip': tip,
+      'scheduledFor': scheduledFor,
     });
     return Map<String, dynamic>.from(res.data);
   }

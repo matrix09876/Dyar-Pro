@@ -6,6 +6,7 @@ import 'package:dyar_ui/dyar_ui.dart';
 
 import '../state/cart.dart';
 import 'checkout_screen.dart';
+import 'item_sheet.dart';
 
 /// صفحة المتجر بمعيار Ultra UI: غلاف كبير بتدرّج + بطاقة معلومات عائمة
 /// (تقييم/وقت/توصيل) + أصناف بصور وعدّادات + شريط سلة لاصق متدرّج.
@@ -275,9 +276,12 @@ class _MenuTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cart = ref.watch(cartProvider);
-    final qty = cart.storeId == storeId ? (cart.lines[item.id]?.qty ?? 0) : 0;
+    final qty = cart.storeId == storeId ? cart.qtyOf(item.id) : 0;
 
-    return Container(
+    return GestureDetector(
+      // فتح نافذة الصنف بخياراته (نمط Wolt) — النقر على البطاقة كاملة
+      onTap: () => showItemSheet(context, ref, storeId, item),
+      child: Container(
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
@@ -362,7 +366,7 @@ class _MenuTile extends ConsumerWidget {
                   IconButton(
                     visualDensity: VisualDensity.compact,
                     onPressed: () =>
-                        ref.read(cartProvider.notifier).remove(item),
+                        ref.read(cartProvider.notifier).removeOne(item.id),
                     icon: const Icon(LucideIcons.minus,
                         size: 18, color: DyarTokens.brandDark),
                   ),
@@ -379,6 +383,7 @@ class _MenuTile extends ConsumerWidget {
                 ]),
               ),
       ]),
+      ),
     );
   }
 }
