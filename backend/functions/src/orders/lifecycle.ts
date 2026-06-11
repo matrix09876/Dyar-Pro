@@ -13,7 +13,8 @@ function shortCode(): string {
 export const createOrder = onCall(async (req) => {
   const uid = req.auth?.uid;
   if (!uid) throw new HttpsError('unauthenticated', 'login required');
-  const { storeId, items, type, address, couponCode, tip = 0 } = req.data;
+  // scheduledFor: جدولة التوصيل (اختياري) — ISO timestamp بالمللي ثانية
+  const { storeId, items, type, address, couponCode, tip = 0, scheduledFor } = req.data;
   if (!storeId || !Array.isArray(items) || items.length === 0) {
     throw new HttpsError('invalid-argument', 'storeId and items required');
   }
@@ -67,6 +68,7 @@ export const createOrder = onCall(async (req) => {
     pricing: { subtotal, deliveryFee, serviceFee, discount, tip, total },
     payment: { method: req.data.paymentMethod || 'cash', status: 'pending' },
     timeline: [{ status: 'pending', at: now, by: uid }],
+    ...(scheduledFor ? { scheduledFor: Timestamp.fromMillis(Number(scheduledFor)) } : {}),
     createdAt: now, updatedAt: now,
   };
   const ref = await db().collection('orders').add(order);
