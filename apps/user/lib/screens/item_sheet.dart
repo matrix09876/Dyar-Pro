@@ -9,20 +9,25 @@ import '../state/cart.dart';
 
 /// نافذة الصنف (نمط Wolt/Talabat): صورة كبيرة + وصف + مجموعات الخيارات
 /// من stores/{id}/options + عدّاد كمية + زر "أضف — ₪المجموع" الحي.
+/// [brand] (هوية المينيو) تصبغ زر الإضافة والخيارات بلون قالب المتجر.
 Future<void> showItemSheet(
-    BuildContext context, WidgetRef ref, String storeId, MenuItem item) {
+    BuildContext context, WidgetRef ref, String storeId, MenuItem item,
+    {MenuBrand? brand}) {
   return showModalBottomSheet(
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
-    builder: (_) => _ItemSheet(storeId: storeId, item: item),
+    builder: (_) => _ItemSheet(
+        storeId: storeId, item: item, brand: brand ?? MenuBrand.dyar),
   );
 }
 
 class _ItemSheet extends ConsumerStatefulWidget {
-  const _ItemSheet({required this.storeId, required this.item});
+  const _ItemSheet(
+      {required this.storeId, required this.item, required this.brand});
   final String storeId;
   final MenuItem item;
+  final MenuBrand brand;
 
   @override
   ConsumerState<_ItemSheet> createState() => _ItemSheetState();
@@ -91,7 +96,7 @@ class _ItemSheetState extends ConsumerState<_ItemSheet> {
                       ? CachedNetworkImage(
                           imageUrl: item.imageUrl!, fit: BoxFit.cover)
                       : Container(
-                          color: DyarTokens.brandLight,
+                          color: widget.brand.accentSoft,
                           child: const Center(
                               child:
                                   Text('🍜', style: TextStyle(fontSize: 48))),
@@ -151,7 +156,7 @@ class _ItemSheetState extends ConsumerState<_ItemSheet> {
                               CheckboxListTile(
                                 contentPadding: EdgeInsets.zero,
                                 dense: true,
-                                activeColor: DyarTokens.brand,
+                                activeColor: widget.brand.accent,
                                 controlAffinity:
                                     ListTileControlAffinity.leading,
                                 value: _picked.contains(c['name']),
@@ -199,6 +204,10 @@ class _ItemSheetState extends ConsumerState<_ItemSheet> {
                   child: SizedBox(
                     height: 54,
                     child: FilledButton(
+                      style: widget.brand.template == 'dyar'
+                          ? null
+                          : FilledButton.styleFrom(
+                              backgroundColor: widget.brand.accentDark),
                       onPressed: () {
                         final opts = _choices
                             .where((c) => _picked.contains(c['name']))
