@@ -43,6 +43,10 @@ isOpen: boolean                // تبديل يدوي/تلقائي حسب openin
 openingHours: { [day]: {open,close}[] }
 rating: number, ratingCount: number
 deliveryFee: number, minOrder: number, prepTimeMins: number
+brand: { template: 'elegant'|'fresh'|'street'|'pharma'|'boutique',
+         accent?: '#hex' }     // هوية المينيو — قوالب MenuBrand في dyar_ui؛
+                               // غيابه = هوية ديار الافتراضية. accent يعيد
+                               // صبغ القالب بلون المتجر (يكتبه partner/admin)
 commissionPct: number          // عمولة المنصّة
 status: 'pending'|'approved'|'suspended'   // الإدارة توافق
 createdAt, updatedAt

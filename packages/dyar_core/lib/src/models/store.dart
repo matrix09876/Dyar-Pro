@@ -16,6 +16,7 @@ class Store {
   final int prepTimeMins;
   final Map<String, dynamic>? location;
   final Map<String, dynamic>? dineOut; // reservationCost, cancellationPolicy..
+  final Map<String, dynamic>? brand; // هوية المينيو: { template, accent? }
 
   const Store({
     required this.id, required this.ownerUid, required this.name,
@@ -24,7 +25,7 @@ class Store {
     this.isOpen = false, this.status = 'pending',
     this.rating = 0, this.ratingCount = 0,
     this.deliveryFee = 0, this.minOrder = 0, this.prepTimeMins = 20,
-    this.location, this.dineOut,
+    this.location, this.dineOut, this.brand,
   });
 
   factory Store.fromDoc(DocumentSnapshot<Map<String, dynamic>> doc) {
@@ -52,6 +53,9 @@ class Store {
       dineOut: d['dineOut'] == null
           ? null
           : Map<String, dynamic>.from(d['dineOut']),
+      brand: d['brand'] == null
+          ? null
+          : Map<String, dynamic>.from(d['brand']),
     );
   }
 }
