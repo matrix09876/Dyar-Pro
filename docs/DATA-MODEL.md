@@ -133,6 +133,34 @@ extraSellStore: { businessId, extraDeliveryCost, askDriverStoreData }
 mainDashboardProductsBusinessId?: string
 ```
 
+### `cities/{id}/zones/{zoneId}`  — مناطق المدينة (مضلّعات على الخريطة)
+```
+name, polygon: [{lat,lng}]          // رؤوس قابلة للتحرير (رسم حر)
+deliveryFee: number
+tier: 'base'|'second'|'third'|'fourth'   // Base area...
+groupId?: string                    // مجموعات مناطق (Manage groups)
+active: boolean                     // Disable zones
+```
+`cities/{id}/zoneGroups/{groupId}`: `{ name }`.
+
+### إعدادات خدمات المدينة — `cities/{id}.services`
+```
+packageService: {
+  request:  { basePer1Km, costPerExtraKm, serviceCost },
+  withPayment: { enabled, basePer1Km, costPerExtraKm, increasePctOverProduct },
+  weightTiers: { upTo5kg: {enabled, basePer1Km, costPerExtraKm, serviceCost},
+                 upTo15kg: {...} },
+  fastService: { enabled, ... },
+  dynamicFare: { enabled, increasePct, demandLevel },
+  extraStops: boolean, waitingTime: boolean,
+  extraWeight: { enabled, costPerKg },
+  paymentGateway?: string
+}
+taxiService / sharedTransport / parcelDelivery: نفس النمط (أساس + كم + خيارات)
+```
+خريطة الطلبات الحية (Orders map): تُرسم من `orders` النشطة بإحداثيات
+`address.lat/lng` لكل مدينة.
+
 ### `drivers` — أعمدة لوحة السائقين (من اللوحة الحالية)
 لكل سائق إضافةً لما سبق: `access: boolean` (دخول)، `loginEnabled: boolean`،
 `prizes[]` (جوائز السائقين: pending_delivery|delivered)،
