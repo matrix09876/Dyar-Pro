@@ -15,7 +15,6 @@
         "flutter_riverpod",
         "geolocator",
         "google_maps_flutter",
-        "lucide_icons",
         "shared_preferences",
         "url_launcher"
       ],
@@ -47,13 +46,6 @@
         "stream_channel",
         "test_api",
         "vector_math"
-      ]
-    },
-    {
-      "name": "lucide_icons",
-      "version": "0.257.0",
-      "dependencies": [
-        "flutter"
       ]
     },
     {
@@ -132,8 +124,7 @@
       "version": "0.1.0",
       "dependencies": [
         "flutter",
-        "google_fonts",
-        "lucide_icons"
+        "google_fonts"
       ]
     },
     {

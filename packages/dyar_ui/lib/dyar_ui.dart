@@ -2,6 +2,7 @@
 library dyar_ui;
 
 export 'src/tokens.dart';
+export 'src/icons.dart';
 export 'src/theme.dart';
 export 'src/widgets/cta_button.dart';
 export 'src/widgets/status_chip.dart';

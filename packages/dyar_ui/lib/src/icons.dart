@@ -1,0 +1,54 @@
+import 'package:flutter/material.dart';
+
+/// طبقة توافق Lucide → Material: نفس أسماء الـ Handoff (Icon Mapping)
+/// بدون الاعتماد على حزمة lucide_icons (غير متوافقة مع Flutter الحديث).
+abstract final class LucideIcons {
+  static const IconData home = Icons.home_rounded;
+  static const IconData receipt = Icons.receipt_long_rounded;
+  static const IconData userCircle2 = Icons.account_circle_rounded;
+  static const IconData bike = Icons.directions_bike_rounded;
+  static const IconData wallet = Icons.account_balance_wallet_rounded;
+  static const IconData trendingUp = Icons.trending_up_rounded;
+  static const IconData navigation = Icons.navigation_rounded;
+  static const IconData packageSearch = Icons.manage_search_rounded;
+  static const IconData handMetal = Icons.front_hand_rounded;
+  static const IconData powerOff = Icons.power_settings_new_rounded;
+  static const IconData mapPin = Icons.place_rounded;
+  static const IconData check = Icons.check_rounded;
+  static const IconData checkCircle2 = Icons.check_circle_rounded;
+  static const IconData xCircle = Icons.cancel_rounded;
+  static const IconData utensils = Icons.restaurant_rounded;
+  static const IconData settings = Icons.settings_rounded;
+  static const IconData store = Icons.storefront_rounded;
+  static const IconData languages = Icons.translate_rounded;
+  static const IconData moon = Icons.dark_mode_rounded;
+  static const IconData logOut = Icons.logout_rounded;
+  static const IconData logIn = Icons.login_rounded;
+  static const IconData star = Icons.star_rounded;
+  static const IconData search = Icons.search_rounded;
+  static const IconData layoutGrid = Icons.grid_view_rounded;
+  static const IconData shoppingBag = Icons.shopping_bag_rounded;
+  static const IconData pill = Icons.medication_rounded;
+  static const IconData flower2 = Icons.local_florist_rounded;
+  static const IconData wrench = Icons.build_rounded;
+  static const IconData clock = Icons.schedule_rounded;
+  static const IconData shoppingCart = Icons.shopping_cart_rounded;
+  static const IconData plus = Icons.add_rounded;
+  static const IconData minus = Icons.remove_rounded;
+  static const IconData lock = Icons.lock_rounded;
+  static const IconData creditCard = Icons.credit_card_rounded;
+  static const IconData banknote = Icons.payments_rounded;
+  static const IconData gift = Icons.card_giftcard_rounded;
+  static const IconData bell = Icons.notifications_rounded;
+  static const IconData bellRing = Icons.notifications_active_rounded;
+  static const IconData trash2 = Icons.delete_rounded;
+  static const IconData car = Icons.directions_car_rounded;
+  static const IconData bus = Icons.directions_bus_rounded;
+  static const IconData shieldAlert = Icons.gpp_maybe_rounded;
+  static const IconData circle = Icons.circle;
+  static const IconData radio = Icons.sensors_rounded;
+  static const IconData package = Icons.inventory_2_rounded;
+  static const IconData packageCheck = Icons.task_alt_rounded;
+  static const IconData sunrise = Icons.wb_twilight_rounded;
+  static const IconData calendarDays = Icons.calendar_month_rounded;
+}

@@ -20,3 +20,4 @@ export 'src/services/location_service.dart';
 export 'src/services/tracking_service.dart';
 export 'src/i18n/strings.dart';
 export 'src/providers.dart';
+export 'src/firebase_boot.dart';

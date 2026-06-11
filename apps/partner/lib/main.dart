@@ -9,7 +9,7 @@ import 'screens/shell.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  await initDyarFirebase();
   runApp(const ProviderScope(child: PartnerApp()));
 }
 

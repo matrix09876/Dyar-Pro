@@ -10,7 +10,7 @@ import 'screens/auth_gate.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // إعدادات Firebase تُولَّد لاحقًا بـ flutterfire configure (firebase_options.dart)
-  await Firebase.initializeApp();
+  await initDyarFirebase();
   runApp(const ProviderScope(child: DriverApp()));
 }
 
