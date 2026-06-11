@@ -48,6 +48,7 @@ class S {
     'discount': ['الخصم', 'הנחה', 'Discount'],
     'payment': ['طريقة الدفع', 'אמצעי תשלום', 'Payment method'],
     'payCash': ['نقدًا', 'מזומן', 'Cash'],
+    'payBit': ['Bit ביט', 'ביט Bit', 'Bit'],
     'payCard': ['بطاقة', 'כרטיס', 'Card'],
     'wallet': ['المحفظة', 'ארנק', 'Wallet'],
     'orderPlaced': ['تم إرسال طلبك!', 'ההזמנה נשלחה!', 'Order placed!'],

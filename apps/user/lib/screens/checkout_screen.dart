@@ -104,6 +104,14 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           Text(s('payment'),
               style: const TextStyle(fontWeight: FontWeight.w800)),
           const SizedBox(height: 8),
+          // طرق الدفع المعتمدة: VISA · CASH · BIT (قرار المالك)
+          _PayOption(
+            icon: LucideIcons.creditCard,
+            label: 'VISA · ${s('payCard')}',
+            selected: _method == 'card',
+            onTap: () => setState(() => _method = 'card'),
+          ),
+          const SizedBox(height: 8),
           _PayOption(
             icon: LucideIcons.banknote,
             label: s('payCash'),
@@ -112,10 +120,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           ),
           const SizedBox(height: 8),
           _PayOption(
-            icon: LucideIcons.creditCard,
-            label: '${s('payCard')} · Stripe',
-            selected: _method == 'card',
-            onTap: () => setState(() => _method = 'card'),
+            icon: LucideIcons.wallet,
+            label: s('payBit'),
+            selected: _method == 'bit',
+            onTap: () => setState(() => _method = 'bit'),
           ),
           const SizedBox(height: 24),
 
