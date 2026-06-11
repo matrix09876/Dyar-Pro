@@ -183,6 +183,17 @@ rates: { base: 50, perKg: 100, perM3: 100 }
 active: boolean
 ```
 
+### قوالب البريد — `config/emails`
+```
+templates: {
+  newUserRegistration: { html },             // HTML بأنماط CSS داخلية فقط
+  driverOnboarding:    { subject, html },
+  orderReceipt:        { subject, html },    // إيصال رقمي للطلب
+}
+```
+المتغيرات بصيغة `{userName}` تُستبدل عند الإرسال (عبر دالة بريد في
+Functions). لا CSS خارجي — كل التنسيق داخل الملف.
+
 ### بوابات الدفع — أسرار (Functions Secrets، لا تُخزَّن في Firestore)
 ```
 GREENPAY:   merchantId, terminal
@@ -190,6 +201,9 @@ EASYCARDNG: terminalId, apiKey        // البوابة الأساسية في ا
 MERCADOPAGO: accessToken
 STRIPE:     secret, webhook           // مُنفَّذ فعليًا لدينا
 ```
+**طرق الدفع للمستخدم النهائي (قرار المالك): VISA (بطاقة) · CASH (نقدًا)
+· BIT (تطبيق Bit الإسرائيلي)** — تُنفَّذ البطاقة عبر EasycardNG/Stripe،
+وBit عبر تكامل بوابة محلية؛ `payment.method: 'card'|'cash'|'bit'|'wallet'`.
 الاختيار لكل خدمة/مدينة عبر `paymentGateway` في الإعدادات؛ المفاتيح نفسها
 عبر `firebase functions:secrets:set` فقط.
 
