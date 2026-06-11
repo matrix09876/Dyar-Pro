@@ -1,0 +1,140 @@
+import 'package:flutter/widgets.dart';
+
+/// ترجمة ثلاثية (عربي/عبري/إنجليزي) مع RTL/LTR تلقائي — وفق جدول i18n
+/// في Dyar Ultra UI Handoff (صفحة 16).
+enum DyarLang { ar, he, en }
+
+extension DyarLangX on DyarLang {
+  TextDirection get direction =>
+      this == DyarLang.en ? TextDirection.ltr : TextDirection.rtl;
+  Locale get locale => Locale(name);
+  String get label => switch (this) {
+        DyarLang.ar => 'العربية',
+        DyarLang.he => 'עברית',
+        DyarLang.en => 'English',
+      };
+}
+
+class S {
+  S(this.lang);
+  final DyarLang lang;
+
+  static const _d = <String, List<String>>{
+    // [ar, he, en]
+    'appName': ['ديار', 'דיאר', 'Dyar'],
+    'allYouNeed': ['كل ما تحتاجه في مكان واحد', 'הכל במקום אחד', 'All you need in one place'],
+    'continue': ['متابعة', 'המשך', 'Continue'],
+    'phone': ['رقم الهاتف', 'מספר טלפון', 'Phone number'],
+    'otpCode': ['رمز التحقق', 'קוד אימות', 'Verification code'],
+    'signIn': ['دخول', 'כניסה', 'Sign in'],
+    'logout': ['تسجيل الخروج', 'התנתקות', 'Log out'],
+    'home': ['الرئيسية', 'בית', 'Home'],
+    'orders': ['الطلبات', 'הזמנות', 'Orders'],
+    'history': ['السجل', 'היסטוריה', 'History'],
+    'support': ['الدعم', 'תמיכה', 'Support'],
+    'profile': ['حسابي', 'החשבון שלי', 'Profile'],
+    'menu': ['القائمة', 'תפריט', 'Menu'],
+    'offers': ['عروض', 'מבצעים', 'Offers'],
+    'more': ['المزيد', 'עוד', 'More'],
+    'active': ['نشط', 'פעיל', 'Active'],
+    'online': ['متصل', 'מחובר', 'Online'],
+    'offline': ['غير متصل', 'לא מחובר', 'Offline'],
+    'cart': ['السلة', 'עגלה', 'Cart'],
+    'checkout': ['إتمام الطلب', 'לתשלום', 'Checkout'],
+    'total': ['الإجمالي', 'סה״כ', 'Total'],
+    'subtotal': ['المجموع الجزئي', 'סכום ביניים', 'Subtotal'],
+    'deliveryFee': ['رسوم التوصيل', 'דמי משלוח', 'Delivery fee'],
+    'serviceFee': ['رسوم الخدمة', 'דמי שירות', 'Service fee'],
+    'discount': ['الخصم', 'הנחה', 'Discount'],
+    'payment': ['طريقة الدفع', 'אמצעי תשלום', 'Payment method'],
+    'payCash': ['نقدًا', 'מזומן', 'Cash'],
+    'payCard': ['بطاقة', 'כרטיס', 'Card'],
+    'wallet': ['المحفظة', 'ארנק', 'Wallet'],
+    'orderPlaced': ['تم إرسال طلبك!', 'ההזמנה נשלחה!', 'Order placed!'],
+    'trackOrder': ['تتبع الطلب', 'מעקב הזמנה', 'Track order'],
+    'rateOrder': ['قيّم طلبك', 'דרג את ההזמנה', 'Rate your order'],
+    'addToCart': ['أضف إلى السلة', 'הוסף לעגלה', 'Add to cart'],
+    'minOrder': ['الحد الأدنى للطلب', 'הזמנה מינימלית', 'Min. order'],
+    'searchHint': ['ابحث عن مطاعم ومتاجر...', 'חפש מסעדות וחנויות...', 'Search restaurants & stores...'],
+    'categories': ['التصنيفات', 'קטגוריות', 'Categories'],
+    'restaurants': ['مطاعم', 'מסעדות', 'Restaurants'],
+    'groceries': ['بقالة', 'מכולת', 'Groceries'],
+    'pharmacies': ['صيدليات', 'בתי מרקחת', 'Pharmacies'],
+    'flowers': ['ورود', 'פרחים', 'Flowers'],
+    'services': ['خدمات', 'שירותים', 'Services'],
+    'stores': ['متاجر', 'חנויות', 'Stores'],
+    'favorites': ['المفضلات', 'מועדפים', 'Favorites'],
+    'allergies': ['الحساسية', 'אלרגיות', 'Allergies'],
+    'newOrder': ['طلب جديد!', 'הזמנה חדשה!', 'New order!'],
+    'accept': ['قبول', 'אישור', 'Accept'],
+    'reject': ['رفض', 'דחייה', 'Reject'],
+    'preparing': ['قيد التحضير', 'בהכנה', 'Preparing'],
+    'ready': ['جاهز', 'מוכן', 'Ready'],
+    'pickedUp': ['تم الاستلام', 'נאסף', 'Picked up'],
+    'onTheWay': ['في الطريق', 'בדרך', 'On the way'],
+    'delivered': ['تم التوصيل', 'נמסר', 'Delivered'],
+    'cancelled': ['ملغي', 'בוטל', 'Cancelled'],
+    'pending': ['بانتظار', 'ממתין', 'Pending'],
+    'earnings': ['الأرباح', 'רווחים', 'Earnings'],
+    'earningsToday': ['أرباح اليوم', 'רווחי היום', "Today's earnings"],
+    'availableOrders': ['طلبات متاحة', 'הזמנות זמינות', 'Available orders'],
+    'activeTask': ['المهمة النشطة', 'משימה פעילה', 'Active task'],
+    'claim': ['استلام المهمة', 'קח משימה', 'Claim task'],
+    'navigate': ['الملاحة', 'ניווט', 'Navigate'],
+    'surgeActive': ['التعرفة الديناميكية مفعّلة — اكسب أكثر الآن', 'תעריף דינמי פעיל — הרווח יותר', 'Dynamic pricing active — earn more now'],
+    'storeStatus': ['حالة المتجر', 'סטטוס חנות', 'Store status'],
+    'hideItem': ['إخفاء المنتج', 'הסתר מוצר', 'Hide product'],
+    'changePrice': ['تغيير السعر', 'שינוי מחיר', 'Change price'],
+    'addCategory': ['إضافة فئة', 'הוסף קטגוריה', 'Add category'],
+    'addPromotion': ['إضافة ترويج', 'הוסף מבצע', 'Add promotion'],
+    'bookings': ['الحجوزات', 'הזמנות מקום', 'Bookings'],
+    'workHours': ['مواعيد العمل', 'שעות פעילות', 'Work hours'],
+    'statistics': ['إحصائيات', 'סטטיסטיקות', 'Statistics'],
+    'rating': ['التقييم', 'דירוג', 'Rating'],
+    'language': ['اللغة', 'שפה', 'Language'],
+    'darkMode': ['الوضع الليلي', 'מצב כהה', 'Dark mode'],
+    'taxi': ['تاكسي', 'מונית', 'Taxi'],
+    'parcel': ['شحن طرد', 'משלוח חבילה', 'Send parcel'],
+    'whereTo': ['إلى أين تريد الذهاب؟', '?לאן נוסעים', 'Where to?'],
+    'bookTable': ['حجز طاولة', 'הזמנת שולחן', 'Book a table'],
+    'inviteEarn': ['ادعُ واربح', 'הזמן והרווח', 'Invite & earn'],
+    'giftCards': ['بطاقات الهدايا', 'כרטיסי מתנה', 'Gift cards'],
+    'name': ['الاسم', 'שם', 'Name'],
+    'moreServices': ['خدمات أخرى', 'שירותים נוספים', 'More services'],
+    'pickupLocation': ['نقطة الانطلاق', 'נקודת איסוף', 'Pickup'],
+    'dropoffLocation': ['الوجهة', 'יעד', 'Destination'],
+    'requestRide': ['اطلب مشوار', 'הזמן נסיעה', 'Request ride'],
+    'standard': ['قياسي', 'רגיל', 'Standard'],
+    'comfort': ['راحة', 'נוחות', 'Comfort'],
+    'xl': ['عائلي', 'משפחתי', 'XL'],
+    'searchingDriver': ['نبحث عن سائق...', 'מחפשים נהג...', 'Finding a driver...'],
+    'sosTitle': ['الطوارئ', 'חירום', 'Emergency'],
+    'senderInfo': ['بيانات المرسِل', 'פרטי השולח', 'Sender details'],
+    'recipientInfo': ['بيانات المستلِم', 'פרטי הנמען', 'Recipient details'],
+    'weight': ['الوزن (كغم)', 'משקל (ק"ג)', 'Weight (kg)'],
+    'sendParcel': ['أرسل الطرد', 'שלח חבילה', 'Send parcel'],
+    'deliveryOtp': ['رمز التسليم', 'קוד מסירה', 'Delivery code'],
+    'myAddresses': ['عناويني', 'הכתובות שלי', 'My addresses'],
+    'addAddress': ['إضافة عنوان', 'הוסף כתובת', 'Add address'],
+    'notifications': ['الإشعارات', 'התראות', 'Notifications'],
+    'scheduleDelivery': ['جدولة التوصيل', 'תזמון משלוח', 'Schedule delivery'],
+    'now': ['الآن', 'עכשיו', 'Now'],
+    'redeemGift': ['استرداد بطاقة هدية', 'מימוש כרטיס מתנה', 'Redeem gift card'],
+    'shareCode': ['رمز المشاركة', 'קוד שיתוף', 'Your code'],
+    'noData': ['لا توجد بيانات بعد', 'אין נתונים עדיין', 'Nothing here yet'],
+    'error': ['حدث خطأ، حاول مجددًا', 'אירעה שגיאה, נסה שוב', 'Something went wrong, try again'],
+  };
+
+  String call(String key) {
+    final v = _d[key];
+    if (v == null) return key;
+    return v[lang.index];
+  }
+
+  /// تسمية حالة الطلب
+  String status(String key) => call(switch (key) {
+        'picked_up' => 'pickedUp',
+        'on_the_way' => 'onTheWay',
+        _ => key,
+      });
+}

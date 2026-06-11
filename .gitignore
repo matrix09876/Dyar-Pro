@@ -9,7 +9,7 @@ node_modules/
 
 node_modules/
 dist/
-lib/
+backend/functions/lib/
 .env
 *.local
 .DS_Store
