@@ -117,6 +117,29 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
           const SliverToBoxAdapter(child: SizedBox(height: 46)),
 
+          // ===== Stories — حلقات متدرجة (نمط HAAT) =====
+          SliverToBoxAdapter(
+            child: SizedBox(
+              height: 96,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                padding:
+                    const EdgeInsetsDirectional.only(start: 20, end: 8),
+                children: [
+                  for (final st in stores.take(6))
+                    _StoryRing(
+                        name: st.name,
+                        imageUrl: st.coverUrl,
+                        onTap: () => Navigator.of(context).push(
+                            MaterialPageRoute(
+                                builder: (_) =>
+                                    StoreScreen(storeId: st.id)))),
+                ],
+              ),
+            ),
+          ),
+          const SliverToBoxAdapter(child: SizedBox(height: 16)),
+
           // ===== بانرات العروض =====
           SliverToBoxAdapter(
             child: SizedBox(
@@ -260,6 +283,63 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   void _select(String? t) => setState(() => _type = t);
+}
+
+class _StoryRing extends StatelessWidget {
+  const _StoryRing({required this.name, this.imageUrl, required this.onTap});
+  final String name;
+  final String? imageUrl;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsetsDirectional.only(end: 14),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Column(children: [
+          Container(
+            height: 64, width: 64,
+            padding: const EdgeInsets.all(3),
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFFFFC53D),
+                  DyarTokens.brand,
+                  Color(0xFFE91E63),
+                ],
+              ),
+            ),
+            child: Container(
+              padding: const EdgeInsets.all(2),
+              decoration: const BoxDecoration(
+                  color: Colors.white, shape: BoxShape.circle),
+              child: ClipOval(
+                child: imageUrl != null
+                    ? Image.network(imageUrl!, fit: BoxFit.cover)
+                    : Container(
+                        color: DyarTokens.brandLight,
+                        child: const Center(child: Text('🍜'))),
+              ),
+            ),
+          ),
+          const SizedBox(height: 5),
+          SizedBox(
+            width: 66,
+            child: Text(name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                    fontSize: 10.5, fontWeight: FontWeight.w700)),
+          ),
+        ]),
+      ),
+    );
+  }
 }
 
 class _PromoBanner extends StatelessWidget {
