@@ -53,3 +53,41 @@ Arabic، والألوان من الـ tokens.
 لقطة كاملة للصفحة أُخذت وتم تدقيق إطاري Home وCheckout بدقة أعلى —
 RTL سليم، التدرّجات والظلال مطابقة للكود، طرق الدفع VISA/CASH/BIT
 والبقشيش والجدولة ظاهرة كما في `checkout_screen.dart`.
+
+
+---
+
+# موجة 2 — تطبيقا السائق والتاجر (Driver + Partner Wave)
+
+> وثيقة تسليم وكيل التصميم — 2026-06-11 · نفس الملف `FtF2s8zxdAMS2nDJeUFYPS`
+
+## الصفحة `11:2` — 02 · Dyar Driver — FINAL (6 × iPhone 390×844)
+
+| # | الإطار | nodeId | المصدر (الكود المنفّذ) |
+|---|---|---|---|
+| 1 | 1-Login-OTP | `11:3` | `apps/driver/lib/screens/login_screen.dart` |
+| 2 | 2-Register-KYC | `11:34` | `register_screen.dart` (شرائح مركبة + لوحة/رخصة/هوية + pending) |
+| 3 | 3-Home-Available | `11:68` | `home_screen.dart` (متصل + بانر التعرفة + claimOrder) |
+| 4 | 4-Active-Task | `11:104` | `active_task_screen.dart` (أرباحي + ملاحة + CTA المرحلة التالية) |
+| 5 | 5-Earnings | `11:134` | `earnings_screen.dart` (اليوم/الأسبوع/الإجمالي) |
+| 6 | 6-Settings | `11:166` | `profile_screen.dart` (لغات 3 / داكن / خروج) |
+
+## الصفحة `12:2` — 03 · Dyar Partner — FINAL (6 × iPhone 390×844)
+
+| # | الإطار | nodeId | المصدر (الكود المنفّذ) |
+|---|---|---|---|
+| 1 | 1-Login-Email | `12:3` | `apps/partner/lib/screens/login_screen.dart` |
+| 2 | 2-Orders-Live | `12:24` | `orders_screen.dart` + `shell.dart` (نشط + قبول/رفض) |
+| 3 | 3-Bookings | `12:69` | `bookings_screen.dart` (تأكيد/إجلاس/إكمال/لم يحضر) |
+| 4 | 4-Menu | `12:118` | `menu_screen.dart` (سعر سريع + switch توفر) |
+| 5 | 5-Hours | `12:164` | `hours_screen.dart` (صفوف أيام + TimePicker + حفظ) |
+| 6 | 6-More | `12:236` | `more_screen.dart` (تقييم/رصيد متدرّج/عروض/لغة/خروج) |
+
+كل إطار تحته شريحة **CTA-spec** توثّق: الفعل عند كل نقرة، الوجهة،
+hover (تفتيح 6%) / pressed (scale 0.97 + تعتيم 8%) / disabled
+(E5E7EB + 9CA3AF)، وتذكير أن الخادم يفرض تسلسل الحالات والأرباح.
+
+## ملاحظات موجة 2
+- إيموجي بدل Lucide (قيد بيئة Figma API) — كما الموجة الأولى.
+- الوضع الليلي في «المزيد» (Partner) موثّق في CTA-spec دون صف مرئي.
+- ساعات العمل RTL: الفتح يمينًا والإغلاق يسارًا — مطابق لرندر Flutter.
