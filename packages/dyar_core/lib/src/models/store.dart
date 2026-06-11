@@ -5,6 +5,8 @@ class Store {
   final String ownerUid;
   final String name;
   final String type; // restaurant|grocery|pharmacy|flowers|service|store
+  final String? serviceCategory; // مهنة المزوّد عند type=='service' (عقد kServiceCategories)
+  final String? phone; // هاتف المتجر/المزوّد (زر الاتصال)
   final String? logoUrl, coverUrl, description;
   final bool isOpen;
   final String status; // pending|approved|suspended
@@ -17,7 +19,8 @@ class Store {
 
   const Store({
     required this.id, required this.ownerUid, required this.name,
-    required this.type, this.logoUrl, this.coverUrl, this.description,
+    required this.type, this.serviceCategory, this.phone,
+    this.logoUrl, this.coverUrl, this.description,
     this.isOpen = false, this.status = 'pending',
     this.rating = 0, this.ratingCount = 0,
     this.deliveryFee = 0, this.minOrder = 0, this.prepTimeMins = 20,
@@ -31,6 +34,8 @@ class Store {
       ownerUid: d['ownerUid'] ?? '',
       name: d['name'] ?? '',
       type: d['type'] ?? 'store',
+      serviceCategory: d['serviceCategory'],
+      phone: d['phone'],
       logoUrl: d['logoUrl'],
       coverUrl: d['coverUrl'],
       description: d['description'],

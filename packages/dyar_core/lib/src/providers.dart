@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'i18n/strings.dart';
@@ -39,3 +40,48 @@ final langProvider = StateProvider<DyarLang>((_) => DyarLang.ar);
 final darkModeProvider = StateProvider<bool>((_) => false);
 
 final stringsProvider = Provider<S>((ref) => S(ref.watch(langProvider)));
+
+/// قواعد الرؤية لكل مدينة — `cities/{id}.categories` من اللوحة.
+/// الافتراضي الآمن: كل فئة غير مذكورة تُعتبر ظاهرة (true).
+class CityConfig {
+  const CityConfig(this.categories);
+
+  /// خريطة `categories.{key} = bool` كما تكتبها اللوحة
+  final Map<String, bool> categories;
+
+  /// هل الفئة ظاهرة في هذه المدينة؟ (true إن لم تُضبط)
+  bool shows(String key) => categories[key] ?? true;
+}
+
+/// وثيقة المدينة الافتراضية: `config/app.defaultCityId` أو أول مدينة
+/// `active`. إن لم توجد وثيقة، يُعاد إعداد فارغ (كل شيء ظاهر).
+final cityConfigProvider = StreamProvider<CityConfig>((ref) async* {
+  final db = FirebaseFirestore.instance;
+  String? cityId;
+  try {
+    final cfg = await db.doc('config/app').get();
+    cityId = cfg.data()?['defaultCityId'] as String?;
+    if (cityId == null) {
+      final q = await db
+          .collection('cities')
+          .where('active', isEqualTo: true)
+          .limit(1)
+          .get();
+      if (q.docs.isNotEmpty) cityId = q.docs.first.id;
+    }
+  } catch (_) {
+    // تعذّر القراءة → افتراضي آمن: إظهار كل شيء
+  }
+  if (cityId == null) {
+    yield const CityConfig({});
+    return;
+  }
+  yield* db.doc('cities/$cityId').snapshots().map((d) {
+    final raw = d.data()?['categories'];
+    if (raw is! Map) return const CityConfig({});
+    return CityConfig({
+      for (final e in raw.entries)
+        if (e.value is bool) e.key.toString(): e.value as bool,
+    });
+  });
+});

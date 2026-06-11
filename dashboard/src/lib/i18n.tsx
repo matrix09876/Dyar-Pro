@@ -125,6 +125,21 @@ export const T: Dict = {
   referralReward:{ ar: 'مكافأة الإحالة (أغورة)', he: 'תגמול הפניה (אגורות)', en: 'Referral reward (agorot)' },
   notConfigured:{ ar: 'لم يتم ربط Firebase بعد — انسخ env. وأدخل المفاتيح', he: 'Firebase לא מחובר — מלא את env.', en: 'Firebase not configured — fill .env' },
 
+  // فئات المدينة (الرؤية في تطبيق المستخدم)
+  visibleCategories: { ar: 'الفئات الظاهرة في هذه المدينة', he: 'קטגוריות מוצגות בעיר זו', en: 'Categories visible in this city' },
+  visibleCategoriesHint: { ar: 'ما يُعطَّل هنا يختفي من تطبيق المستخدم في هذه المدينة', he: 'מה שמכובה כאן מוסתר באפליקציה בעיר זו', en: 'Disabled items are hidden from the user app in this city' },
+  cat_restaurants:  { ar: 'مطاعم', he: 'מסעדות', en: 'Restaurants' },
+  cat_groceries:    { ar: 'بقالة', he: 'מכולת', en: 'Groceries' },
+  cat_pharmacies:   { ar: 'صيدليات', he: 'בתי מרקחת', en: 'Pharmacies' },
+  cat_flowers:      { ar: 'ورود', he: 'פרחים', en: 'Flowers' },
+  cat_services:     { ar: 'خدمات', he: 'שירותים', en: 'Services' },
+  cat_stores:       { ar: 'متاجر', he: 'חנויות', en: 'Stores' },
+  cat_taxi:         { ar: 'تاكسي', he: 'מונית', en: 'Taxi' },
+  cat_parcel:       { ar: 'طرود', he: 'חבילות', en: 'Parcels' },
+  cat_marketplace:  { ar: 'بيع وشراء', he: 'קנייה ומכירה', en: 'Marketplace' },
+  cat_bookings:     { ar: 'حجوزات', he: 'הזמנות מקום', en: 'Bookings' },
+  cat_jobs:         { ar: 'وظائف', he: 'משרות', en: 'Jobs' },
+
   // حالات الطلب
   st_pending:   { ar: 'بانتظار', he: 'ממתין', en: 'Pending' },
   st_accepted:  { ar: 'مقبول', he: 'התקבל', en: 'Accepted' },

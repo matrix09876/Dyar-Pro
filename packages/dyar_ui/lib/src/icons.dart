@@ -57,4 +57,5 @@ abstract final class LucideIcons {
   static const IconData fileText = Icons.description_rounded;
   static const IconData send = Icons.send_rounded;
   static const IconData tag = Icons.sell_rounded;
+  static const IconData phone = Icons.call_rounded;
 }
