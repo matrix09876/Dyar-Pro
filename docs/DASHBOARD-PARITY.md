@@ -35,6 +35,22 @@
 - Marketing settings: Pixel 1/2 + Google Analytics + روابط تحميل ذكية
   (dyar.app/download → المتجر المناسب حسب الجهاز).
 
+## تفاصيل مؤكدة من اللقطات الختامية
+- **4 واجهات ويب للنظام** (System Site Links): الموقع العام، White-label
+  لكل تاجر، Kiosk للفروع، Fleet للأساطيل — `web/` لدينا يغطي العام،
+  والثلاثة الباقية قوالب من نفس الكود ببراميتر متجر.
+- **Training**: المحتوى الفعلي بالعربية (ما هو ديار؟ المناطق؟ التسجيل؟
+  طرق الدفع؟ الإلغاء؟ تقييم؟ عمولة التاجر؟ ساعات العمل؟...) + أزرار
+  فيديوهات السائقين/التجار — تُزرع في `faq` مباشرة.
+- **صيغة السجل**: "<الكيان> enabled/blocked/disabled by <اسم> the <تاريخ>
+  [until <تاريخ>]" — حقول logs: entity, action, by, at, until?.
+- **Seetly**: باقات Advance/Pro/Enterprise بعدّاد مستخدمين ومبلغ + مقاييس
+  (Total Income, Seetly fee, Tax, Total Earnings) + جدول أعضاء
+  (Membership/Subscription) — تكامل خارجي مؤجل.
+- **بطاقة إعدادات مميزة**: Build Applications (توليد APK مخصص) و
+  Import data from the web (استيراد قوائم بالـ AI) — لدينا أساس الثانية
+  في خطة AI.
+
 ## ما تفوقنا به على اللوحة الحالية
 ثلاث لغات RTL/LTR فورية + دارك مود + صلاحيات staff مفروضة من الخادم (لا
 عرض فقط) + رد دعم AI + تتبّع حي + state machine للطلبات يمنع أي تلاعب.
