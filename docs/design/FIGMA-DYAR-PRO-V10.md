@@ -124,3 +124,37 @@ hover (تفتيح 6%) / pressed (scale 0.97 + تعتيم 8%) / disabled
 (سوبر-آب 7 خدمات + OTP + AI) · الهوية/CTA 9. خلف Wolt بنقطة لفجوات
 تفعيلية فقط (Maps/App Check/تقارير التاجر/heat-map السائق) — التقدير بعد
 المفاتيح ≈ **107/120** أي الصدارة.
+
+
+---
+
+## تحديث: اكتمال الشرائح والترابط (2026-06-11)
+
+**fileKey:** `FtF2s8zxdAMS2nDJeUFYPS`
+
+### إطارات جديدة من الكود
+| الصفحة | الإطار | nodeId | مصدر الكود |
+|---|---|---|---|
+| 01 · User | 11-Services-Hub — شبكة 14 مهنة بتدرجات مميزة | `32:2` | `services_screen.dart` |
+| 01 · User | 12-Jobs — وظائف + شيت تقديم CV | `32:60` | `jobs_screen.dart` |
+| 02 · Driver | 7-Tasks-Hub — شرائح 🍔/📦/🚕 بعدادات + بانرات نشطة | `33:2` | `home_screen.dart` |
+| 02 · Driver | 8-Active-Parcel — تسليم بـOTP كبير | `33:61` | `active_parcel_screen.dart` |
+| 02 · Driver | 9-Active-Ride — بطاقة داكنة + تسلسل الحالة | `34:2` | `active_ride_screen.dart` |
+| 02 · Driver | 10-Support-AI — Dyar Bot 🤖 + ردود سريعة | `34:45` | `support_screen.dart` |
+| 02 · Driver | 11-AppLock — قفل بصمة/Face ID 🔒 | `34:79` | `dyar_core/security/app_lock.dart` |
+| 04 · Dashboard | 7-Order-Timeline — drawer الخط الزمني الكامل | `35:2` | `Orders.tsx` |
+
+### البروتوتايب — 65 Reaction (ON_CLICK → NAVIGATE، Dissolve 0.3s)
+- **01 User: 19** — Splash→Home→Store→Item→Store→Checkout→Tracking،
+  Home→Services-Hub/Marketplace/Jobs، Profile↔Home.
+- **02 Driver: 27** — Login→KYC→Tasks-Hub→Active-Task/Parcel/Ride→
+  Earnings، Profile→Support، AppLock→Tasks-Hub.
+- **03 Partner: 16** — Login→Orders→Bookings/Menu/Hours/More + رجوع.
+- **04 Dashboard: 3** — Orders⇄Order-Timeline.
+- نقاط بداية Flow على الصفحات الأربع (🛒/🛵/🏪/🖥️)؛ الوصلات
+  عبر-الصفحات بشرائح برتقالية: `36:9` `36:12` `36:15` `36:18`.
+
+### تعديلات على إطارات قائمة
+- `1:6` Home: تصفيف شرائح الفئات (إظهار «خدمات») + زرّا 🛍️ (`36:2`)
+  و💼 (`36:4`) بالهيدر — يطابقان مداخل الكود الفعلية.
+- `11:166` Settings (Driver): تايل «🤖 الدعم والمساعدة» (`36:6`).
