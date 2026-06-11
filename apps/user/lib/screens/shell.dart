@@ -4,6 +4,7 @@ import 'package:dyar_core/dyar_core.dart';
 import 'package:dyar_ui/dyar_ui.dart';
 
 import '../state/cart.dart';
+import 'checkout_screen.dart';
 import 'home_screen.dart';
 import 'orders_screen.dart';
 import 'profile_screen.dart';
@@ -34,7 +35,50 @@ class _UserShellState extends ConsumerState<UserShell> {
       },
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.fromLTRB(20, 0, 20, 18),
-        child: Container(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // شريط السلة الدائم عبر التبويبات (Basket bar — QW5)
+            if (cartCount > 0) ...[
+              GestureDetector(
+                onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => const CheckoutScreen())),
+                child: Container(
+                  height: 50,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(colors: [
+                      Color(0xFFFF8A3D),
+                      DyarTokens.brandDark,
+                    ]),
+                    borderRadius: BorderRadius.circular(18),
+                    boxShadow: [
+                      BoxShadow(
+                          color: DyarTokens.brand.withValues(alpha: 0.45),
+                          blurRadius: 14,
+                          offset: const Offset(0, 6)),
+                    ],
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(children: [
+                    const Icon(LucideIcons.shoppingCart,
+                        color: Colors.white, size: 20),
+                    const SizedBox(width: 8),
+                    Text('${s('viewCart')} ($cartCount)',
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w900)),
+                    const Spacer(),
+                    Text(MoneyText.format(ref.watch(cartProvider).subtotal),
+                        textDirection: TextDirection.ltr,
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w900)),
+                  ]),
+                ),
+              ),
+              const SizedBox(height: 10),
+            ],
+            Container(
           height: 68,
           decoration: BoxDecoration(
             color: Colors.white,
@@ -70,6 +114,8 @@ class _UserShellState extends ConsumerState<UserShell> {
               ),
             ],
           ),
+        ),
+          ],
         ),
       ),
     );

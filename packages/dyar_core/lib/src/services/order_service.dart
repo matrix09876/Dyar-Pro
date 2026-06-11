@@ -44,6 +44,16 @@ class OrderService {
         'status': status.key,
       });
 
+  /// دفع EasycardNG (VISA/Bit): يعيد رابط صفحة الدفع لفتحه بالمتصفح،
+  /// والتأكيد يصل عبر الـ webhook فيتحدث payment.status لحظيًا.
+  Future<String?> payWithEasycard(String orderId, String method) async {
+    final res = await _fns.httpsCallable('createEasycardPayment').call({
+      'orderId': orderId,
+      'method': method, // 'card' | 'bit'
+    });
+    return res.data['paymentUrl'] as String?;
+  }
+
   Future<String> createPaymentIntent(String orderId) async {
     final res =
         await _fns.httpsCallable('createPaymentIntent').call({'orderId': orderId});

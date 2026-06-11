@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import '../models/app_user.dart';
 
 /// ملف المستخدم: العناوين، المفضلة، الحساسية، الإشعارات — كلها مربوطة
@@ -50,17 +51,11 @@ class UserService {
   Future<void> markNotificationRead(String id) =>
       _db.collection('notifications').doc(id).update({'read': true});
 
-  // ---- بطاقات الهدايا ----
-  Future<void> redeemGiftCard(String uid, String code) async {
-    final q = await _db
-        .collection('giftcards')
-        .where('code', isEqualTo: code)
-        .where('status', isEqualTo: 'active')
-        .limit(1)
-        .get();
-    if (q.docs.isEmpty) throw Exception('invalid gift card');
-    // الإضافة للرصيد تتم عبر الخادم؛ هنا نعلّم البطاقة كمستردة محليًا للعرض
-    await q.docs.first.reference
-        .update({'status': 'redeemed', 'redeemedBy': uid});
+  // ---- بطاقات الهدايا (خادميًا بالكامل: وسم + رصيد + حركة مالية) ----
+  Future<int> redeemGiftCard(String uid, String code) async {
+    final res = await FirebaseFunctions.instance
+        .httpsCallable('redeemGiftCard')
+        .call({'code': code});
+    return (res.data['amount'] ?? 0) as int;
   }
 }

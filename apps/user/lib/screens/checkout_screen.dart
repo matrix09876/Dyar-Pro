@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dyar_core/dyar_core.dart';
 import 'package:dyar_ui/dyar_ui.dart';
@@ -25,11 +26,19 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   final _promo = TextEditingController();
   final _notes = TextEditingController();
   DateTime? _scheduledFor; // null = الآن
+  String _orderType = 'delivery'; // delivery | pickup (وفّر رسوم التوصيل)
+  Store? _store; // للحد الأدنى ورسوم التوصيل
 
   @override
   void initState() {
     super.initState();
     _loadDefaultAddress();
+    final storeId = ref.read(cartProvider).storeId;
+    if (storeId != null) {
+      ref.read(storeServiceProvider).watchStore(storeId).first.then((st) {
+        if (mounted) setState(() => _store = st);
+      });
+    }
   }
 
   Future<void> _loadDefaultAddress() async {
@@ -127,19 +136,21 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           MaterialPageRoute(builder: (_) => const UserLoginScreen()));
       if (FirebaseAuth.instance.currentUser == null) return;
     }
-    if (_address == null) {
+    if (_orderType == 'delivery' && _address == null) {
       await _pickAddress();
-      if (_address == null) return; // العنوان شرط للتوصيل
+      if (_address == null) return; // العنوان شرط للتوصيل فقط
     }
     final cart = ref.read(cartProvider);
     if (cart.isEmpty || cart.storeId == null) return;
+    // فرض الحد الأدنى قبل النداء (الخادم يفرضه أيضًا)
+    if (cart.subtotal < (_store?.minOrder ?? 0)) return;
 
     setState(() => _busy = true);
     try {
       final res = await ref.read(orderServiceProvider).createOrder(
             storeId: cart.storeId!,
             items: ref.read(cartProvider.notifier).toOrderItems(),
-            type: 'delivery',
+            type: _orderType,
             paymentMethod: _method,
             address: {
               ...?_address,
@@ -152,6 +163,21 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                 : _promo.text.trim().toUpperCase(),
             scheduledFor: _scheduledFor?.millisecondsSinceEpoch,
           );
+      // VISA/Bit عبر EasycardNG: فتح صفحة الدفع — التأكيد يصل بالـ webhook
+      if (_method != 'cash') {
+        try {
+          final url = await ref
+              .read(orderServiceProvider)
+              .payWithEasycard(res['orderId'] as String,
+                  _method == 'bit' ? 'bit' : 'card');
+          if (url != null) {
+            await launchUrl(Uri.parse(url),
+                mode: LaunchMode.externalApplication);
+          }
+        } catch (_) {
+          // البوابة غير مفعّلة بعد (وضع الديمو) — الطلب مسجّل والدفع لاحق
+        }
+      }
       ref.read(cartProvider.notifier).clear();
       if (mounted) {
         Navigator.of(context).pushReplacement(MaterialPageRoute(
@@ -215,7 +241,37 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           Text(s('payment'),
               style: const TextStyle(fontWeight: FontWeight.w800)),
           const SizedBox(height: 8),
-          // عنوان التوصيل — إلزامي
+          // توصيل / استلام ذاتي (وفّر رسوم التوصيل — صياغة إيجابية P0#10)
+          Row(children: [
+            Expanded(
+              child: ChoiceChip(
+                selected: _orderType == 'delivery',
+                selectedColor: DyarTokens.brand,
+                labelStyle: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    color: _orderType == 'delivery' ? Colors.white : null),
+                label: Center(child: Text('🛵 ${s('deliveryFee')}')),
+                onSelected: (_) =>
+                    setState(() => _orderType = 'delivery'),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: ChoiceChip(
+                selected: _orderType == 'pickup',
+                selectedColor: DyarTokens.brand,
+                labelStyle: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    color: _orderType == 'pickup' ? Colors.white : null),
+                label: Center(child: Text(s('pickup'))),
+                onSelected: (_) => setState(() => _orderType = 'pickup'),
+              ),
+            ),
+          ]),
+          const SizedBox(height: 12),
+
+          // عنوان التوصيل — إلزامي للتوصيل فقط
+          if (_orderType == 'delivery')
           DyarCard(
             onTap: _pickAddress,
             child: Row(children: [
@@ -350,13 +406,19 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           ),
           const SizedBox(height: 24),
 
-          CtaButton(
-            label: s('checkout'),
-            trailing: MoneyText.format(cart.subtotal),
-            loading: _busy,
-            icon: LucideIcons.lock,
-            onPressed: cart.isEmpty ? null : _placeOrder,
-          ),
+          Builder(builder: (context) {
+            final minOrder = _store?.minOrder ?? 0;
+            final below = cart.subtotal < minOrder;
+            return CtaButton(
+              label: below
+                  ? '${s('minOrder')} ${MoneyText.format(minOrder)}'
+                  : s('checkout'),
+              trailing: MoneyText.format(cart.subtotal),
+              loading: _busy,
+              icon: below ? LucideIcons.shoppingBag : LucideIcons.lock,
+              onPressed: cart.isEmpty || below ? null : _placeOrder,
+            );
+          }),
         ],
       ),
     );

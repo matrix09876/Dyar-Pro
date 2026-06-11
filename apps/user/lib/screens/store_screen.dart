@@ -186,7 +186,6 @@ class StoreScreen extends ConsumerWidget {
                   stream: menuStream,
                   builder: (context, menuSnap) {
                     final items = (menuSnap.data ?? [])
-                        .where((i) => i.available)
                         .toList();
                     if (items.isEmpty) {
                       return SliverToBoxAdapter(
@@ -306,8 +305,43 @@ class _MenuTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final s = ref.watch(stringsProvider);
     final cart = ref.watch(cartProvider);
     final qty = cart.storeId == storeId ? cart.qtyOf(item.id) : 0;
+
+    // الصنف غير المتوفر يبقى ظاهرًا بشارة (اكتمال المينيو — درس TALABI)
+    if (!item.available) {
+      return Opacity(
+        opacity: 0.55,
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          padding: const EdgeInsets.all(12),
+          child: Row(children: [
+            Expanded(
+              child: Text(item.name,
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w800, fontSize: 14.5)),
+            ),
+            Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF3F4F6),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(s('unavailable'),
+                  style: const TextStyle(
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w800,
+                      color: DyarTokens.inkMuted)),
+            ),
+          ]),
+        ),
+      );
+    }
 
     return GestureDetector(
       // فتح نافذة الصنف بخياراته (نمط Wolt) — النقر على البطاقة كاملة
