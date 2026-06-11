@@ -9,6 +9,7 @@ import 'package:dyar_ui/dyar_ui.dart';
 import 'store_screen.dart';
 import 'taxi_screen.dart';
 import 'parcel_screen.dart';
+import 'marketplace_screen.dart';
 
 final approvedStoresProvider = StreamProvider.family<List<Store>, String?>(
     (ref, type) => ref.watch(storeServiceProvider).watchApproved(type: type));
@@ -248,31 +249,44 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
           const SliverToBoxAdapter(child: SizedBox(height: 18)),
 
-          // ===== تاكسي + طرود =====
+          // ===== تاكسي + طرود + بيع وشراء =====
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(children: [
-                Expanded(
-                  child: _ActionCard(
-                    emoji: '🚕',
-                    label: s('taxi'),
-                    sub: s('whereTo'),
-                    colors: const [Color(0xFF111827), Color(0xFF374151)],
-                    onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                        builder: (_) => const TaxiScreen())),
+              child: Column(children: [
+                Row(children: [
+                  Expanded(
+                    child: _ActionCard(
+                      emoji: '🚕',
+                      label: s('taxi'),
+                      sub: s('whereTo'),
+                      colors: const [Color(0xFF111827), Color(0xFF374151)],
+                      onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                              builder: (_) => const TaxiScreen())),
+                    ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _ActionCard(
-                    emoji: '📦',
-                    label: s('parcel'),
-                    sub: 'OTP · حماية ديار',
-                    colors: const [Color(0xFFF59E0B), Color(0xFFB45309)],
-                    onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                        builder: (_) => const ParcelScreen())),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _ActionCard(
+                      emoji: '📦',
+                      label: s('parcel'),
+                      sub: 'OTP · حماية ديار',
+                      colors: const [Color(0xFFF59E0B), Color(0xFFB45309)],
+                      onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                              builder: (_) => const ParcelScreen())),
+                    ),
                   ),
+                ]),
+                const SizedBox(height: 12),
+                _ActionCard(
+                  emoji: '🛍️',
+                  label: s('marketplace'),
+                  sub: s('marketplaceSub'),
+                  colors: const [Color(0xFF8B5CF6), Color(0xFF5B21B6)],
+                  onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) => const MarketplaceScreen())),
                 ),
               ]),
             ),

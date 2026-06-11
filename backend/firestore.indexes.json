@@ -36,20 +36,35 @@
       ]
     },
     {
+<<<<<<< HEAD
       "collectionGroup": "bookings",
       "queryScope": "COLLECTION",
       "fields": [
         { "fieldPath": "customerUid", "order": "ASCENDING" },
+=======
+      "collectionGroup": "marketProducts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+>>>>>>> origin/claude/agent-marketplace
         { "fieldPath": "createdAt", "order": "DESCENDING" }
       ]
     },
     {
+<<<<<<< HEAD
       "collectionGroup": "bookings",
       "queryScope": "COLLECTION",
       "fields": [
         { "fieldPath": "storeId", "order": "ASCENDING" },
         { "fieldPath": "status", "order": "ASCENDING" },
         { "fieldPath": "slot", "order": "ASCENDING" }
+=======
+      "collectionGroup": "marketProducts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "sellerUid", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+>>>>>>> origin/claude/agent-marketplace
       ]
     },
     {

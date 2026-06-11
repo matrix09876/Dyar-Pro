@@ -288,8 +288,27 @@ rating: number, ratingCount: number
 ### `support/{ticketId}`
 `{ uid, subject, messages[], status:'open'|'closed', createdAt }`
 
+### `marketProducts/{productId}`  — سوق C2C (بيع وشراء)
+المستخدم يرفع منتجًا، الإدارة توافق، والمنصّة تأخذ عمولة عند البيع.
+```
+sellerUid: string              // → users (أي مستخدم مسجّل)
+title, description: string
+price: number                  // أغورة
+imageUrl: string
+category: 'electronics'|'fashion'|'home'|'cars'|'other'
+city: string
+status: 'pending'|'approved'|'rejected'|'sold'
+createdAt: Timestamp           // (+ soldAt عند البيع)
+```
+الصلاحيات: القراءة للجميع عند `approved`؛ البائع يقرأ منتجاته بكل
+الحالات؛ create لأي مسجّل بـ `status:'pending'` فقط؛ البائع يعدّل منتجه
+دون `status/sellerUid`؛ admin كل شيء. **البيع النهائي عبر callable
+`markProductSold`** (البائع أو admin): يضع `sold` ويكتب في `transactions`
+عمولة بالسالب على البائع =
+`price * config/app.marketplaceCommissionPct (افتراضي 5) / 100`.
+
 ### `config/app`  (وثيقة إعدادات مفردة)
-`{ serviceFee, defaultCommissionPct, currency, supportPhone, minAppVersion, maintenanceMode, referralReward, surgeEnabled }`
+`{ serviceFee, defaultCommissionPct, marketplaceCommissionPct, currency, supportPhone, minAppVersion, maintenanceMode, referralReward, surgeEnabled }`
 
 ---
 ## وحدات السوبر آب (من دراسة تطبيق ديار الحالي + المنافسين)

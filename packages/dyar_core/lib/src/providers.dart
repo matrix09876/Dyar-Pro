@@ -11,6 +11,7 @@ import 'services/booking_service.dart';
 import 'services/user_service.dart';
 import 'services/location_service.dart';
 import 'services/tracking_service.dart';
+import 'services/market_service.dart';
 
 /// مزوّدات Riverpod المشتركة بين التطبيقات الثلاثة.
 
@@ -24,6 +25,7 @@ final bookingServiceProvider = Provider((_) => BookingService());
 final userServiceProvider = Provider((_) => UserService());
 final locationServiceProvider = Provider((_) => LocationService());
 final trackingServiceProvider = Provider((_) => TrackingService());
+final marketServiceProvider = Provider((_) => MarketService());
 
 final authStateProvider = StreamProvider<User?>(
     (ref) => ref.watch(authServiceProvider).authState);
