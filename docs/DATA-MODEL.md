@@ -338,18 +338,15 @@ createdAt: Timestamp           // (+ soldAt عند البيع)
 `price * config/app.marketplaceCommissionPct (افتراضي 5) / 100`.
 
 ### `config/app`  (وثيقة إعدادات مفردة)
-<<<<<<< HEAD
 `{ serviceFee, defaultCommissionPct, marketplaceCommissionPct, commissionTiers, serviceProvidersPct, commissionRules, currency, supportPhone, minAppVersion, maintenanceMode, referralReward, surgeEnabled }`
 
 `commissionTiers` و`serviceProvidersPct` و`commissionRules` موثّقة أعلاه
 في قسم «العمولة المتدرجة» و«قواعد العمولة الذكية».
-=======
 `{ serviceFee, defaultCommissionPct, marketplaceCommissionPct, currency, supportPhone, minAppVersion, maintenanceMode, referralReward, surgeEnabled, defaultCityId? }`
 
 `defaultCityId`: المدينة التي يقرأ منها تطبيق المستخدم قواعد الرؤية
 (`cities/{id}.categories`) عبر `cityConfigProvider` — وإن غاب، تُؤخذ أول
 مدينة `active`، وإن لم توجد فكل الفئات ظاهرة (افتراضي آمن).
->>>>>>> origin/claude/agent-providers
 
 ---
 ## وحدات السوبر آب (من دراسة تطبيق ديار الحالي + المنافسين)

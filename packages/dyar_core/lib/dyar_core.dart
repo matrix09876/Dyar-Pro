@@ -10,11 +10,8 @@ export 'src/models/ride.dart';
 export 'src/models/parcel.dart';
 export 'src/models/booking.dart';
 export 'src/models/market_product.dart';
-<<<<<<< HEAD
 export 'src/models/job.dart';
-=======
 export 'src/models/service_category.dart';
->>>>>>> origin/claude/agent-providers
 export 'src/services/auth_service.dart';
 export 'src/services/order_service.dart';
 export 'src/services/store_service.dart';

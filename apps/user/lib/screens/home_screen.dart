@@ -10,11 +10,8 @@ import 'store_screen.dart';
 import 'taxi_screen.dart';
 import 'parcel_screen.dart';
 import 'marketplace_screen.dart';
-<<<<<<< HEAD
 import 'jobs_screen.dart';
-=======
 import 'services_screen.dart';
->>>>>>> origin/claude/agent-providers
 
 final approvedStoresProvider = StreamProvider.family<List<Store>, String?>(
     (ref, type) => ref.watch(storeServiceProvider).watchApproved(type: type));
@@ -269,7 +266,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           // ===== تاكسي + طرود + بيع وشراء (حسب رؤية المدينة) =====
           if (city.shows('taxi') ||
               city.shows('parcel') ||
-              city.shows('marketplace'))
+              city.shows('marketplace') ||
+              city.shows('jobs'))
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -322,24 +320,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           MaterialPageRoute(
                               builder: (_) => const MarketplaceScreen())),
                     ),
-                ]),
-<<<<<<< HEAD
-                const SizedBox(height: 12),
-                Row(children: [
-                  Expanded(
-                    child: _ActionCard(
-                      emoji: '🛍️',
-                      label: s('marketplace'),
-                      sub: s('marketplaceSub'),
-                      colors: const [Color(0xFF8B5CF6), Color(0xFF5B21B6)],
-                      onTap: () => Navigator.of(context).push(
-                          MaterialPageRoute(
-                              builder: (_) => const MarketplaceScreen())),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _ActionCard(
+                  if (city.shows('marketplace') && city.shows('jobs'))
+                    const SizedBox(height: 12),
+                  if (city.shows('jobs'))
+                    _ActionCard(
                       emoji: '💼',
                       label: s('jobsBoard'),
                       sub: s('jobsSub'),
@@ -348,12 +332,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           MaterialPageRoute(
                               builder: (_) => const JobsScreen())),
                     ),
-                  ),
                 ]),
-              ]),
-=======
               ),
->>>>>>> origin/claude/agent-providers
             ),
           const SliverToBoxAdapter(child: SizedBox(height: 24)),
 
