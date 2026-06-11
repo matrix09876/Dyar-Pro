@@ -32,6 +32,8 @@ export const T: Dict = {
   marketplaceCommission: { ar: 'عمولة السوق %', he: 'עמלת השוק %', en: 'Market commission %' },
   settings:     { ar: 'الإعدادات', he: 'הגדרות', en: 'Settings' },
   logout:       { ar: 'تسجيل الخروج', he: 'התנתקות', en: 'Log out' },
+  broadcast:    { ar: 'بث الإشعارات', he: 'שידור התראות', en: 'Broadcast' },
+  blockedAddresses: { ar: 'العناوين المحظورة', he: 'כתובות חסומות', en: 'Blocked addresses' },
 
   // عام
   search:       { ar: 'بحث...', he: 'חיפוש...', en: 'Search...' },
@@ -139,6 +141,65 @@ export const T: Dict = {
   cat_marketplace:  { ar: 'بيع وشراء', he: 'קנייה ומכירה', en: 'Marketplace' },
   cat_bookings:     { ar: 'حجوزات', he: 'הזמנות מקום', en: 'Bookings' },
   cat_jobs:         { ar: 'وظائف', he: 'משרות', en: 'Jobs' },
+
+  // بث الإشعارات (Broadcast)
+  bcTitle:      { ar: 'العنوان', he: 'כותרת', en: 'Title' },
+  bcBody:       { ar: 'نص الرسالة', he: 'תוכן ההודעה', en: 'Message body' },
+  audience:     { ar: 'الجمهور', he: 'קהל יעד', en: 'Audience' },
+  audCustomers: { ar: 'الزبائن', he: 'לקוחות', en: 'Customers' },
+  audDrivers:   { ar: 'المندوبون', he: 'שליחים', en: 'Drivers' },
+  audPartners:  { ar: 'الأعمال التابعة', he: 'עסקים שותפים', en: 'Partners' },
+  audSingle:    { ar: 'مستخدم واحد (UID)', he: 'משתמש יחיד (UID)', en: 'Single user (UID)' },
+  send:         { ar: 'إرسال', he: 'שליחה', en: 'Send' },
+  sent:         { ar: 'أُرسل ✓', he: 'נשלח ✓', en: 'Sent ✓' },
+  sentBy:       { ar: 'أرسلها', he: 'נשלח ע״י', en: 'Sent by' },
+  history:      { ar: 'السجل', he: 'היסטוריה', en: 'History' },
+
+  // العناوين المحظورة (مكافحة الاحتيال)
+  addressLine:  { ar: 'العنوان', he: 'כתובת', en: 'Address' },
+  reason:       { ar: 'السبب', he: 'סיבה', en: 'Reason' },
+  addAddress:   { ar: 'إضافة عنوان', he: 'הוספת כתובת', en: 'Add address' },
+  blockedAddressesHint: {
+    ar: 'أي طلب يحتوي عنوانه على سطر محظور يُرفض تلقائيًا — مكافحة الاحتيال',
+    he: 'כל הזמנה שכתובתה מכילה שורה חסומה נדחית אוטומטית — מניעת הונאות',
+    en: 'Any order whose address contains a blocked line is rejected automatically — anti-fraud',
+  },
+
+  // نظام النقاط (الولاء)
+  loyalty:      { ar: 'نظام النقاط', he: 'מערכת נקודות', en: 'Loyalty points' },
+  loyaltyEnabled: { ar: 'تفعيل النقاط', he: 'הפעלת נקודות', en: 'Enable points' },
+  earnPerShekel:{ ar: 'نقاط لكل ₪1', he: 'נקודות לכל ₪1', en: 'Points per ₪1' },
+  redeemRate:   { ar: 'أغورة لكل نقطة (استبدال)', he: 'אגורות לנקודה (פדיון)', en: 'Agorot per point (redeem)' },
+  points:       { ar: 'النقاط', he: 'נקודות', en: 'Points' },
+
+  // جوائز المندوبين
+  driverPrizes: { ar: 'جوائز المندوبين', he: 'פרסי שליחים', en: 'Driver prizes' },
+  targetDeliveries: { ar: 'هدف التوصيلات', he: 'יעד משלוחים', en: 'Deliveries target' },
+  bonus:        { ar: 'المكافأة (أغورة)', he: 'בונוס (אגורות)', en: 'Bonus (agorot)' },
+  addPrize:     { ar: 'إضافة جائزة', he: 'הוספת פרס', en: 'Add prize' },
+  monthlyEarningsReport: { ar: 'تقرير الأرباح الشهري', he: 'דו״ח רווחים חודשי', en: 'Monthly earnings report' },
+
+  // تفعيل/تعطيل فئة في كل المدن
+  bulkCategoryToggle: { ar: 'تفعيل/تعطيل فئة في كل المدن', he: 'הפעלה/כיבוי קטגוריה בכל הערים', en: 'Toggle category in all cities' },
+  category:     { ar: 'الفئة', he: 'קטגוריה', en: 'Category' },
+  enable:       { ar: 'تفعيل', he: 'הפעלה', en: 'Enable' },
+  disable:      { ar: 'تعطيل', he: 'כיבוי', en: 'Disable' },
+  apply:        { ar: 'تطبيق', he: 'החלה', en: 'Apply' },
+
+  // إعدادات عامة موسّعة
+  platformName: { ar: 'اسم المنصة', he: 'שם הפלטפורמה', en: 'Platform name' },
+  brandColor:   { ar: 'لون الهوية', he: 'צבע מותג', en: 'Brand color' },
+  currency:     { ar: 'العملة', he: 'מטבע', en: 'Currency' },
+  phoneCode:    { ar: 'رمز الهاتف الدولي', he: 'קידומת בינלאומית', en: 'Phone code' },
+  mapsEnabled:  { ar: 'تفعيل الخرائط', he: 'הפעלת מפות', en: 'Maps enabled' },
+  newUserGift:  { ar: 'هدية المستخدم الجديد ₪', he: 'מתנת משתמש חדש ₪', en: 'New user gift ₪' },
+
+  // الدعم — عدّادات حية
+  activeOrders: { ar: 'طلبات نشطة', he: 'הזמנות פעילות', en: 'Active orders' },
+  messages:     { ar: 'رسائل', he: 'הודעות', en: 'Messages' },
+
+  // المتاجر — نسخ النشاط
+  duplicate:    { ar: 'نسخ', he: 'שכפול', en: 'Duplicate' },
 
   // حالات الطلب
   st_pending:   { ar: 'بانتظار', he: 'ממתין', en: 'Pending' },

@@ -24,6 +24,8 @@ import Training from './pages/Training';
 import CitySettings from './pages/CitySettings';
 import Banners from './pages/Banners';
 import Marketplace from './pages/Marketplace';
+import Broadcast from './pages/Broadcast';
+import BlockedAddresses from './pages/BlockedAddresses';
 import Settings from './pages/Settings';
 import { Spinner } from './components/ui';
 
@@ -60,6 +62,8 @@ export default function App() {
                 <Route path="/cities" element={<Cities />} />
                 <Route path="/cities/:id" element={<CitySettings />} />
                 <Route path="/banners" element={<Banners />} />
+                <Route path="/broadcast" element={<Broadcast />} />
+                <Route path="/blocked-addresses" element={<BlockedAddresses />} />
                 <Route path="/marketplace" element={<Marketplace />} />
                 <Route path="/notes" element={<Notes />} />
                 <Route path="/logs" element={<Logs />} />
