@@ -183,6 +183,20 @@ rates: { base: 50, perKg: 100, perM3: 100 }
 active: boolean
 ```
 
+### بوابات الدفع — أسرار (Functions Secrets، لا تُخزَّن في Firestore)
+```
+GREENPAY:   merchantId, terminal
+EASYCARDNG: terminalId, apiKey        // البوابة الأساسية في السوق
+MERCADOPAGO: accessToken
+STRIPE:     secret, webhook           // مُنفَّذ فعليًا لدينا
+```
+الاختيار لكل خدمة/مدينة عبر `paymentGateway` في الإعدادات؛ المفاتيح نفسها
+عبر `firebase functions:secrets:set` فقط.
+
+### استيراد البيانات من الويب (AI) — أداة لوحة
+`{ source: 'UberEats'|..., url }` → دالة AI تسحب القائمة والصور وتبنيها
+في `stores/{id}/menu` — تتكامل مع بنية الـ AI الموجودة (`ai/assistant.ts`).
+
 ### Extras لكل مدينة — `cities/{id}.extras`
 ```
 games: {
