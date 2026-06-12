@@ -233,3 +233,19 @@ hover (تفتيح 6%) / pressed (scale 0.97 + تعتيم 8%) / disabled
 إصلاح QA: شرائح CTA-spec العشرون على صفحة 07 كانت 16 منها منهارة
 الارتفاع (40px تقصّ البنود) — أُصلحت جميعها بـ`primaryAxisSizingMode=AUTO`
 وتحقّق أن 0 منها مقصوص.
+
+## شرائح الأقسام المضافة (من مكتبة FIGMA-PROMPTS)
+| الصفحة | الإطار | Node | الكود |
+|---|---|---|---|
+| 01 User | 13-Login-OTP | `56:2` | `login_screen.dart` |
+| 01 User | 14-Addresses | `56:46` | `addresses_screen.dart` |
+| 01 User | 15-Notifications | `57:2` | `notifications_screen.dart` |
+| 01 User | 16-My-Bookings | `57:64` | `bookings_screen.dart` |
+| 01 User | 17-Taxi-Request (+SOS) | `59:2` | `taxi_screen.dart` |
+| 01 User | 18-Send-Parcel (OTP) | `59:59` | `parcel_screen.dart` |
+| 01 User | 19-My-Orders | `60:2` | `orders_screen.dart` |
+| 02 Driver | 10-History | `61:2` | `history_screen.dart` |
+| 02 Driver | 11-Profile-Docs | `61:71` | `profile_screen.dart` |
+| 03 Partner | 7-Promotions | `64:2` | `promotions_screen.dart` |
+| 03 Partner | 8-Balance | `64:59` | `balance_screen.dart` |
+| 04 Dashboard | A7-Stores → A16-Jobs | `63:2` `63:173` `63:344` `65:2` `65:151` `65:300` `68:2` `68:144` `70:2` `70:156` | `Stores/Drivers/Users/Rides/Parcels/Bookings/Marketing/Finance/Banners/Jobs.tsx` |
