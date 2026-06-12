@@ -28,7 +28,7 @@ interface VoiceCfg {
 }
 const VOICE_DEFAULTS: VoiceCfg = {
   enabled: true,
-  agentId: '',
+  agentId: 'agent_8801ktyhd1yve9ybf8bn5m9y27gw', // تاليا — منشورة Live 12/06
   support: 'rh16DBXwtscjdPFeMBYf',   // Talya
   support2: '6ZvbKYJmZfL6zVBzLwpV',  // Lina
   driver: 'kr4VZw8MSZMHE0y2m40n',    // Hasawi
