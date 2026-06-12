@@ -29,13 +29,21 @@ admin.auth().setCustomUserClaims('<UID>', { role: 'admin' })
 ```
 
 ## 3) الدفع — EasycardNG (يفعّل VISA + Bit فورًا)
+> ✅ **التكامل مجرَّب حيًا بطرفية الاختبار (12/06/2026)**: توكن
+> ‏identity ‏200 ✓ ثم PaymentIntent ‏201 برابط Checkout ✓ —
+> أدخل مفاتيح **الإنتاج** بنفس الخطوات وستعمل من أول مرة.
 ```bash
-firebase functions:secrets:set EASYCARD_TERMINAL_ID
-firebase functions:secrets:set EASYCARD_API_KEY
+firebase functions:secrets:set EASYCARD_TERMINAL_ID   # من لوحة EasyCard
+firebase functions:secrets:set EASYCARD_API_KEY       # المفتاح الخاص (Reset Private Key)
+firebase functions:secrets:set EASYCARD_WEBHOOK_SECRET # قيمة عشوائية قوية تختارها
 firebase deploy --only functions:createEasycardPayment,functions:easycardWebhook
 ```
-ثم سجّل رابط الـ webhook في لوحة EasyCard:
+ثم اطلب من فريق EasyCard (يُضبط من طرفهم حاليًا) تسجيل webhook
+على الطرفية بحدث **PaymentTransaction** إلى:
 `https://<region>-<PROJECT_ID>.cloudfunctions.net/easycardWebhook`
+مع ترويسة أمان مخصصة: الاسم `X-Dyar-Secret` والقيمة نفس
+`EASYCARD_WEBHOOK_SECRET`. الـwebhook عندنا لا يثق بالحمولة —
+يتحقق من كل معاملة بالاستعلام المباشر `GET /api/transactions/{id}`.
 (بديل/إضافي: `STRIPE_SECRET` + `STRIPE_WEBHOOK` بنفس الطريقة.)
 
 ## 4) Google Maps
