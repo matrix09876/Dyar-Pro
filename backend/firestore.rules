@@ -72,8 +72,10 @@ service cloud.firestore {
         && request.resource.data.status == 'pending';
       // تحديثات محدودة: التاجر يقبل/يحضّر؛ السائق يحدّث حالة التوصيل.
       // تغيير الدفع/الأرباح/تعيين السائق ممنوع من العميل (Functions فقط).
+      // خدمة العملاء (staffCan orders.manage): حل مشاكل الطلب وتغيير
+      // حالته — دون المساس بالدفع/التسعير/الملكية (Functions فقط)
       allow update: if isAdmin() ||
-        ( (isPartner() || isDriver())
+        ( (isPartner() || isDriver() || staffCan('orders.manage'))
           && !request.resource.data.diff(resource.data).affectedKeys()
                .hasAny(['payment','pricing','customerUid','storeId','items']) );
       allow delete: if isAdmin();
@@ -201,15 +203,21 @@ service cloud.firestore {
         || (isBackoffice() && request.resource.data.by == uid());
     }
     match /support/{ticketId}/messages/{msgId} {
-      // محادثة الدعم: صاحب التذكرة يقرأ ويرسل؛ ردود الـ AI تُكتب بالخادم
-      allow read: if isAdmin() || (isSignedIn() && ticketId == uid());
-      allow create: if isSignedIn() && ticketId == uid()
-        && request.resource.data.senderUid == uid();
+      // محادثة الدعم: صاحب التذكرة يقرأ ويرسل؛ فريق خدمة العملاء
+      // (staffCan support.manage) يقرأ ويرد باسمه؛ ردود AI من الخادم
+      allow read: if isAdmin() || staffCan('support.manage')
+        || (isSignedIn() && ticketId == uid());
+      allow create: if (isSignedIn() && ticketId == uid()
+          && request.resource.data.senderUid == uid())
+        || ((isAdmin() || staffCan('support.manage'))
+          && request.resource.data.senderUid == uid());
     }
     match /support/{ticketId} {
       allow read, create: if isSignedIn() &&
-        (isAdmin() || request.resource.data.uid == uid() || resource.data.uid == uid());
-      allow update: if isAdmin() || (isSignedIn() && resource.data.uid == uid());
+        (isAdmin() || staffCan('support.manage')
+         || request.resource.data.uid == uid() || resource.data.uid == uid());
+      allow update: if isAdmin() || staffCan('support.manage')
+        || (isSignedIn() && resource.data.uid == uid());
     }
   }
 }

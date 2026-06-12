@@ -63,3 +63,50 @@
 | إعلانات رسمية | Nasser — مؤسسي | `3GnbqfjaW8xI6hRTVx4Y` |
 
 كلها تُدار من اللوحة (config/voice) وتُستبدل بلصق Voice ID آخر.
+
+---
+
+## 🪝 أدوات الوكيل (Tools/Webhooks) — خدمة حقيقية لا كلام
+
+ثلاث دوال جاهزة بالخلفية يستدعيها الوكيل أثناء المكالمة، وكل تذكرة
+تظهر **فورًا** في اللوحة → الدعم (مع الشارة الحمراء) ليتابعها فريق
+خدمة العملاء. التفعيل عند النشر:
+```bash
+firebase functions:secrets:set SUPPORT_HOOK_SECRET   # قيمة قوية تختارها
+firebase deploy --only functions:hookOrderStatus,functions:hookCreateTicket,functions:hookRefundRequest
+```
+
+في ElevenLabs → الوكيل → **Tools → Add tool (Webhook)** أنشئ الثلاثة
+(استبدل `<region>-<PROJECT_ID>` برابط مشروعك، وضع السر في الترويسة):
+
+### 1) order_status — حالة وتتبع الطلب
+- **Description**: «تجلب حالة طلب ديار الحية ووقت الوصول. استعمليها فور
+  ذكر الزبون رقم طلبه. اطلبي آخر 3 أرقام من هاتفه للتحقق.»
+- POST `https://<region>-<PROJECT_ID>.cloudfunctions.net/hookOrderStatus`
+- Headers: `x-dyar-hook: <SUPPORT_HOOK_SECRET>`
+- Body: `orderCode` (string، مطلوب) · `phoneTail` (string، آخر 3 أرقام)
+- الرد يتضمن `say` — جملة جاهزة تنطقها تاليا.
+
+### 2) create_ticket — تذكرة لفريق خدمة العملاء
+- **Description**: «تفتح تذكرة لفريق الدعم البشري. استعمليها لأي مشكلة
+  لا تحلّينها بنفسك أو عندما يطلب الزبون موظفًا. لخّصي المشكلة بدقة.»
+- POST `…/hookCreateTicket` + نفس الترويسة
+- Body: `topic` (مثل order-issue/driver/app/other) · `summary` (ملخص
+  عربي واضح) · `phone` · `orderCode` (اختياريان)
+
+### 3) refund_request — طلب استرداد (بموافقة الموظف)
+- **Description**: «تسجّل طلب استرداد لطلب محدد. لا تعدي بإرجاع فوري —
+  قولي إنه بعد مراجعة الفريق يرجع للمحفظة.»
+- POST `…/hookRefundRequest` + نفس الترويسة
+- Body: `orderCode` + `reason` (مطلوبان) · `phone` · `phoneTail`
+
+> 🔒 الأمان: السر في ترويسة `x-dyar-hook` إلزامي (401 بدونه)،
+> الردود بلا PII (لا عناوين/هواتف كاملة)، والاسترداد تذكرة موسومة
+> `refund` تتطلب موافقة موظف — لا حركة أموال آلية من الوكيل.
+
+## 🎧 دور «خدمة العملاء» في اللوحة
+من الفريق → افتح الموظف → زر **«🎧 دور خدمة العملاء»** يمنحه:
+`support.manage` + `orders.view` + `orders.manage` — فلا يرى من
+اللوحة إلا **الدعم والطلبات**: يرد على التذاكر (ومنها تذاكر تاليا)،
+يتتبع الطلبات ويغيّر حالتها لحل المشاكل، **دون** وصول للدفع/التسعير/
+المالية/الإعدادات (مفروض في قواعد Firestore نفسها، مختبر 20/20).

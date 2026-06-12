@@ -17,8 +17,8 @@ const env = await initializeTestEnvironment({
   },
 });
 
-const as = (uid, role) =>
-  env.authenticatedContext(uid, role ? { role } : {}).firestore();
+const as = (uid, role, perms) =>
+  env.authenticatedContext(uid, role ? { role, ...(perms ? { perms } : {}) } : {}).firestore();
 
 let passed = 0;
 const t = async (name, fn) => {
@@ -33,6 +33,7 @@ await env.withSecurityRulesDisabled(async (ctx) => {
   await setDoc(doc(db, 'users/bob'), { role: 'customer' });
   // pending عمدًا: السيناريو الهجومي = التاجر يحاول اعتماد متجره بنفسه
   await setDoc(doc(db, 'stores/s1'), { ownerUid: 'p1', status: 'pending', commissionPct: 10 });
+  await setDoc(doc(db, 'support/t1'), { uid: 'bob', status: 'open', topic: 'general' });
   await setDoc(doc(db, 'orders/o1'), {
     customerUid: 'alice', storeId: 's1', status: 'pending',
     payment: { method: 'cash', status: 'pending' },
@@ -85,6 +86,21 @@ await t('لا أحد يكتب transactions من العميل', () =>
 
 await t('الأدمن يقرأ أي مستخدم', () =>
   assertSucceeds(getDoc(doc(as('admin1', 'admin'), 'users/bob'))));
+
+// ---- دور خدمة العملاء (staff + perms) ----
+await t('موظف خدمة العملاء يقرأ تذاكر الدعم', () =>
+  assertSucceeds(getDoc(doc(as('cs1', 'staff', ['support.manage']), 'support/t1'))));
+
+await t('موظف بلا صلاحية لا يقرأ تذاكر غيره', () =>
+  assertFails(getDoc(doc(as('cs2', 'staff', ['jobs']), 'support/t1'))));
+
+await t('خدمة العملاء تغيّر حالة الطلب (orders.manage)', () =>
+  assertSucceeds(updateDoc(doc(as('cs1', 'staff', ['orders.manage']), 'orders/o1'),
+    { status: 'accepted' })));
+
+await t('خدمة العملاء لا تعدّل تسعير الطلب', () =>
+  assertFails(updateDoc(doc(as('cs1', 'staff', ['orders.manage']), 'orders/o1'),
+    { pricing: { total: 1 } })));
 
 await t('الزبون لا يقرأ العناوين المحظورة', () =>
   assertFails(getDoc(doc(as('alice', 'customer'), 'blockedAddresses/b1'))));

@@ -352,6 +352,13 @@ createdAt: Timestamp
 سطر محظور — `HttpsError('failed-precondition','blocked-address')`.
 الصلاحيات: قراءة/كتابة admin فقط.
 
+### `support/{ticketId}` — حقول تذاكر الوكيل الصوتي
+```
+via?: 'voice-agent'            // مصدر التذكرة
+topic?: string                 // order-issue|driver|app|refund|other
+orderCode?, phone?: string     // للمتابعة والاتصال
+```
+
 ### `config/voice`  (صوت ديار — ElevenLabs)
 ```
 enabled: boolean               // مفتاح عام من اللوحة

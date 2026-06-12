@@ -221,6 +221,10 @@ export const T: Dict = {
   voiceAgentId:  { ar: 'الوكيل الصوتي الحي (Agent ID)', he: 'סוכן קולי חי (Agent ID)', en: 'Live voice agent (Agent ID)' },
   voiceAgentHint:{ ar: 'محادثة فورية طبيعية — أنشئه باتباع docs/VOICE-AGENT.md والصق المعرف هنا', he: 'שיחה חיה — ראה docs/VOICE-AGENT.md', en: 'Real-time conversation — create per docs/VOICE-AGENT.md and paste the ID' },
 
+  // الفريق — أدوار جاهزة
+  csRole:     { ar: 'دور خدمة العملاء', he: 'תפקיד שירות לקוחות', en: 'Customer service role' },
+  clearPerms: { ar: 'مسح الصلاحيات', he: 'איפוס הרשאות', en: 'Clear permissions' },
+
   // الدعم — عدّادات حية
   activeOrders: { ar: 'طلبات نشطة', he: 'הזמנות פעילות', en: 'Active orders' },
   messages:     { ar: 'رسائل', he: 'הודעות', en: 'Messages' },

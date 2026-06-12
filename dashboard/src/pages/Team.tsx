@@ -19,6 +19,9 @@ interface StaffUser extends AppUser {
   permissions?: string[];
 }
 
+/** دور جاهز: خدمة العملاء — دعم + حل مشاكل الطلبات وتتبعها فقط */
+const CS_PRESET = ['support.manage', 'orders.view', 'orders.manage'];
+
 export default function Team() {
   const { t } = useI18n();
   // الموظفون = staff + admin
@@ -79,6 +82,23 @@ export default function Team() {
           <div className="card w-full max-w-lg p-6" onClick={(e) => e.stopPropagation()}>
             <h2 className="text-lg font-extrabold mb-1">{editing.name ?? editing.email}</h2>
             <p className="text-sm text-ink-muted mb-4">{t('team')}</p>
+            {/* أدوار جاهزة بنقرة */}
+            <div className="flex gap-2 mb-4">
+              <button
+                type="button"
+                className="badge !px-3 !py-1.5 bg-brand-50 text-brand-700 border border-brand-200 hover:bg-brand-100"
+                onClick={() => setPerms(CS_PRESET)}
+              >
+                🎧 {t('csRole')}
+              </button>
+              <button
+                type="button"
+                className="badge !px-3 !py-1.5 bg-gray-100 text-ink-muted"
+                onClick={() => setPerms([])}
+              >
+                {t('clearPerms')}
+              </button>
+            </div>
             <div className="grid grid-cols-2 gap-2 mb-6">
               {PERMISSIONS.map((p) => (
                 <label key={p} className="flex items-center gap-2 rounded-xl border border-gray-200 dark:border-gray-700 px-3 py-2 cursor-pointer">

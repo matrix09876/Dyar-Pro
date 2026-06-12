@@ -37,6 +37,21 @@ const NAV = [
   { to: '/settings', key: 'settings', icon: Settings },
 ];
 
+// أي صلاحية staff تفتح أي بنود قائمة؟ admin يرى الكل.
+// خدمة العملاء (support.manage + orders.*) ترى الدعم والطلبات فقط.
+const PERM_NAV: Record<string, string[]> = {
+  'orders.view': ['orders'], 'orders.manage': ['orders'],
+  'orders.assignDriver': ['orders'],
+  'stores.view': ['stores'], 'stores.approve': ['stores'],
+  'drivers.view': ['drivers'], 'drivers.approve': ['drivers'],
+  'users.view': ['users'], 'users.block': ['users'],
+  'marketing.manage': ['marketing', 'banners'],
+  'finance.view': ['finance', 'reports'],
+  'support.manage': ['support'],
+  broadcast: ['broadcast'],
+  jobs: ['jobs'],
+};
+
 const LANGS: { code: Lang; label: string }[] = [
   { code: 'ar', label: 'العربية' },
   { code: 'he', label: 'עברית' },
@@ -44,7 +59,7 @@ const LANGS: { code: Lang; label: string }[] = [
 ];
 
 export default function Layout() {
-  const { logout, user } = useAuth();
+  const { logout, user, role, perms } = useAuth();
   const { t, lang, setLang, dark, toggleDark } = useI18n();
 
   // شارات تنبيه حية (كاللوحة المرجعية): تسجيلات مندوبين معلقة +
@@ -57,6 +72,12 @@ export default function Layout() {
     support: openTickets.length,
     stores: pendingStores.length,
   };
+
+  // staff يرى فقط بنود صلاحياته (admin: القائمة كاملة)
+  const visibleNav = role === 'staff'
+    ? NAV.filter(({ key }) =>
+        perms.some((p) => (PERM_NAV[p] ?? []).includes(key)))
+    : NAV;
 
   return (
     <div className="min-h-screen flex">
@@ -71,7 +92,7 @@ export default function Layout() {
         </div>
 
         <nav className="flex-1 px-3 space-y-0.5 overflow-y-auto">
-          {NAV.map(({ to, key, icon: Icon }) => (
+          {visibleNav.map(({ to, key, icon: Icon }) => (
             <NavLink
               key={to} to={to} end={to === '/'}
               className={({ isActive }) =>
