@@ -58,4 +58,5 @@ abstract final class LucideIcons {
   static const IconData send = Icons.send_rounded;
   static const IconData tag = Icons.sell_rounded;
   static const IconData phone = Icons.call_rounded;
+  static const IconData headphones = Icons.headset_mic_rounded;
 }

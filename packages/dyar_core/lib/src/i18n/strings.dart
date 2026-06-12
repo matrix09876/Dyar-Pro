@@ -189,6 +189,7 @@ class S {
     'chooseProfession': ['اختر المهنة المطلوبة', 'בחר את המקצוע', 'Choose a profession'],
     'call': ['اتصال', 'התקשר', 'Call'],
     'noProviders': ['لا يوجد مقدمو خدمة بعد', 'אין נותני שירות עדיין', 'No providers yet'],
+    'talkToTalya': ['🎙️ مكالمة مع تاليا — خدمة العملاء', '🎙️ שיחה עם טליה — שירות לקוחות', '🎙️ Call Talya — customer care'],
     'nearestFirst': ['الأقرب أولًا 📍', 'הקרוב ביותר 📍', 'Nearest first 📍'],
     'topRated': ['الأعلى تقييمًا ⭐', 'המדורגים ביותר ⭐', 'Top rated ⭐'],
     'wholesale': ['تجار الجملة B2B', 'סיטונאות B2B', 'Wholesale B2B'],

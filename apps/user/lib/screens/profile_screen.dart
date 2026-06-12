@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dyar_core/dyar_core.dart';
 import 'package:dyar_ui/dyar_ui.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'login_screen.dart';
 import 'addresses_screen.dart';
@@ -110,6 +111,14 @@ class UserProfileScreen extends ConsumerWidget {
               label: s('myBookings'),
               onTap: () => Navigator.of(context).push(MaterialPageRoute(
                   builder: (_) => const MyBookingsScreen())),
+            ),
+            const SizedBox(height: 10),
+            // مكالمة حية مع تاليا — وكيلة خدمة العملاء الصوتية
+            _Tile(
+              icon: LucideIcons.headphones,
+              label: s('talkToTalya'),
+              onTap: () => launchUrl(Uri.parse(kTalyaTalkUrl),
+                  mode: LaunchMode.externalApplication),
             ),
             const SizedBox(height: 10),
             _Tile(

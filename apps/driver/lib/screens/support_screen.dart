@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dyar_core/dyar_core.dart';
 import 'package:dyar_ui/dyar_ui.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /// دعم السائق: محادثة حية مع بوت ديار (aiSupportReply يرد تلقائيًا
 /// بالخادم) + ردود سريعة جاهزة — مثل التطبيق الحالي وأفضل.
@@ -44,7 +45,19 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
     final uid = FirebaseAuth.instance.currentUser!.uid;
 
     return Scaffold(
-      appBar: AppBar(title: Text('${s('support')} 🤖')),
+      appBar: AppBar(
+        title: Text('${s('support')} 🤖'),
+        actions: [
+          // مكالمة حية مع تاليا — وكيلة خدمة العملاء الصوتية
+          IconButton(
+            tooltip: s('talkToTalya'),
+            icon: const Icon(LucideIcons.headphones, color: DyarTokens.brand),
+            onPressed: () => launchUrl(Uri.parse(kTalyaTalkUrl),
+                mode: LaunchMode.externalApplication),
+          ),
+          const SizedBox(width: 6),
+        ],
+      ),
       body: Column(children: [
         Expanded(
           child: StreamBuilder<List<Map<String, dynamic>>>(
