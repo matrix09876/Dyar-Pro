@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { addDoc, collection, deleteDoc, doc, updateDoc, Timestamp } from 'firebase/firestore';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, TicketPercent, BadgePercent, Gift, Image, Megaphone } from 'lucide-react';
 import { db } from '../lib/firebase';
 import { useCol } from '../hooks/useCol';
 import { useI18n } from '../lib/i18n';
@@ -19,6 +20,7 @@ type Tab = 'coupons' | 'promotions' | 'giftcards';
 
 export default function Marketing() {
   const { t } = useI18n();
+  const nav = useNavigate();
   const [tab, setTab] = useState<Tab>('coupons');
   const { data: coupons } = useCol<Coupon>('coupons');
   const { data: promos } = useCol<Promo>('promotions');
@@ -52,16 +54,41 @@ export default function Marketing() {
         ) : undefined}
       />
 
-      <div className="flex gap-2 mb-5">
-        {(['coupons', 'promotions', 'giftcards'] as Tab[]).map((k) => (
+      {/* نمط Hub ببطاقات (كاللوحة المرجعية): أيقونة داكنة + عنوان + وصف */}
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+        {([
+          { k: 'coupons' as Tab, icon: TicketPercent, desc: t('hubCoupons'), count: coupons.length },
+          { k: 'promotions' as Tab, icon: BadgePercent, desc: t('hubPromos'), count: promos.length },
+          { k: 'giftcards' as Tab, icon: Gift, desc: t('hubGiftcards'), count: cards.length },
+        ]).map(({ k, icon: Icon, desc, count }) => (
           <button
             key={k}
             onClick={() => setTab(k)}
-            className={`badge !px-4 !py-2 ${tab === k ? 'bg-brand-600 text-white' : 'bg-gray-100 text-ink-muted dark:bg-gray-800 dark:text-gray-400'}`}
+            className={`card p-4 text-start transition-shadow hover:shadow-md ${
+              tab === k ? 'ring-2 ring-brand-500' : ''
+            }`}
           >
-            {t(k)}
+            <div className="h-11 w-11 rounded-2xl bg-ink text-white grid place-items-center mb-3 dark:bg-gray-700">
+              <Icon size={22} strokeWidth={1.8} />
+            </div>
+            <div className="font-extrabold text-sm">{t(k)} <span className="text-ink-muted font-bold">· {count}</span></div>
+            <div className="text-xs text-ink-muted mt-0.5 leading-5">{desc}</div>
           </button>
         ))}
+        <button className="card p-4 text-start transition-shadow hover:shadow-md" onClick={() => nav('/banners')}>
+          <div className="h-11 w-11 rounded-2xl bg-ink text-white grid place-items-center mb-3 dark:bg-gray-700">
+            <Image size={22} strokeWidth={1.8} />
+          </div>
+          <div className="font-extrabold text-sm">{t('banners')}</div>
+          <div className="text-xs text-ink-muted mt-0.5 leading-5">{t('hubBanners')}</div>
+        </button>
+        <button className="card p-4 text-start transition-shadow hover:shadow-md" onClick={() => nav('/broadcast')}>
+          <div className="h-11 w-11 rounded-2xl bg-ink text-white grid place-items-center mb-3 dark:bg-gray-700">
+            <Megaphone size={22} strokeWidth={1.8} />
+          </div>
+          <div className="font-extrabold text-sm">{t('broadcast')}</div>
+          <div className="text-xs text-ink-muted mt-0.5 leading-5">{t('hubBroadcast')}</div>
+        </button>
       </div>
 
       {tab === 'coupons' && (

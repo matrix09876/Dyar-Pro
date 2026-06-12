@@ -71,6 +71,7 @@ export interface Order {
   code: string;
   customerUid: string;
   storeId: string;
+  storeName?: string;
   driverUid?: string;
   items: OrderItem[];
   status: OrderStatus;

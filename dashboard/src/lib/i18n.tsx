@@ -195,6 +195,21 @@ export const T: Dict = {
   mapsEnabled:  { ar: 'تفعيل الخرائط', he: 'הפעלת מפות', en: 'Maps enabled' },
   newUserGift:  { ar: 'هدية المستخدم الجديد ₪', he: 'מתנת משתמש חדש ₪', en: 'New user gift ₪' },
 
+  // التقارير
+  reports:      { ar: 'التقارير', he: 'דוחות', en: 'Reports' },
+  topDrivers:   { ar: 'أفضل المندوبين', he: 'שליחים מובילים', en: 'Top drivers' },
+  salesByStore: { ar: 'المبيعات حسب النشاط', he: 'מכירות לפי עסק', en: 'Sales by business' },
+  timeAnalysis: { ar: 'تحليل الأوقات', he: 'ניתוח שעות', en: 'Time analysis' },
+  couponsUsed:  { ar: 'الأكواد المستخدمة', he: 'קודים בשימוש', en: 'Codes used' },
+  deliveries:   { ar: 'التوصيلات', he: 'משלוחים', en: 'Deliveries' },
+
+  // التسويق — نمط Hub
+  hubCoupons:   { ar: 'أكواد خصم بشروط وحدود استخدام', he: 'קודי הנחה עם תנאים', en: 'Discount codes with rules & limits' },
+  hubPromos:    { ar: 'عروض ترويجية تظهر في التطبيق', he: 'מבצעים המוצגים באפליקציה', en: 'Promotions shown in the app' },
+  hubGiftcards: { ar: 'بطاقات هدايا برصيد قابل للصرف', he: 'כרטיסי מתנה עם יתרה', en: 'Gift cards with redeemable balance' },
+  hubBanners:   { ar: 'لافتات بكل المواضع (ستوري/رئيسية/فئات)', he: 'באנרים בכל המיקומים', en: 'Banners in all placements' },
+  hubBroadcast: { ar: 'إشعارات دفع للزبائن والمندوبين والأعمال', he: 'התראות פוש לכל הקהלים', en: 'Push notifications to all audiences' },
+
   // الدعم — عدّادات حية
   activeOrders: { ar: 'طلبات نشطة', he: 'הזמנות פעילות', en: 'Active orders' },
   messages:     { ar: 'رسائل', he: 'הודעות', en: 'Messages' },

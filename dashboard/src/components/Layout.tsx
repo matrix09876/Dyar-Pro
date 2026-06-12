@@ -3,9 +3,11 @@ import {
   LayoutDashboard, ReceiptText, CarTaxiFront, Package, CalendarCheck,
   Store, Bike, Users, BadgePercent, Wallet, Briefcase, Headset, Settings,
   Moon, Sun, LogOut, Globe, ShieldCheck, Building2, StickyNote, ScrollText,
-  GraduationCap, Image, ShoppingBag, Megaphone, Ban,
+  GraduationCap, Image, ShoppingBag, Megaphone, Ban, BarChart3,
 } from 'lucide-react';
+import { where } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
+import { useCol } from '../hooks/useCol';
 import { useI18n, type Lang } from '../lib/i18n';
 
 // أيقونات Lucide وفق Icon Mapping في الـ Handoff (stroke 1.8 · 22-24px)
@@ -21,6 +23,7 @@ const NAV = [
   { to: '/users', key: 'users', icon: Users },
   { to: '/marketing', key: 'marketing', icon: BadgePercent },
   { to: '/finance', key: 'finance', icon: Wallet },
+  { to: '/reports', key: 'reports', icon: BarChart3 },
   { to: '/jobs', key: 'jobs', icon: Briefcase },
   { to: '/support', key: 'support', icon: Headset },
   { to: '/cities', key: 'city', icon: Building2 },
@@ -43,6 +46,17 @@ const LANGS: { code: Lang; label: string }[] = [
 export default function Layout() {
   const { logout, user } = useAuth();
   const { t, lang, setLang, dark, toggleDark } = useI18n();
+
+  // شارات تنبيه حية (كاللوحة المرجعية): تسجيلات مندوبين معلقة +
+  // محادثات دعم مفتوحة + متاجر بانتظار الموافقة
+  const { data: pendingDrivers } = useCol<{ id: string }>('drivers', where('status', '==', 'pending'));
+  const { data: openTickets } = useCol<{ id: string }>('support', where('status', '==', 'open'));
+  const { data: pendingStores } = useCol<{ id: string }>('stores', where('status', '==', 'pending'));
+  const NAV_BADGES: Record<string, number> = {
+    drivers: pendingDrivers.length,
+    support: openTickets.length,
+    stores: pendingStores.length,
+  };
 
   return (
     <div className="min-h-screen flex">
@@ -68,7 +82,14 @@ export default function Layout() {
                 }`}
             >
               <Icon size={22} strokeWidth={1.8} />
-              {t(key)}
+              <span className="flex-1">{t(key)}</span>
+              {NAV_BADGES[key] > 0 && (
+                <span className={`h-5 min-w-5 px-1 rounded-full grid place-items-center text-[10px] font-extrabold text-white ${
+                  key === 'support' ? 'bg-red-500' : 'bg-brand-500'
+                }`}>
+                  {NAV_BADGES[key]}
+                </span>
+              )}
             </NavLink>
           ))}
         </nav>
