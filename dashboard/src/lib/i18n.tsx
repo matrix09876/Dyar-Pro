@@ -32,6 +32,7 @@ export const T: Dict = {
   marketplaceCommission: { ar: 'عمولة السوق %', he: 'עמלת השוק %', en: 'Market commission %' },
   settings:     { ar: 'الإعدادات', he: 'הגדרות', en: 'Settings' },
   logout:       { ar: 'تسجيل الخروج', he: 'התנתקות', en: 'Log out' },
+  hello:        { ar: 'مرحبًا،', he: 'שלום,', en: 'Hello,' },
   broadcast:    { ar: 'بث الإشعارات', he: 'שידור התראות', en: 'Broadcast' },
   blockedAddresses: { ar: 'العناوين المحظورة', he: 'כתובות חסומות', en: 'Blocked addresses' },
 

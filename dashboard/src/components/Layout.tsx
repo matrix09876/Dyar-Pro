@@ -73,40 +73,51 @@ export default function Layout() {
           ))}
         </nav>
 
-        <div className="p-4 border-t border-gray-100 dark:border-gray-800 space-y-3">
-          {/* مبدّل اللغة */}
-          <div className="flex items-center gap-2">
-            <Globe size={18} className="text-ink-muted" />
-            <div className="flex rounded-lg bg-gray-100 dark:bg-gray-800 p-0.5 flex-1">
-              {LANGS.map((l) => (
-                <button
-                  key={l.code}
-                  onClick={() => setLang(l.code)}
-                  className={`flex-1 rounded-md px-1 py-1 text-xs font-bold transition-colors ${
-                    lang === l.code ? 'bg-white dark:bg-surface-card shadow text-brand-600' : 'text-ink-muted'
-                  }`}
-                >
-                  {l.label}
-                </button>
-              ))}
+        <div className="p-4 border-t border-gray-100 dark:border-gray-800 text-center text-[11px] text-ink-muted">
+          Dyar v10 · {t('adminPanel')}
+        </div>
+      </aside>
+
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* الهيدر — ترحيب + مبدّل اللغات الثلاثي (يقلب RTL/LTR ويترجم فورًا) */}
+        <header className="sticky top-0 z-40 bg-white/90 dark:bg-surface-card/90 backdrop-blur border-b border-gray-100 dark:border-gray-800 px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+          <div className="min-w-0">
+            <div className="font-extrabold leading-tight truncate">
+              {t('hello')} {user?.displayName ?? user?.email?.split('@')[0] ?? 'Admin'} 👋
             </div>
+            <div className="text-xs text-ink-muted truncate" dir="ltr">{user?.email}</div>
           </div>
-          {/* دارك مود + خروج */}
-          <div className="flex items-center justify-between">
+
+          <div className="flex items-center gap-3 shrink-0">
+            <div className="flex items-center gap-2">
+              <Globe size={18} className="text-ink-muted" />
+              <div className="flex rounded-full bg-gray-100 dark:bg-gray-800 p-0.5">
+                {LANGS.map((l) => (
+                  <button
+                    key={l.code}
+                    onClick={() => setLang(l.code)}
+                    className={`rounded-full px-3 py-1.5 text-xs font-bold transition-colors ${
+                      lang === l.code ? 'bg-white dark:bg-surface-card shadow text-brand-600' : 'text-ink-muted'
+                    }`}
+                  >
+                    {l.label}
+                  </button>
+                ))}
+              </div>
+            </div>
             <button onClick={toggleDark} className="btn-ghost !px-3" title="Dark mode">
               {dark ? <Sun size={20} /> : <Moon size={20} />}
             </button>
-            <div className="text-xs text-ink-muted truncate max-w-[120px]">{user?.email}</div>
             <button onClick={logout} className="btn-ghost !px-3" title={t('logout')}>
               <LogOut size={20} />
             </button>
           </div>
-        </div>
-      </aside>
+        </header>
 
-      <main className="flex-1 p-6 lg:p-8 overflow-x-hidden">
-        <Outlet />
-      </main>
+        <main className="flex-1 p-6 lg:p-8 overflow-x-hidden">
+          <Outlet />
+        </main>
+      </div>
     </div>
   );
 }
