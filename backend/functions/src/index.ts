@@ -4,7 +4,7 @@
 import { initializeApp } from 'firebase-admin/app';
 initializeApp();
 
-export { setUserRole, onUserCreate } from './auth/roles';
+export { setUserRole, onUserCreate, claimFirstAdmin } from './auth/roles';
 export { createOrder, updateOrderStatus, assignDriver, rateOrder } from './orders/lifecycle';
 export { autoAssignNearestDriver } from './drivers/assignment';
 export { createPaymentIntent, stripeWebhook } from './payments/stripe';

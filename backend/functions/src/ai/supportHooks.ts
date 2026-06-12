@@ -9,7 +9,7 @@ import { defineSecret } from 'firebase-functions/params';
 import type { Response } from 'express';
 import { logAction } from '../ops/utils';
 
-const SUPPORT_HOOK_SECRET = defineSecret('SUPPORT_HOOK_SECRET');
+export const SUPPORT_HOOK_SECRET = defineSecret('SUPPORT_HOOK_SECRET');
 const db = () => getFirestore();
 
 /** حالات الطلب بالعربية — لتنطقها تاليا طبيعيًا. */
