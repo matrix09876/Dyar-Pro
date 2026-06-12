@@ -3,6 +3,11 @@
 كل الكود جاهز ويستهلك هذه القيم تلقائيًا. نفّذ بالترتيب.
 
 ## 1) Firebase (الأساس — كل شيء خلفه)
+> ✅ **حالة 12/06/2026 — مشروع `dyar-ai`**: ‏Auth (Email+Phone) ✓ ·
+> ‏Storage في ME-WEST1 ✓ · خطة Blaze ✓ · ‏Web config مركّب في
+> ‏`dashboard/.env(.example)` ✓ · سكربت نشر جاهز: `scripts/deploy-prod.sh`
+> ⏳ **متبقٍ واحد**: قاعدة Firestore ‏`(default)` في `nam5` — يجب
+> حذفها (قرار المالك، تدميري) وإنشاؤها في **me-west1** قبل أول نشر.
 أنشئ مشروعًا على console.firebase.google.com ثم:
 ```bash
 # اللوحة + الموقع

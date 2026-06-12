@@ -1,5 +1,6 @@
 {
   "projects": {
-    "default": "demo-dyar"
+    "default": "demo-dyar",
+    "prod": "dyar-ai"
   }
 }
