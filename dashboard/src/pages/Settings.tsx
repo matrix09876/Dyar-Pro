@@ -20,6 +20,21 @@ interface AppConfig {
   newUserGift: number; // أغورة — هدية المستخدم الجديد
 }
 
+/** صوت ديار — config/voice: 4 شخصيات ElevenLabs (انظر DATA-MODEL). */
+interface VoiceCfg {
+  enabled: boolean;
+  agentId: string; // وكيل المحادثة الحية (ElevenLabs ConvAI)
+  support: string; support2: string; driver: string; announce: string;
+}
+const VOICE_DEFAULTS: VoiceCfg = {
+  enabled: true,
+  agentId: '',
+  support: 'rh16DBXwtscjdPFeMBYf',   // Talya
+  support2: '6ZvbKYJmZfL6zVBzLwpV',  // Lina
+  driver: 'kr4VZw8MSZMHE0y2m40n',    // Hasawi
+  announce: '3GnbqfjaW8xI6hRTVx4Y',  // Nasser
+};
+
 /** نظام النقاط — config/loyalty (انظر docs/DATA-MODEL.md). */
 interface LoyaltyCfg {
   enabled: boolean;
@@ -84,6 +99,8 @@ export default function Settings() {
   const [rulesSaved, setRulesSaved] = useState(false);
   const [loyalty, setLoyalty] = useState<LoyaltyCfg>(LOYALTY_DEFAULTS);
   const [loyaltySaved, setLoyaltySaved] = useState(false);
+  const [voice, setVoice] = useState<VoiceCfg>(VOICE_DEFAULTS);
+  const [voiceSaved, setVoiceSaved] = useState(false);
 
   useEffect(() => {
     if (!isConfigured) { setCfg(DEFAULTS); return; }
@@ -95,6 +112,9 @@ export default function Settings() {
     });
     getDoc(doc(db, 'config', 'loyalty')).then((snap) => {
       setLoyalty({ ...LOYALTY_DEFAULTS, ...(snap.data() as Partial<LoyaltyCfg> | undefined) });
+    });
+    getDoc(doc(db, 'config', 'voice')).then((snap) => {
+      setVoice({ ...VOICE_DEFAULTS, ...(snap.data() as Partial<VoiceCfg> | undefined) });
     });
   }, []);
 
@@ -110,6 +130,12 @@ export default function Settings() {
     await setDoc(doc(db, 'config', 'loyalty'), loyalty, { merge: true });
     setLoyaltySaved(true);
     setTimeout(() => setLoyaltySaved(false), 2000);
+  };
+
+  const saveVoice = async () => {
+    await setDoc(doc(db, 'config', 'voice'), voice, { merge: true });
+    setVoiceSaved(true);
+    setTimeout(() => setVoiceSaved(false), 2000);
   };
 
   const saveRules = async () => {
@@ -224,6 +250,42 @@ export default function Settings() {
         </label>
         <button type="button" className="btn-primary" onClick={saveLoyalty}>
           {loyaltySaved ? '✓' : t('save')}
+        </button>
+      </div>
+
+      {/* صوت ديار — config/voice: 4 شخصيات ElevenLabs تديرها اللوحة */}
+      <div className="card p-6 mt-5 max-w-xl space-y-5">
+        <h2 className="font-extrabold">🔊 {t('dyarVoice')}</h2>
+        <p className="text-xs text-ink-muted">{t('dyarVoiceHint')}</p>
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-bold">{t('voiceEnabled')}</span>
+          <input type="checkbox" className="h-5 w-5 accent-brand-600"
+            checked={voice.enabled}
+            onChange={(e) => setVoice({ ...voice, enabled: e.target.checked })} />
+        </div>
+        {([
+          ['support', t('voiceSupport'), 'Talya'],
+          ['support2', t('voiceSupport2'), 'Lina'],
+          ['driver', t('voiceDriver'), 'Hasawi'],
+          ['announce', t('voiceAnnounce'), 'Nasser'],
+        ] as const).map(([k, label, def]) => (
+          <label key={k} className="block">
+            <span className="text-sm font-bold">{label} <span className="text-ink-muted font-normal">({def})</span></span>
+            <input className="input mt-1 font-mono text-xs" dir="ltr"
+              value={voice[k]}
+              onChange={(e) => setVoice({ ...voice, [k]: e.target.value })} />
+          </label>
+        ))}
+        <label className="block">
+          <span className="text-sm font-bold">{t('voiceAgentId')}</span>
+          <input className="input mt-1 font-mono text-xs" dir="ltr"
+            placeholder="agent_…"
+            value={voice.agentId}
+            onChange={(e) => setVoice({ ...voice, agentId: e.target.value })} />
+          <span className="text-xs text-ink-muted">{t('voiceAgentHint')}</span>
+        </label>
+        <button type="button" className="btn-primary" onClick={saveVoice}>
+          {voiceSaved ? '✓' : t('save')}
         </button>
       </div>
 

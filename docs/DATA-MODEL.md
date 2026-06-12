@@ -352,6 +352,13 @@ createdAt: Timestamp
 سطر محظور — `HttpsError('failed-precondition','blocked-address')`.
 الصلاحيات: قراءة/كتابة admin فقط.
 
+### `config/voice`  (صوت ديار — ElevenLabs)
+```
+enabled: boolean               // مفتاح عام من اللوحة
+agentId?: string               // وكيل المحادثة الحية (ConvAI) — docs/VOICE-AGENT.md
+support, support2, driver, announce: string  // Voice IDs للشخصيات الأربع
+```
+
 ### `config/loyalty`  — نظام النقاط (الولاء)
 ```
 enabled: boolean

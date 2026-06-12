@@ -210,6 +210,17 @@ export const T: Dict = {
   hubBanners:   { ar: 'لافتات بكل المواضع (ستوري/رئيسية/فئات)', he: 'באנרים בכל המיקומים', en: 'Banners in all placements' },
   hubBroadcast: { ar: 'إشعارات دفع للزبائن والمندوبين والأعمال', he: 'התראות פוש לכל הקהלים', en: 'Push notifications to all audiences' },
 
+  // صوت ديار
+  dyarVoice:     { ar: 'صوت ديار', he: 'הקול של דיאר', en: 'Dyar Voice' },
+  dyarVoiceHint: { ar: 'أصوات بشرية عربية من ElevenLabs — شخصية لكل دور، وتُستبدل بلصق Voice ID آخر', he: 'קולות אנושיים בערבית — אישיות לכל תפקיד', en: 'Human Arabic voices — a persona per role, replace by pasting another Voice ID' },
+  voiceEnabled:  { ar: 'تفعيل الصوت', he: 'הפעלת קול', en: 'Enable voice' },
+  voiceSupport:  { ar: 'الدعم — الرد الأساسي', he: 'תמיכה — מענה ראשי', en: 'Support — primary' },
+  voiceSupport2: { ar: 'الدعم — استرداد واعتذار', he: 'תמיכה — החזרים', en: 'Support — refunds' },
+  voiceDriver:   { ar: 'تنبيهات السائق', he: 'התראות נהג', en: 'Driver alerts' },
+  voiceAnnounce: { ar: 'الإعلانات الرسمية', he: 'הודעות רשמיות', en: 'Announcements' },
+  voiceAgentId:  { ar: 'الوكيل الصوتي الحي (Agent ID)', he: 'סוכן קולי חי (Agent ID)', en: 'Live voice agent (Agent ID)' },
+  voiceAgentHint:{ ar: 'محادثة فورية طبيعية — أنشئه باتباع docs/VOICE-AGENT.md والصق المعرف هنا', he: 'שיחה חיה — ראה docs/VOICE-AGENT.md', en: 'Real-time conversation — create per docs/VOICE-AGENT.md and paste the ID' },
+
   // الدعم — عدّادات حية
   activeOrders: { ar: 'طلبات نشطة', he: 'הזמנות פעילות', en: 'Active orders' },
   messages:     { ar: 'رسائل', he: 'הודעות', en: 'Messages' },

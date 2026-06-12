@@ -62,8 +62,11 @@ firebase deploy --only functions:createEasycardPayment,functions:easycardWebhook
 firebase functions:secrets:set ELEVENLABS_API_KEY
 # اختياري — صوت مخصص بدل الافتراضي:
 firebase functions:secrets:set ELEVENLABS_VOICE_ID
-firebase deploy --only functions:speak
+firebase deploy --only functions:speak,functions:liveSupportUrl
 ```
+> 🎙️ **الوكيل الصوتي الحي**: محادثة فورية كبشري لخدمة العملاء —
+> أنشئه مرة واحدة حسب `docs/VOICE-AGENT.md` والصق Agent ID في
+> اللوحة → الإعدادات → صوت ديار.
 > ⚠️ المفتاح الذي أُرسل في الدردشة (sk_…) صار مكشوفًا — **دوّره** من
 > لوحة ElevenLabs قبل الإطلاق وأدخل الجديد بالأمر أعلاه فقط.
 
