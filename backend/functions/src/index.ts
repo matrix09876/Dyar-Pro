@@ -9,6 +9,7 @@ export { createOrder, updateOrderStatus, assignDriver, rateOrder } from './order
 export { autoAssignNearestDriver } from './drivers/assignment';
 export { createPaymentIntent, stripeWebhook } from './payments/stripe';
 export { createEasycardPayment, easycardWebhook } from './payments/easycard';
+export { speak } from './ai/voice';
 export { redeemGiftCard } from './wallet/giftcards';
 export { requestPayout } from './wallet/payouts';
 export { claimParcel, startParcelTransit } from './parcels/shipping';

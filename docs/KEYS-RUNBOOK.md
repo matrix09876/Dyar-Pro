@@ -55,7 +55,19 @@ firebase deploy --only functions:createEasycardPayment,functions:easycardWebhook
 ثبّت Firebase Extension **Trigger Email** على مجموعة `mail` بحساب SMTP —
 قوالبنا تُحقن تلقائيًا من `config/emails`.
 
-## 6) النشر للمتاجر
+## 6) الصوت — ElevenLabs (اختياري، مجرَّب حيًا ✓)
+> دالة `speak` جاهزة: نطق عربي/عبري/إنجليزي (multilingual_v2) لردود
+> Dyar Bot وإعلانات السائق الصوتية. جُرّبت بمفتاحك (12/06): ‏200 ✓.
+```bash
+firebase functions:secrets:set ELEVENLABS_API_KEY
+# اختياري — صوت مخصص بدل الافتراضي:
+firebase functions:secrets:set ELEVENLABS_VOICE_ID
+firebase deploy --only functions:speak
+```
+> ⚠️ المفتاح الذي أُرسل في الدردشة (sk_…) صار مكشوفًا — **دوّره** من
+> لوحة ElevenLabs قبل الإطلاق وأدخل الجديد بالأمر أعلاه فقط.
+
+## 7) النشر للمتاجر
 ```bash
 cd apps/user && flutter build appbundle   # ثم Google Play Console
 open ios/Runner.xcworkspace               # Archive ثم App Store Connect
@@ -66,7 +78,7 @@ open ios/Runner.xcworkspace               # Archive ثم App Store Connect
 > بعد البند 3 يتفعّل VISA/Bit. لا يوجد أي مكان آخر يحتاج مفاتيح.
 
 
-## 7) App Check (درع ضد البوتات وإساءة الاستخدام)
+## 8) App Check (درع ضد البوتات وإساءة الاستخدام)
 في Firebase Console → App Check: فعّل **Play Integrity** (أندرويد)،
 **App Attest** (iOS)، **reCAPTCHA v3** (الويب)، ثم Enforce على
 Firestore وFunctions. التطبيقات جاهزة — أضف سطر التفعيل في
