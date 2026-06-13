@@ -206,6 +206,8 @@ class S {
     'stay': ['البقاء', 'הישארות', 'Stay'],
     'soundEffects': ['الأصوات والمؤثرات', 'צלילים ואפקטים', 'Sounds & effects'],
     'payMeal': ['ميزانية الوجبات', 'תקציב ארוחות', 'Meal budget'],
+    'mealToday': ['رصيد اليوم', 'יתרת היום', 'Today\'s balance'],
+    'mealMonthly': ['رصيد الشهر', 'יתרת החודש', 'Monthly balance'],
     'talkToTalya': ['🎙️ مكالمة مع تاليا — خدمة العملاء', '🎙️ שיחה עם טליה — שירות לקוחות', '🎙️ Call Talya — customer care'],
     'nearestFirst': ['الأقرب أولًا 📍', 'הקרוב ביותר 📍', 'Nearest first 📍'],
     'topRated': ['الأعلى تقييمًا ⭐', 'המדורגים ביותר ⭐', 'Top rated ⭐'],

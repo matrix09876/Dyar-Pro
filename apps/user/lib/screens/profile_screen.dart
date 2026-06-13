@@ -99,6 +99,48 @@ class UserProfileScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 10),
+            // ديار Meals: بطاقة رصيد وجبات الشركة (تظهر فقط عند وجود حساب)
+            Builder(builder: (_) {
+              final meal = ref.watch(mealAccountProvider).value;
+              if (meal == null) return const SizedBox.shrink();
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                        colors: [Color(0xFF16A34A), Color(0xFF065F46)]),
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  child: Row(children: [
+                    const Text('🍱', style: TextStyle(fontSize: 26)),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(s('payMeal'),
+                              style: const TextStyle(
+                                  color: Colors.white70, fontSize: 12)),
+                          Text(
+                              meal.period == 'monthly'
+                                  ? s('mealMonthly')
+                                  : s('mealToday'),
+                              style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w800)),
+                        ],
+                      ),
+                    ),
+                    MoneyText(meal.balance,
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w900,
+                            fontSize: 18)),
+                  ]),
+                ),
+              );
+            }),
             _Tile(
               icon: LucideIcons.mapPin,
               label: s('myAddresses'),

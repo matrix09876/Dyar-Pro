@@ -143,4 +143,26 @@ void main() {
       expect(a.period, 'daily');
     });
   });
+
+  group('DriverProfile.fromDoc', () {
+    test('الأرباح المتداخلة + الحالة + أونلاين', () {
+      final d = DriverProfile.fromDoc(FakeDoc('d1', {
+        'vehicle': {'type': 'motorcycle', 'plate': '12-345-67'},
+        'isOnline': true, 'status': 'approved',
+        'earnings': {'today': 3200, 'week': 18000, 'total': 240000},
+        'rating': 4.8,
+      }));
+      expect(d.vehicleType, 'motorcycle');
+      expect(d.isOnline, isTrue);
+      expect(d.earningsToday, 3200);
+      expect(d.earningsTotal, 240000);
+      expect(d.rating, 4.8);
+    });
+    test('قيم افتراضية آمنة', () {
+      final d = DriverProfile.fromDoc(FakeDoc('d2', {}));
+      expect(d.status, 'pending');
+      expect(d.earningsTotal, 0);
+      expect(d.isOnline, isFalse);
+    });
+  });
 }
