@@ -192,6 +192,10 @@ class UserProfileScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 10),
 
+          // مفتاح الأصوات والمؤثرات (طلب الطعام/الإشعار) — يحفظه المستخدم
+          const _SfxToggle(),
+          const SizedBox(height: 10),
+
           if (user != null)
             DyarCard(
               onTap: () => ref.read(authServiceProvider).signOut(),
@@ -208,6 +212,46 @@ class UserProfileScreen extends ConsumerWidget {
             ),
         ],
       ),
+    );
+  }
+}
+
+/// مفتاح الأصوات والمؤثرات — يقرأ/يكتب تفضيل المستخدم عبر SfxService.
+class _SfxToggle extends ConsumerStatefulWidget {
+  const _SfxToggle();
+  @override
+  ConsumerState<_SfxToggle> createState() => _SfxToggleState();
+}
+
+class _SfxToggleState extends ConsumerState<_SfxToggle> {
+  bool _on = true;
+
+  @override
+  void initState() {
+    super.initState();
+    ref.read(sfxServiceProvider).isEnabled().then((v) {
+      if (mounted) setState(() => _on = v);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final s = ref.watch(stringsProvider);
+    return DyarCard(
+      child: Row(children: [
+        const Icon(LucideIcons.bell),
+        const SizedBox(width: 10),
+        Expanded(child: Text(s('soundEffects'))),
+        Switch(
+          value: _on,
+          activeThumbColor: DyarTokens.brand,
+          onChanged: (v) async {
+            setState(() => _on = v);
+            await ref.read(sfxServiceProvider).setEnabled(v);
+            if (v) ref.read(sfxServiceProvider).tap();
+          },
+        ),
+      ]),
     );
   }
 }

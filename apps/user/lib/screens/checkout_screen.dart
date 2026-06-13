@@ -186,6 +186,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         }
       }
       ref.read(cartProvider.notifier).clear();
+      // مؤثر صوتي/اهتزاز عند نجاح الطلب (يحترم مفتاح المستخدم)
+      ref.read(sfxServiceProvider).success();
       if (mounted) {
         Navigator.of(context).pushReplacement(MaterialPageRoute(
             builder: (_) =>

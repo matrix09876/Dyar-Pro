@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dyar_core/dyar_core.dart';
 import 'package:dyar_ui/dyar_ui.dart';
@@ -21,12 +22,48 @@ class UserShell extends ConsumerStatefulWidget {
 class _UserShellState extends ConsumerState<UserShell> {
   int _tab = 0;
 
+  /// زر الرجوع: من أي تبويب → يعود للرئيسية؛ من الرئيسية → شريحة تأكيد الخروج.
+  Future<void> _onBack() async {
+    if (_tab != 0) {
+      setState(() => _tab = 0);
+      return;
+    }
+    final s = ref.read(stringsProvider);
+    final exit = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+        title: Text(s('exitTitle'),
+            style: const TextStyle(fontWeight: FontWeight.w900)),
+        content: Text(s('exitBody')),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(s('stay'),
+                  style: const TextStyle(fontWeight: FontWeight.w800))),
+          FilledButton(
+              style: FilledButton.styleFrom(
+                  backgroundColor: const Color(0xFFDC2626)),
+              onPressed: () => Navigator.pop(ctx, true),
+              child: Text(s('exitApp'))),
+        ],
+      ),
+    );
+    if (exit == true) await SystemNavigator.pop();
+  }
+
   @override
   Widget build(BuildContext context) {
     final s = ref.watch(stringsProvider);
     final cartCount = ref.watch(cartProvider).count;
 
-    return Scaffold(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _onBack();
+      },
+      child: Scaffold(
       extendBody: true,
       body: switch (_tab) {
         0 => const HomeScreen(),
@@ -117,6 +154,7 @@ class _UserShellState extends ConsumerState<UserShell> {
         ),
           ],
         ),
+      ),
       ),
     );
   }
