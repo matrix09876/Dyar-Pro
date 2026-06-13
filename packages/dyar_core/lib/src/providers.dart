@@ -5,6 +5,7 @@ import 'i18n/strings.dart';
 import 'models/app_user.dart';
 import 'models/feature_flags.dart';
 import 'models/story.dart';
+import 'models/meal_account.dart';
 import 'services/auth_service.dart';
 import 'services/order_service.dart';
 import 'services/store_service.dart';
@@ -117,4 +118,12 @@ final storiesProvider = StreamProvider<List<DyarStory>>((ref) {
       .map((q) => q.docs.map(DyarStory.fromDoc).toList())
       // إن لم تُضبط الفهرسة/المجموعة بعد، أعِد قائمة فارغة بأمان
       .handleError((_) {});
+});
+
+/// حساب وجبات المستخدم (ديار Meals) — null إن لا شركة/رصيد.
+final mealAccountProvider = StreamProvider<MealAccount?>((ref) {
+  final auth = ref.watch(authStateProvider).value;
+  if (auth == null) return Stream.value(null);
+  return FirebaseFirestore.instance.doc('mealAccounts/${auth.uid}').snapshots()
+      .map((d) => d.exists ? MealAccount.fromDoc(d) : null);
 });

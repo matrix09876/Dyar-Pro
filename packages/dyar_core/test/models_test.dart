@@ -128,4 +128,19 @@ void main() {
       expect(img.isVideo, isFalse);
     });
   });
+
+  group('MealAccount.fromDoc (ديار Meals)', () {
+    test('رصيد + دورة + hasBudget', () {
+      final a = MealAccount.fromDoc(FakeDoc('alice', {
+        'orgId': 'org1', 'balance': 2500, 'period': 'daily'}));
+      expect(a.orgId, 'org1');
+      expect(a.balance, 2500);
+      expect(a.hasBudget, isTrue);
+    });
+    test('رصيد صفر = لا ميزانية', () {
+      final a = MealAccount.fromDoc(FakeDoc('x', {'balance': 0}));
+      expect(a.hasBudget, isFalse);
+      expect(a.period, 'daily');
+    });
+  });
 }

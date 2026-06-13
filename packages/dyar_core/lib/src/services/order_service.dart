@@ -54,6 +54,14 @@ class OrderService {
     return res.data['paymentUrl'] as String?;
   }
 
+  /// الدفع من ميزانية وجبات الشركة (ديار Meals) — يعيد المتبقي بالأغورة.
+  Future<int> payWithMealBudget(String orderId) async {
+    final res = await _fns
+        .httpsCallable('payWithMealBudget')
+        .call({'orderId': orderId});
+    return (res.data['remaining'] ?? 0) as int;
+  }
+
   Future<String> createPaymentIntent(String orderId) async {
     final res =
         await _fns.httpsCallable('createPaymentIntent').call({'orderId': orderId});

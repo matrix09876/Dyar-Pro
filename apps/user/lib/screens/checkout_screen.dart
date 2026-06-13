@@ -173,16 +173,23 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       // VISA/Bit عبر EasycardNG: فتح صفحة الدفع — التأكيد يصل بالـ webhook
       if (_method != 'cash') {
         try {
-          final url = await ref
-              .read(orderServiceProvider)
-              .payWithEasycard(res['orderId'] as String,
-                  _method == 'bit' ? 'bit' : 'card');
-          if (url != null) {
-            await launchUrl(Uri.parse(url),
-                mode: LaunchMode.externalApplication);
+          if (_method == 'meal') {
+            // ديار Meals: خصم من ميزانية وجبات الشركة (خادميًا)
+            await ref
+                .read(orderServiceProvider)
+                .payWithMealBudget(res['orderId'] as String);
+          } else {
+            final url = await ref
+                .read(orderServiceProvider)
+                .payWithEasycard(res['orderId'] as String,
+                    _method == 'bit' ? 'bit' : 'card');
+            if (url != null) {
+              await launchUrl(Uri.parse(url),
+                  mode: LaunchMode.externalApplication);
+            }
           }
         } catch (_) {
-          // البوابة غير مفعّلة بعد (وضع الديمو) — الطلب مسجّل والدفع لاحق
+          // البوابة/الميزانية غير متاحة بعد — الطلب مسجّل والدفع لاحق
         }
       }
       ref.read(cartProvider.notifier).clear();
@@ -391,6 +398,21 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             ),
           ]),
           const SizedBox(height: 16),
+
+          // ديار Meals: تظهر فقط إن للمستخدم رصيد ميزانية وجبات شركة
+          Builder(builder: (_) {
+            final meal = ref.watch(mealAccountProvider).value;
+            if (meal == null || !meal.hasBudget) return const SizedBox.shrink();
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: _PayOption(
+                icon: LucideIcons.utensils,
+                label: '🍱 ${s('payMeal')} · ${MoneyText.format(meal.balance)}',
+                selected: _method == 'meal',
+                onTap: () => setState(() => _method = 'meal'),
+              ),
+            );
+          }),
 
           // طرق الدفع المعتمدة: VISA · CASH · BIT (قرار المالك)
           _PayOption(
