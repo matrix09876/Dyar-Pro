@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:dyar_core/dyar_core.dart';
 import 'fake_doc.dart';
@@ -163,6 +164,71 @@ void main() {
       expect(d.status, 'pending');
       expect(d.earningsTotal, 0);
       expect(d.isOnline, isFalse);
+    });
+  });
+
+  group('Rfq.fromDoc (ديار B2B)', () {
+    test('طلب مفتوح بلا عرض', () {
+      final r = Rfq.fromDoc(FakeDoc('rfq1', {
+        'merchantUid': 'alice', 'storeId': 's1', 'storeName': 'مورد',
+        'productName': 'دقيق', 'qty': 100, 'status': 'open',
+      }));
+      expect(r.isOpen, isTrue);
+      expect(r.isQuoted, isFalse);
+      expect(r.qty, 100);
+      expect(r.quote, isNull);
+    });
+    test('عرض مع عمولة + صلاحية مستقبلية', () {
+      final future = Timestamp.fromDate(
+          DateTime.now().add(const Duration(hours: 6)));
+      final r = Rfq.fromDoc(FakeDoc('rfq2', {
+        'merchantUid': 'alice', 'storeId': 's1', 'productName': 'سكر',
+        'qty': 50, 'status': 'quoted',
+        'quote': {
+          'unitPrice': 500, 'total': 25000, 'commission': 750,
+          'commissionPct': 3, 'validUntil': future,
+        },
+      }));
+      expect(r.isQuoted, isTrue);
+      expect(r.quote!.unitPrice, 500);
+      expect(r.quote!.total, 25000);
+      expect(r.quote!.commission, 750);
+      expect(r.quote!.commissionPct, 3);
+      expect(r.quote!.isValid, isTrue);
+    });
+    test('عرض منتهي الصلاحية → isValid=false', () {
+      final past = Timestamp.fromDate(
+          DateTime.now().subtract(const Duration(hours: 1)));
+      final q = RfqQuote.fromMap({
+        'unitPrice': 100, 'total': 1000, 'commission': 30,
+        'commissionPct': 3, 'validUntil': past,
+      });
+      expect(q.isValid, isFalse);
+    });
+  });
+
+  group('AiCartSuggestion.fromMap (ديار AI)', () {
+    test('اقتراح كامل بأصناف وإجمالي', () {
+      final sug = AiCartSuggestion.fromMap({
+        'usedAi': true, 'overBudget': false,
+        'storeId': 's1', 'storeName': 'مطعم', 'storeType': 'restaurant',
+        'explanation': 'اخترنا الأوفر', 'deliveryFee': 1500,
+        'subtotal': 6000, 'estimatedTotal': 7500,
+        'items': [
+          {'itemId': 'i1', 'name': 'شاورما', 'price': 3000, 'qty': 2, 'lineTotal': 6000},
+        ],
+      });
+      expect(sug.usedAi, isTrue);
+      expect(sug.items.length, 1);
+      expect(sug.items.first.lineTotal, 6000);
+      expect(sug.estimatedTotal, 7500);
+      expect(sug.overBudget, isFalse);
+    });
+    test('قيم افتراضية آمنة عند نقص الحقول', () {
+      final sug = AiCartSuggestion.fromMap({'storeId': 's2'});
+      expect(sug.items, isEmpty);
+      expect(sug.subtotal, 0);
+      expect(sug.usedAi, isFalse);
     });
   });
 }

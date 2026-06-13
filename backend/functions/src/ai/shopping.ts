@@ -160,32 +160,40 @@ export const aiBuildCart = onCall({ secrets: [ANTHROPIC_API_KEY] }, async (req) 
     throw new HttpsError('failed-precondition', 'no open stores');
   }
 
-  // 1) محاولة Claude، 2) احتياطي حسابي عند أي خطأ/غياب مفتاح
-  let proposal: { storeId: string; items: { itemId: string; qty: number }[]; explanation: string } | null = null;
+  // تحقق صارم: المتجر موجود في الكاتالوج، وكل صنف يعود له بسعره الحقيقي.
+  // يعيد null إن كان الاقتراح غير صالح (متجر مُختلَق/أصناف غير موجودة).
+  type Proposal = { storeId: string; items: { itemId: string; qty: number }[]; explanation: string };
+  const validate = (p: Proposal | null) => {
+    if (!p) return null;
+    const store = catalog.find((st) => st.storeId === p.storeId);
+    if (!store) return null;
+    const byId = new Map(store.items.map((it) => [it.itemId, it]));
+    const items = p.items
+      .map((line) => {
+        const it = byId.get(line.itemId);
+        if (!it) return null;
+        const qty = Math.min(20, Math.max(1, Math.round(line.qty)));
+        return { itemId: it.itemId, name: it.name, price: it.price, qty, lineTotal: it.price * qty };
+      })
+      .filter((x): x is NonNullable<typeof x> => x != null);
+    if (items.length === 0) return null;
+    return { store, items, explanation: p.explanation };
+  };
+
+  // 1) محاولة Claude، 2) احتياطي حسابي عند أي خطأ/غياب مفتاح/اقتراح غير صالح
   let usedAi = false;
+  let valid: ReturnType<typeof validate> = null;
   try {
-    proposal = await askClaude(query, lang, budget, catalog);
-    usedAi = proposal != null;
+    const aiProposal = await askClaude(query, lang, budget, catalog);
+    valid = validate(aiProposal);
+    usedAi = valid != null;
   } catch {
-    proposal = null;
+    valid = null;
   }
-  if (!proposal) proposal = heuristicPick(catalog, budget);
-  if (!proposal) throw new HttpsError('internal', 'could not build cart');
+  if (!valid) valid = validate(heuristicPick(catalog, budget));
+  if (!valid) throw new HttpsError('internal', 'could not build cart');
 
-  // 3) تحقق صارم: المتجر موجود، وكل صنف يعود له بسعره الحقيقي
-  const store = catalog.find((s) => s.storeId === proposal!.storeId);
-  if (!store) throw new HttpsError('internal', 'invalid store proposed');
-  const byId = new Map(store.items.map((it) => [it.itemId, it]));
-  const items = proposal.items
-    .map((p) => {
-      const it = byId.get(p.itemId);
-      if (!it) return null;
-      const qty = Math.min(20, Math.max(1, Math.round(p.qty)));
-      return { itemId: it.itemId, name: it.name, price: it.price, qty, lineTotal: it.price * qty };
-    })
-    .filter((x): x is NonNullable<typeof x> => x != null);
-  if (items.length === 0) throw new HttpsError('internal', 'no valid items proposed');
-
+  const { store, items, explanation } = valid;
   const subtotal = items.reduce((s, it) => s + it.lineTotal, 0);
   return {
     ok: true,
@@ -197,7 +205,7 @@ export const aiBuildCart = onCall({ secrets: [ANTHROPIC_API_KEY] }, async (req) 
     items, // [{itemId,name,price,qty,lineTotal}]
     subtotal,
     estimatedTotal: subtotal + store.deliveryFee,
-    explanation: proposal.explanation,
+    explanation,
     overBudget: budget != null && subtotal > budget,
   };
 });

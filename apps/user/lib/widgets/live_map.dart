@@ -24,6 +24,26 @@ class LiveTrackingMap extends ConsumerStatefulWidget {
 
 class _LiveTrackingMapState extends ConsumerState<LiveTrackingMap> {
   GoogleMapController? _controller;
+  Stream<DriverLocation?>? _stream;
+
+  @override
+  void initState() {
+    super.initState();
+    _bindStream();
+  }
+
+  @override
+  void didUpdateWidget(LiveTrackingMap old) {
+    super.didUpdateWidget(old);
+    if (old.driverUid != widget.driverUid) _bindStream();
+  }
+
+  // بثّ مُخزَّن مرة واحدة (لا يُعاد الاشتراك مع كل rebuild — أداء/استقرار).
+  void _bindStream() {
+    _stream = (kMapsEnabled && widget.driverUid != null)
+        ? ref.read(driverServiceProvider).watchLocation(widget.driverUid!)
+        : Stream<DriverLocation?>.value(null);
+  }
 
   @override
   void dispose() {
@@ -40,22 +60,21 @@ class _LiveTrackingMapState extends ConsumerState<LiveTrackingMap> {
       return _MapFallback(destLat: widget.destLat, destLng: widget.destLng);
     }
 
-    final stream = widget.driverUid == null
-        ? Stream<DriverLocation?>.value(null)
-        : ref.read(driverServiceProvider).watchLocation(widget.driverUid!);
-
     return ClipRRect(
       borderRadius: BorderRadius.circular(DyarTokens.radius),
       child: SizedBox(
         height: 220,
         child: StreamBuilder<DriverLocation?>(
-          stream: stream,
+          stream: _stream,
           builder: (context, snap) {
             final driver = snap.data;
             if (driver != null && _controller != null) {
-              _controller!.animateCamera(
-                CameraUpdate.newLatLng(LatLng(driver.lat, driver.lng)),
-              );
+              // تحريك الكاميرا بعد إطار البناء (لا أثناءه).
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                _controller?.animateCamera(
+                  CameraUpdate.newLatLng(LatLng(driver.lat, driver.lng)),
+                );
+              });
             }
             final markers = <Marker>{
               Marker(
