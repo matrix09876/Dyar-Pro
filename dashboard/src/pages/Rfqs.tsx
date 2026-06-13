@@ -1,4 +1,4 @@
-import { orderBy } from 'firebase/firestore';
+import { orderBy, limit } from 'firebase/firestore';
 import { FileText } from 'lucide-react';
 import { useCol } from '../hooks/useCol';
 import { useI18n } from '../lib/i18n';
@@ -20,7 +20,7 @@ interface Rfq {
  *  أداة تدقيق «حماية العمولة»: كل صفقة جملة مقبولة تحمل عمولتها. */
 export default function Rfqs() {
   const { t } = useI18n();
-  const { data: rfqs } = useCol<Rfq>('rfqs', orderBy('createdAt', 'desc'));
+  const { data: rfqs } = useCol<Rfq>('rfqs', orderBy('createdAt', 'desc'), limit(200));
 
   const accepted = rfqs.filter((r) => r.status === 'accepted');
   const totalCommission = accepted.reduce((s, r) => s + (r.quote?.commission ?? 0), 0);

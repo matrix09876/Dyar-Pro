@@ -26,7 +26,12 @@ class StoreScreen extends ConsumerStatefulWidget {
 }
 
 class _StoreScreenState extends ConsumerState<StoreScreen> {
-  static const _popular = 'الأشهر';
+  // مفتاح داخلي ثابت لتجميع الأصناف بلا قسم؛ يُعرض مترجمًا عبر _label.
+  static const _popular = '__popular__';
+
+  /// تسمية القسم للعرض: المفتاح الداخلي يُترجم، وبقية الأقسام كما هي.
+  String _label(S s, String key) =>
+      key == _popular ? s('sectionPopular') : key;
 
   final _scroll = ScrollController();
   final Map<String, GlobalKey> _sectionKeys = {};
@@ -124,6 +129,7 @@ class _StoreScreenState extends ConsumerState<StoreScreen> {
                         active: active,
                         brand: brand,
                         onTap: _jumpTo,
+                        labelOf: (k) => _label(s, k),
                       ),
                     ),
                   SliverPadding(
@@ -147,7 +153,7 @@ class _StoreScreenState extends ConsumerState<StoreScreen> {
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
-                                          Text(e.key,
+                                          Text(_label(s, e.key),
                                               style: const TextStyle(
                                                   fontSize: 15.5,
                                                   fontWeight:
@@ -340,6 +346,7 @@ class _SectionChipsDelegate extends SliverPersistentHeaderDelegate {
     required this.active,
     required this.brand,
     required this.onTap,
+    required this.labelOf,
   });
 
   static const barHeight = 54.0;
@@ -348,6 +355,7 @@ class _SectionChipsDelegate extends SliverPersistentHeaderDelegate {
   final String? active;
   final MenuBrand brand;
   final ValueChanged<String> onTap;
+  final String Function(String) labelOf; // تسمية العرض للمفتاح الداخلي
 
   @override
   double get minExtent => barHeight;
@@ -389,7 +397,7 @@ class _SectionChipsDelegate extends SliverPersistentHeaderDelegate {
                       ]
                     : null,
               ),
-              child: Text(name,
+              child: Text(labelOf(name),
                   style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w800,

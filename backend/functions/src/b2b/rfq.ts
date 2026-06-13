@@ -13,9 +13,9 @@
 import { getFirestore, Timestamp } from 'firebase-admin/firestore';
 import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import { logAction } from '../ops/utils';
+import { b2bCommission, DEFAULT_B2B_COMMISSION_PCT } from './commission';
 
 const db = () => getFirestore();
-const DEFAULT_B2B_COMMISSION_PCT = 3; // عمولة ديار الافتراضية للجملة (الهاندوف)
 
 /** التاجر يطلب عرض سعر لمنتج بكمية من مورد جملة. */
 export const createRfq = onCall(async (req) => {
@@ -92,7 +92,7 @@ export const quoteRfq = onCall(async (req) => {
     const qty = (rfq.qty ?? 0) as number;
     const total = unitPrice * qty;
     const commissionPct = (store?.commissionPct ?? DEFAULT_B2B_COMMISSION_PCT) as number;
-    const commission = Math.round((total * commissionPct) / 100);
+    const commission = b2bCommission(total, commissionPct);
 
     tx.update(rRef, {
       status: 'quoted',

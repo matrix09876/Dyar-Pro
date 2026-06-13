@@ -257,6 +257,7 @@ class S {
     'statusAccepted': ['مقبول', 'אושר', 'Accepted'],
     'statusDeclined': ['مرفوض', 'נדחה', 'Declined'],
     'statusExpired': ['منتهٍ', 'פג תוקף', 'Expired'],
+    'sectionPopular': ['الأشهر', 'הנפוצים', 'Popular'],
     'talkToTalya': ['🎙️ مكالمة مع تاليا — خدمة العملاء', '🎙️ שיחה עם טליה — שירות לקוחות', '🎙️ Call Talya — customer care'],
     'nearestFirst': ['الأقرب أولًا 📍', 'הקרוב ביותר 📍', 'Nearest first 📍'],
     'topRated': ['الأعلى تقييمًا ⭐', 'המדורגים ביותר ⭐', 'Top rated ⭐'],
