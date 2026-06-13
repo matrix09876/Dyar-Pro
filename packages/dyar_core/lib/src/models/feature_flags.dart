@@ -53,7 +53,7 @@ const Map<String, List<String>> kFeatureKeysByAudience = {
   'user': [
     'food', 'grocery', 'pharmacy', 'flowers', 'services', 'taxi', 'parcel',
     'marketplace', 'jobs', 'bookings', 'wholesale', 'loyalty', 'subscription',
-    'referral', 'giftcards', 'voiceAgent', 'dietaryFilter',
+    'referral', 'giftcards', 'voiceAgent', 'dietaryFilter', 'aiAssistant',
   ],
   'partner': ['printer', 'promotions', 'menuScheduling', 'selfCampaigns'],
   'driver': ['instantPayout', 'driverPrizes', 'rides', 'heatmap'],

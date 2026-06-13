@@ -14,6 +14,7 @@ import 'jobs_screen.dart';
 import 'services_screen.dart';
 import 'wholesale_screen.dart';
 import 'story_viewer.dart';
+import 'ai_shopping_screen.dart';
 
 final approvedStoresProvider = StreamProvider.family<List<Store>, String?>(
     (ref, type) => ref.watch(storeServiceProvider).watchApproved(type: type));
@@ -173,6 +174,54 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           ),
           const SliverToBoxAdapter(child: SizedBox(height: 46)),
+
+          // ===== ديار AI — المساعد الذكي يتسوّق عنك (ميزة التمايز) =====
+          if (vis('aiAssistant'))
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 14),
+                child: GestureDetector(
+                  onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) => const AiShoppingScreen())),
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                          colors: [DyarTokens.brand, DyarTokens.brandDark]),
+                      borderRadius: BorderRadius.circular(DyarTokens.radiusLg),
+                      boxShadow: [
+                        BoxShadow(
+                            color: DyarTokens.brand.withValues(alpha: 0.30),
+                            blurRadius: 18,
+                            offset: const Offset(0, 8)),
+                      ],
+                    ),
+                    child: Row(children: [
+                      const Text('✨', style: TextStyle(fontSize: 26)),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(s('aiTagline'),
+                                style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w900,
+                                    fontSize: 16)),
+                            Text(s('aiHint'),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                    color: Colors.white70, fontSize: 12)),
+                          ],
+                        ),
+                      ),
+                      const Icon(Icons.chevron_left, color: Colors.white),
+                    ]),
+                  ),
+                ),
+              ),
+            ),
 
           // ===== Stories — نمط إنستجرام (فيديو + صور) من اللوحة، مع
           //        احتياطي حلقات المتاجر إن لم تُضبط ستوريات بعد =====

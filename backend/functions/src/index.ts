@@ -22,5 +22,6 @@ export { requestRide, acceptRide } from './rides/taxi';
 export { createParcel, confirmParcelDelivery } from './parcels/shipping';
 export { createBooking, updateBookingStatus } from './bookings/booking';
 export { aiEta, aiSupportReply } from './ai/assistant';
+export { aiBuildCart } from './ai/shopping';
 export { markProductSold } from './marketplace/market';
 export { resetDriverEarnings, bookingReminders, monthlySettlement } from './ops/scheduled';

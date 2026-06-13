@@ -15,6 +15,8 @@ export 'src/models/service_category.dart';
 export 'src/models/feature_flags.dart';
 export 'src/models/story.dart';
 export 'src/models/meal_account.dart';
+export 'src/models/ai_cart.dart';
+export 'src/services/ai_service.dart';
 export 'src/services/auth_service.dart';
 export 'src/services/order_service.dart';
 export 'src/services/store_service.dart';
