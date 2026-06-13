@@ -225,6 +225,10 @@ export const T: Dict = {
   csRole:     { ar: 'دور خدمة العملاء', he: 'תפקיד שירות לקוחות', en: 'Customer service role' },
   clearPerms: { ar: 'مسح الصلاحيات', he: 'איפוס הרשאות', en: 'Clear permissions' },
 
+  // الحِمية والتصديق (حلال/كوشير)
+  dietaryFilter: { ar: 'حِمية/تصديق', he: 'תזונה/אישור', en: 'Diet/Cert' },
+  verified:      { ar: 'موثّق', he: 'מאומת', en: 'Verified' },
+
   // الدعم — عدّادات حية
   activeOrders: { ar: 'طلبات نشطة', he: 'הזמנות פעילות', en: 'Active orders' },
   messages:     { ar: 'رسائل', he: 'הודעות', en: 'Messages' },

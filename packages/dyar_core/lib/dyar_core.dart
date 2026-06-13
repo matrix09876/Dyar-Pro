@@ -27,6 +27,7 @@ export 'src/services/market_service.dart';
 export 'src/services/job_service.dart';
 export 'src/i18n/strings.dart';
 export 'src/utils/geo.dart';
+export 'src/utils/dietary.dart';
 export 'src/utils/links.dart';
 export 'src/providers.dart';
 export 'src/firebase_boot.dart';

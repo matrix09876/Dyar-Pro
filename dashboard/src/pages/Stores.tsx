@@ -1,11 +1,10 @@
 import {
-  orderBy, doc, updateDoc, addDoc, collection, serverTimestamp,
+  orderBy, doc, updateDoc, addDoc, collection, serverTimestamp, arrayUnion, arrayRemove,
 } from 'firebase/firestore';
-import { Copy, Download, Star } from 'lucide-react';
+import { Copy, Download, Star, BadgeCheck } from 'lucide-react';
 import { auth, db } from '../lib/firebase';
 import { useCol } from '../hooks/useCol';
 import { useI18n } from '../lib/i18n';
-import { money } from '../lib/format';
 import { exportCsv } from '../lib/csv';
 import { PageHeader, Table, EmptyState, Spinner } from '../components/ui';
 import type { Store } from '../types';
@@ -15,6 +14,13 @@ const STORE_STATUS_CLS: Record<Store['status'], string> = {
   approved: 'bg-green-100 text-green-700',
   suspended: 'bg-red-100 text-red-700',
 };
+
+// وسوم الحِمية/التصديق (تطابق dyar_core kDietaryTags)
+const DIET_TAGS: { key: string; emoji: string }[] = [
+  { key: 'halal', emoji: '☪️' }, { key: 'kosher', emoji: '✡️' },
+  { key: 'vegetarian', emoji: '🥗' }, { key: 'vegan', emoji: '🌱' },
+  { key: 'glutenFree', emoji: '🌾' }, { key: 'spicy', emoji: '🌶️' },
+];
 
 export default function Stores() {
   const { t } = useI18n();
@@ -35,6 +41,15 @@ export default function Stores() {
   const statusLabel: Record<Store['status'], string> = {
     pending: t('pendingApproval'), approved: t('approved'), suspended: t('suspended'),
   };
+
+  // تبديل وسم حِمية (التاجر يصرّح؛ هنا تحرير إداري)
+  const toggleDiet = (s: Store, key: string) =>
+    updateDoc(doc(db, 'stores', s.id), {
+      dietary: (s.dietary ?? []).includes(key) ? arrayRemove(key) : arrayUnion(key),
+    });
+  // توثيق الحلال/الكوشير (admin فقط — تظهر ✓ للزبون)
+  const toggleVerified = (s: Store) =>
+    updateDoc(doc(db, 'stores', s.id), { dietaryVerified: !s.dietaryVerified });
 
   // نسخ النشاط: متجر جديد بنفس البيانات بحالة pending + سجل تدقيق
   const duplicate = async (s: Store) => {
@@ -77,7 +92,7 @@ export default function Stores() {
         }
       />
       {loading ? <Spinner /> : stores.length === 0 ? <EmptyState /> : (
-        <Table headers={[t('name'), t('storeType'), t('rating'), t('price'), t('commission'), t('status'), t('actions')]}>
+        <Table headers={[t('name'), t('storeType'), t('rating'), t('dietaryFilter'), t('commission'), t('status'), t('actions')]}>
           {stores.map((s) => (
             <tr key={s.id} className="table-row">
               <td className="td font-bold">
@@ -100,7 +115,30 @@ export default function Stores() {
                   {s.rating ?? '—'} ({s.ratingCount ?? 0})
                 </span>
               </td>
-              <td className="td tabular-nums">{money(s.deliveryFee)} / {money(s.minOrder)}</td>
+              <td className="td">
+                <div className="flex flex-wrap gap-1 max-w-[200px]">
+                  {DIET_TAGS.map((tag) => {
+                    const on = (s.dietary ?? []).includes(tag.key);
+                    return (
+                      <button
+                        key={tag.key}
+                        title={tag.key}
+                        onClick={() => toggleDiet(s, tag.key)}
+                        className={`badge !px-1.5 !py-0.5 !text-xs ${on ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-400'}`}
+                      >
+                        {tag.emoji}
+                      </button>
+                    );
+                  })}
+                  <button
+                    title="توثيق الحلال/الكوشير (✓)"
+                    onClick={() => toggleVerified(s)}
+                    className={`badge !px-1.5 !py-0.5 ${s.dietaryVerified ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-400'}`}
+                  >
+                    <BadgeCheck size={13} />
+                  </button>
+                </div>
+              </td>
               <td className="td">
                 <button className="font-bold text-brand-600" onClick={() => setCommission(s)}>
                   {s.commissionPct ?? 10}%

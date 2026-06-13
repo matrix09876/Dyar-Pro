@@ -18,9 +18,22 @@ class Store {
   final Map<String, dynamic>? dineOut; // reservationCost, cancellationPolicy..
   final Map<String, dynamic>? brand; // هوية المينيو: { template, accent? }
 
+  /// وسوم حِمية/تصديق المتجر — حلال/كوشير/نباتي/فيغان/خالٍ من الغلوتين.
+  /// يصرّح بها التاجر؛ تُعرض كشارات وتُستخدم في فلتر الاكتشاف.
+  final List<String> dietary;
+
+  /// هل صدّقت الإدارة وسوم الحلال/الكوشير؟ (يضبطها admin فقط) — تظهر ✓.
+  final bool dietaryVerified;
+
+  /// إغلاق تلقائي يوم السبت (متاجر كوشير) — وعي السبت/الأعياد.
+  final bool sabbathAware;
+
   /// إحداثيات المتجر (location.lat/lng) — لفرز "الأقرب إليك".
   double? get lat => (location?['lat'] as num?)?.toDouble();
   double? get lng => (location?['lng'] as num?)?.toDouble();
+
+  bool get isHalal => dietary.contains('halal');
+  bool get isKosher => dietary.contains('kosher');
 
   const Store({
     required this.id, required this.ownerUid, required this.name,
@@ -30,6 +43,8 @@ class Store {
     this.rating = 0, this.ratingCount = 0,
     this.deliveryFee = 0, this.minOrder = 0, this.prepTimeMins = 20,
     this.location, this.dineOut, this.brand,
+    this.dietary = const [], this.dietaryVerified = false,
+    this.sabbathAware = false,
   });
 
   factory Store.fromDoc(DocumentSnapshot<Map<String, dynamic>> doc) {
@@ -60,6 +75,9 @@ class Store {
       brand: d['brand'] == null
           ? null
           : Map<String, dynamic>.from(d['brand']),
+      dietary: List<String>.from(d['dietary'] ?? const []),
+      dietaryVerified: d['dietaryVerified'] == true,
+      sabbathAware: d['sabbathAware'] == true,
     );
   }
 }

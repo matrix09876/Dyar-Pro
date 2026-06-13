@@ -149,6 +149,57 @@ class _ItemSheetState extends ConsumerState<_ItemSheet> {
                         style: const TextStyle(
                             color: DyarTokens.inkMuted, fontSize: 13)),
                   ],
+                  // وسوم الحِمية (نباتي/فيغان/حلال/حار…) كشرائح صغيرة
+                  if (item.dietary.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Wrap(spacing: 6, runSpacing: 6, children: [
+                      for (final key in item.dietary)
+                        if (dietaryTagByKey(key) != null)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF1F5F9),
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                            child: Text(
+                                '${dietaryTagByKey(key)!.emoji} ${s('diet_$key')}',
+                                style: const TextStyle(
+                                    fontSize: 11.5,
+                                    fontWeight: FontWeight.w700)),
+                          ),
+                    ]),
+                  ],
+                  // تحذير حساسية إن طابق صنف ملف المستخدم
+                  Builder(builder: (_) {
+                    final allergies =
+                        ref.watch(appUserProvider).value?.allergies ?? const [];
+                    final hay =
+                        '${item.name} ${item.description ?? ''}'.toLowerCase();
+                    final hit = allergies.where((a) =>
+                        a.trim().isNotEmpty && hay.contains(a.toLowerCase()));
+                    if (hit.isEmpty) return const SizedBox.shrink();
+                    return Container(
+                      margin: const EdgeInsets.only(top: 10),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFEF3C7),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(children: [
+                        const Text('⚠️ '),
+                        Expanded(
+                          child: Text(
+                              '${s('allergyWarning')}: ${hit.join('، ')}',
+                              style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: Color(0xFFB45309))),
+                        ),
+                      ]),
+                    );
+                  }),
                 ],
               ),
             ),

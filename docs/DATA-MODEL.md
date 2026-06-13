@@ -35,6 +35,10 @@ name, description, logoUrl, coverUrl
 type: 'restaurant'|'grocery'|'pharmacy'|'flowers'|'service'|'store'|'wholesale'
                                // wholesale = متجر جملة B2B: يظهر فقط في فئة
                                // التجار لحسابات users.merchant==true
+dietary?: string[]             // halal|kosher|vegetarian|vegan|glutenFree|spicy
+                               // يصرّح بها التاجر؛ فلتر اكتشاف + شارات
+dietaryVerified?: boolean      // توثيق الإدارة للحلال/الكوشير (admin فقط) → ✓
+sabbathAware?: boolean         // إغلاق تلقائي يوم السبت (متاجر كوشير)
 serviceCategory?: string       // عند type=='service' فقط — مهنة المزوّد:
                                // 'plumber'|'electrician'|'painter'|'mechanic'
                                // |'carpenter'|'accountant'|'lawyer'|'doctor'
@@ -135,6 +139,8 @@ flags: { vegan, allergens, spicy, spillHazard }   // وسوم الصنف
 maxQty?: number, featured?: boolean
 minQty?: number                    // حد أدنى للكمية (افتراضي 1) —
                                    // لمتاجر الجملة B2B؛ يفرضه الـUI
+dietary?: string[]                 // halal|kosher|vegetarian|vegan|glutenFree|spicy
+                                   // شرائح على الصنف + مطابقة حساسيات المستخدم
 ```
 
 ### `stores/{storeId}/options/{groupId}`  (مجموعات الإضافات)

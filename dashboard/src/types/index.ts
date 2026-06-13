@@ -36,6 +36,11 @@ export interface Store {
   minOrder?: number;
   commissionPct?: number;
   isOpen?: boolean;
+  /** وسوم الحِمية/التصديق: halal/kosher/vegetarian/vegan/glutenFree/spicy */
+  dietary?: string[];
+  /** توثيق الإدارة للحلال/الكوشير (تظهر ✓ للزبون) */
+  dietaryVerified?: boolean;
+  sabbathAware?: boolean;
   status: 'pending' | 'approved' | 'suspended';
   createdAt?: Timestamp;
 }

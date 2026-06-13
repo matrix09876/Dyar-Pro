@@ -41,7 +41,7 @@ service cloud.firestore {
       allow update: if isAdmin() ||
         (isPartner() && resource.data.ownerUid == uid()
          && !request.resource.data.diff(resource.data).affectedKeys()
-              .hasAny(['status','commissionPct','rating','ratingCount']));
+              .hasAny(['status','commissionPct','rating','ratingCount','dietaryVerified']));
       allow delete: if isAdmin();
 
       match /menu/{itemId} {

@@ -76,6 +76,18 @@ await t('التاجر لا يغيّر عمولته', () =>
   assertFails(updateDoc(doc(as('p1', 'partner'), 'stores/s1'),
     { commissionPct: 0 })));
 
+await t('التاجر يصرّح بوسوم الحِمية (حلال/نباتي)', () =>
+  assertSucceeds(updateDoc(doc(as('p1', 'partner'), 'stores/s1'),
+    { dietary: ['halal', 'vegetarian'] })));
+
+await t('التاجر لا يوثّق الحلال/الكوشير بنفسه (dietaryVerified)', () =>
+  assertFails(updateDoc(doc(as('p1', 'partner'), 'stores/s1'),
+    { dietaryVerified: true })));
+
+await t('الإدارة توثّق الحلال/الكوشير', () =>
+  assertSucceeds(updateDoc(doc(as('admin1', 'admin'), 'stores/s1'),
+    { dietaryVerified: true })));
+
 await t('الزبون لا يعدّل تسعير طلبه', () =>
   assertFails(updateDoc(doc(as('alice', 'customer'), 'orders/o1'),
     { 'pricing.total': 1 })));

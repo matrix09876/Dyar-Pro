@@ -37,6 +37,8 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   String? _type;
   String _query = '';
+  // فلتر الحِمية/التصديق: المتجر يجب أن يحمل كل الوسوم المختارة
+  final Set<String> _diet = {};
 
   static const _grad = LinearGradient(
     begin: Alignment.topCenter,
@@ -56,13 +58,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final allStores = storesAsync.value ?? [];
     // بحث وظيفي: بالاسم أو الوصف (غير حسّاس لحالة الأحرف)
     final q = _query.trim().toLowerCase();
-    final stores = q.isEmpty
-        ? allStores
-        : allStores
-            .where((st) =>
-                st.name.toLowerCase().contains(q) ||
-                (st.description ?? '').toLowerCase().contains(q))
-            .toList();
+    final stores = allStores.where((st) {
+      if (q.isNotEmpty &&
+          !st.name.toLowerCase().contains(q) &&
+          !(st.description ?? '').toLowerCase().contains(q)) {
+        return false;
+      }
+      // فلتر الحِمية: كل الوسوم المختارة يجب أن تتوفر في المتجر
+      if (_diet.isNotEmpty && !_diet.every(st.dietary.contains)) return false;
+      return true;
+    }).toList();
 
     return Scaffold(
       backgroundColor: const Color(0xFFF6F7FB),
@@ -369,6 +374,29 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           color: DyarTokens.brand,
                           fontWeight: FontWeight.w700,
                           fontSize: 13)),
+                ],
+              ),
+            ),
+          ),
+          // ===== فلتر الحِمية والتصديق (حلال/كوشير/نباتي…) =====
+          SliverToBoxAdapter(
+            child: SizedBox(
+              height: 38,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+                children: [
+                  for (final tag in kDietaryTags)
+                    Padding(
+                      padding: const EdgeInsetsDirectional.only(end: 8),
+                      child: _DietChip(
+                        label: '${tag.emoji} ${s('diet_${tag.key}')}',
+                        selected: _diet.contains(tag.key),
+                        onTap: () => setState(() => _diet.contains(tag.key)
+                            ? _diet.remove(tag.key)
+                            : _diet.add(tag.key)),
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -760,6 +788,21 @@ class _StoreCard extends ConsumerWidget {
                   Text(store.name,
                       style: const TextStyle(
                           fontWeight: FontWeight.w900, fontSize: 17)),
+                  // شارات التصديق/الحِمية (حلال/كوشير + ✓ إن وُثّقت)
+                  if (store.dietary.isNotEmpty) ...[
+                    const SizedBox(height: 6),
+                    Wrap(
+                      spacing: 6, runSpacing: 6,
+                      children: [
+                        for (final key in store.dietary)
+                          if (dietaryTagByKey(key) != null)
+                            _DietBadge(
+                              tag: dietaryTagByKey(key)!,
+                              verified: store.dietaryVerified,
+                            ),
+                      ],
+                    ),
+                  ],
                   if (store.description != null) ...[
                     const SizedBox(height: 2),
                     Text(store.description!,
@@ -819,6 +862,66 @@ class _Chip extends StatelessWidget {
             style:
                 const TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
       ]),
+    );
+  }
+}
+
+/// شريحة فلتر حِمية في صف الفلاتر (قابلة للتحديد).
+class _DietChip extends StatelessWidget {
+  const _DietChip(
+      {required this.label, required this.selected, required this.onTap});
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        alignment: Alignment.center,
+        padding: const EdgeInsets.symmetric(horizontal: 14),
+        decoration: BoxDecoration(
+          color: selected ? DyarTokens.brand : Colors.white,
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(
+              color: selected ? DyarTokens.brand : const Color(0xFFE5E7EB)),
+        ),
+        child: Text(label,
+            style: TextStyle(
+                fontSize: 12.5,
+                fontWeight: FontWeight.w800,
+                color: selected ? Colors.white : DyarTokens.inkMuted)),
+      ),
+    );
+  }
+}
+
+/// شارة تصديق/حِمية على بطاقة المتجر — حلال أخضر، كوشير أزرق، ✓ إن وُثّقت.
+class _DietBadge extends ConsumerWidget {
+  const _DietBadge({required this.tag, required this.verified});
+  final DietaryTag tag;
+  final bool verified;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final s = ref.watch(stringsProvider);
+    final (bg, fg) = switch (tag.key) {
+      'halal' => (const Color(0xFFDCFCE7), const Color(0xFF15803D)),
+      'kosher' => (const Color(0xFFDBEAFE), const Color(0xFF1D4ED8)),
+      'spicy' => (const Color(0xFFFEE2E2), const Color(0xFFB91C1C)),
+      _ => (const Color(0xFFDCFCE7), const Color(0xFF166534)),
+    };
+    final showCheck = tag.certification && verified;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: bg, borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+          '${tag.emoji} ${s('diet_${tag.key}')}${showCheck ? ' ✓' : ''}',
+          style: TextStyle(
+              fontSize: 11, fontWeight: FontWeight.w800, color: fg)),
     );
   }
 }
