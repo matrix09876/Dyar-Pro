@@ -19,6 +19,16 @@ service firebase.storage {
       allow read: if true;
       allow write: if isAdmin() && isImage() && underSize();
     }
+    // ستوريات ديار (صور + فيديو) — قراءة عامة، رفع للإدارة، حد 50م
+    match /stories/{allPaths=**} {
+      function isMedia() {
+        return request.resource.contentType.matches('image/.*')
+          || request.resource.contentType.matches('video/.*');
+      }
+      allow read: if true;
+      allow write: if isAdmin() && isMedia()
+        && request.resource.size < 50 * 1024 * 1024;
+    }
     // وثائق السائقين: خاصة (السائق نفسه + الإدارة)
     match /drivers/{uid}/{allPaths=**} {
       allow read: if isAdmin() || (isSignedIn() && request.auth.uid == uid);

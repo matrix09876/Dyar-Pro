@@ -3,7 +3,7 @@ import {
   LayoutDashboard, ReceiptText, CarTaxiFront, Package, CalendarCheck,
   Store, Bike, Users, BadgePercent, Wallet, Briefcase, Headset, Settings,
   Moon, Sun, LogOut, Globe, ShieldCheck, Building2, StickyNote, ScrollText,
-  GraduationCap, Image, ShoppingBag, Megaphone, Ban, BarChart3, ToggleRight, Radar,
+  GraduationCap, Image, ShoppingBag, Megaphone, Ban, BarChart3, ToggleRight, Radar, Clapperboard,
 } from 'lucide-react';
 import { where } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
@@ -30,6 +30,7 @@ const NAV = [
   { to: '/cities', key: 'city', icon: Building2 },
   { to: '/notes', key: 'notes', icon: StickyNote },
   { to: '/banners', key: 'banners', icon: Image },
+  { to: '/stories', key: 'stories', icon: Clapperboard },
   { to: '/broadcast', key: 'broadcast', icon: Megaphone },
   { to: '/blocked-addresses', key: 'blockedAddresses', icon: Ban },
   { to: '/training', key: 'training', icon: GraduationCap },
@@ -47,7 +48,7 @@ const PERM_NAV: Record<string, string[]> = {
   'stores.view': ['stores'], 'stores.approve': ['stores'],
   'drivers.view': ['drivers'], 'drivers.approve': ['drivers'],
   'users.view': ['users'], 'users.block': ['users'],
-  'marketing.manage': ['marketing', 'banners'],
+  'marketing.manage': ['marketing', 'banners', 'stories'],
   'finance.view': ['finance', 'reports'],
   'support.manage': ['support'],
   broadcast: ['broadcast'],

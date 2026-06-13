@@ -189,6 +189,12 @@ service cloud.firestore {
       allow write: if false; // Cloud Functions فقط
     }
 
+    // ---- stories (ستوري نمط إنستجرام) — قراءة عامة، إدارة backoffice ----
+    match /stories/{id} {
+      allow read: if true;
+      allow write: if isBackoffice();
+    }
+
     // ---- notifications ----
     match /notifications/{id} {
       allow read: if isOwner(resource.data.uid) || isAdmin();

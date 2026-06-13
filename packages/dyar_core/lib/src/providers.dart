@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'i18n/strings.dart';
 import 'models/app_user.dart';
 import 'models/feature_flags.dart';
+import 'models/story.dart';
 import 'services/auth_service.dart';
 import 'services/order_service.dart';
 import 'services/store_service.dart';
@@ -104,4 +105,16 @@ final cityConfigProvider = StreamProvider<CityConfig>((ref) async* {
 final featureFlagsProvider = StreamProvider<FeatureFlags>((ref) {
   return FirebaseFirestore.instance.doc('config/features').snapshots().map(
       (d) => d.exists ? FeatureFlags.fromDoc(d) : FeatureFlags.empty);
+});
+
+/// ستوريات ديار النشطة (نمط إنستجرام) — `stories` حيث active==true.
+final storiesProvider = StreamProvider<List<DyarStory>>((ref) {
+  return FirebaseFirestore.instance
+      .collection('stories')
+      .where('active', isEqualTo: true)
+      .orderBy('sortOrder')
+      .snapshots()
+      .map((q) => q.docs.map(DyarStory.fromDoc).toList())
+      // إن لم تُضبط الفهرسة/المجموعة بعد، أعِد قائمة فارغة بأمان
+      .handleError((_) {});
 });

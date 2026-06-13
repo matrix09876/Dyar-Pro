@@ -559,3 +559,13 @@ byRegion: { <cityId>: { <featureKey>: boolean } }   // تجاوز للمنطقة
   متوسطات متحركة EMA (80/20) = هوية أداء المتجر/السائق.
 - `learning/byType_{type}` = `{ type, stageStats:{accept,prep,pickup,deliver,total,count} }`
   — تعلّم التوقيت حسب نوع الطلب. تقرأها اللوحة (backoffice) فقط؛ الكتابة Functions.
+
+### `stories/{id}`  (ستوري نمط إنستجرام — صور + فيديو)
+```
+title, ringImage?, storeId?, active: bool, sortOrder: int
+items: [{ type:'image'|'video', url, durationSec }]   // متعدّد العناصر
+expiresAt?                       // اختياري
+```
+يديرها backoffice من صفحة «الستوري» (رفع للوسائط في Storage `stories/`،
+صور+فيديو حتى 50م). الزبون يقرأ النشطة عبر `storiesProvider` ويعرضها
+بعارض إنستجرام (أشرطة تقدّم + تقدّم تلقائي + نقر تنقّل).

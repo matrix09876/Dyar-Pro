@@ -13,6 +13,7 @@ import 'marketplace_screen.dart';
 import 'jobs_screen.dart';
 import 'services_screen.dart';
 import 'wholesale_screen.dart';
+import 'story_viewer.dart';
 
 final approvedStoresProvider = StreamProvider.family<List<Store>, String?>(
     (ref, type) => ref.watch(storeServiceProvider).watchApproved(type: type));
@@ -173,25 +174,47 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
           const SliverToBoxAdapter(child: SizedBox(height: 46)),
 
-          // ===== Stories — حلقات متدرجة (نمط HAAT) =====
+          // ===== Stories — نمط إنستجرام (فيديو + صور) من اللوحة، مع
+          //        احتياطي حلقات المتاجر إن لم تُضبط ستوريات بعد =====
           SliverToBoxAdapter(
             child: SizedBox(
               height: 96,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                padding:
-                    const EdgeInsetsDirectional.only(start: 20, end: 8),
-                children: [
-                  for (final st in stores.take(6))
-                    _StoryRing(
-                        name: st.name,
-                        imageUrl: st.coverUrl,
-                        onTap: () => Navigator.of(context).push(
-                            MaterialPageRoute(
-                                builder: (_) =>
-                                    StoreScreen(storeId: st.id)))),
-                ],
-              ),
+              child: Builder(builder: (_) {
+                final stories =
+                    ref.watch(storiesProvider).value ?? const <DyarStory>[];
+                if (stories.isNotEmpty) {
+                  return ListView(
+                    scrollDirection: Axis.horizontal,
+                    padding:
+                        const EdgeInsetsDirectional.only(start: 20, end: 8),
+                    children: [
+                      for (int i = 0; i < stories.length; i++)
+                        _StoryRing(
+                            name: stories[i].title,
+                            imageUrl: stories[i].cover,
+                            onTap: () => Navigator.of(context).push(
+                                MaterialPageRoute(
+                                    builder: (_) => StoryViewer(
+                                        stories: stories, startIndex: i)))),
+                    ],
+                  );
+                }
+                return ListView(
+                  scrollDirection: Axis.horizontal,
+                  padding:
+                      const EdgeInsetsDirectional.only(start: 20, end: 8),
+                  children: [
+                    for (final st in stores.take(6))
+                      _StoryRing(
+                          name: st.name,
+                          imageUrl: st.coverUrl,
+                          onTap: () => Navigator.of(context).push(
+                              MaterialPageRoute(
+                                  builder: (_) =>
+                                      StoreScreen(storeId: st.id)))),
+                  ],
+                );
+              }),
             ),
           ),
           const SliverToBoxAdapter(child: SizedBox(height: 16)),
