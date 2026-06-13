@@ -3,7 +3,7 @@ import {
   LayoutDashboard, ReceiptText, CarTaxiFront, Package, CalendarCheck,
   Store, Bike, Users, BadgePercent, Wallet, Briefcase, Headset, Settings,
   Moon, Sun, LogOut, Globe, ShieldCheck, Building2, StickyNote, ScrollText,
-  GraduationCap, Image, ShoppingBag, Megaphone, Ban, BarChart3, ToggleRight,
+  GraduationCap, Image, ShoppingBag, Megaphone, Ban, BarChart3, ToggleRight, Radar,
 } from 'lucide-react';
 import { where } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
@@ -14,6 +14,7 @@ import { useI18n, type Lang } from '../lib/i18n';
 const NAV = [
   { to: '/', key: 'overview', icon: LayoutDashboard },
   { to: '/orders', key: 'orders', icon: ReceiptText },
+  { to: '/live', key: 'liveTracking', icon: Radar },
   { to: '/rides', key: 'rides', icon: CarTaxiFront },
   { to: '/parcels', key: 'parcels', icon: Package },
   { to: '/bookings', key: 'bookings', icon: CalendarCheck },
@@ -41,7 +42,7 @@ const NAV = [
 // أي صلاحية staff تفتح أي بنود قائمة؟ admin يرى الكل.
 // خدمة العملاء (support.manage + orders.*) ترى الدعم والطلبات فقط.
 const PERM_NAV: Record<string, string[]> = {
-  'orders.view': ['orders'], 'orders.manage': ['orders'],
+  'orders.view': ['orders', 'liveTracking'], 'orders.manage': ['orders', 'liveTracking'],
   'orders.assignDriver': ['orders'],
   'stores.view': ['stores'], 'stores.approve': ['stores'],
   'drivers.view': ['drivers'], 'drivers.approve': ['drivers'],

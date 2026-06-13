@@ -54,7 +54,7 @@ export interface Driver {
   rating?: number;
   earnings?: { today: number; week: number; total: number };
   /** إحصاءات تشغيلية — deliveredCount يحرّك جوائز المندوبين */
-  stats?: { avgDeliveryMins?: number; deliveries?: number; deliveredCount?: number };
+  stats?: { avgDeliveryMins?: number; avgPickupMins?: number; avgDeliverMins?: number; deliveries?: number; deliveredCount?: number };
 }
 
 /** جائزة مندوبين — driverPrizes (هدف توصيلات → مكافأة بالأغورة). */

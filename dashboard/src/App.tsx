@@ -29,6 +29,7 @@ import Reports from './pages/Reports';
 import BlockedAddresses from './pages/BlockedAddresses';
 import Settings from './pages/Settings';
 import Features from './pages/Features';
+import Live from './pages/Live';
 import { Spinner } from './components/ui';
 
 const queryClient = new QueryClient();
@@ -50,6 +51,7 @@ export default function App() {
               <Route element={<Guarded />}>
                 <Route path="/" element={<Overview />} />
                 <Route path="/orders" element={<Orders />} />
+                <Route path="/live" element={<Live />} />
                 <Route path="/rides" element={<Rides />} />
                 <Route path="/parcels" element={<Parcels />} />
                 <Route path="/bookings" element={<Bookings />} />

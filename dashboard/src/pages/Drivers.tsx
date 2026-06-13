@@ -122,7 +122,7 @@ export default function Drivers() {
       </div>
 
       {loading ? <Spinner /> : drivers.length === 0 ? <EmptyState /> : (
-        <Table headers={['ID', t('vehicle'), t('online'), t('earnings'), t('rating'), t('status'), t('actions')]}>
+        <Table headers={['ID', t('vehicle'), t('online'), t('earnings'), t('identity'), t('rating'), t('status'), t('actions')]}>
           {drivers.map((d) => (
             <tr key={d.id} className="table-row">
               <td className="td font-mono text-xs">{d.id.slice(0, 10)}…</td>
@@ -134,6 +134,10 @@ export default function Drivers() {
                 </span>
               </td>
               <td className="td tabular-nums">{money(d.earnings?.total)}</td>
+              <td className="td text-xs text-ink-muted tabular-nums" title="هوية الأداء: توصيلات · متوسط استلام/توصيل">
+                🏁 {d.stats?.deliveredCount ?? 0} · ⌀{d.stats?.avgDeliverMins ?? d.stats?.avgDeliveryMins ?? '—'}د
+                {d.stats?.avgPickupMins != null ? ` · 🛍${d.stats.avgPickupMins}د` : ''}
+              </td>
               <td className="td">{d.rating ?? '—'}</td>
               <td className="td"><span className={`badge ${DRIVER_STATUS_CLS[d.status]}`}>{statusLabel[d.status]}</span></td>
               <td className="td">
