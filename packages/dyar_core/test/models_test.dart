@@ -120,5 +120,12 @@ void main() {
       expect(st.items.first.type, 'image');
       expect(st.cover, 'single.jpg');
     });
+    test('StoryItem.fromMap: مدة الفيديو والصورة', () {
+      final v = StoryItem.fromMap({'type': 'video', 'url': 'v.mp4'});
+      expect(v.isVideo, isTrue);
+      final img = StoryItem.fromMap({'type': 'image', 'url': 'a.jpg', 'durationSec': 9});
+      expect(img.durationSec, 9);
+      expect(img.isVideo, isFalse);
+    });
   });
 }

@@ -34,6 +34,9 @@ await env.withSecurityRulesDisabled(async (ctx) => {
   // pending عمدًا: السيناريو الهجومي = التاجر يحاول اعتماد متجره بنفسه
   await setDoc(doc(db, 'stores/s1'), { ownerUid: 'p1', status: 'pending', commissionPct: 10 });
   await setDoc(doc(db, 'support/t1'), { uid: 'bob', status: 'open', topic: 'general' });
+  await setDoc(doc(db, 'organizations/org1'), { name: 'Acme', active: true, budget: { amount: 2500, period: 'daily' }, members: ['alice'] });
+  await setDoc(doc(db, 'mealAccounts/alice'), { orgId: 'org1', balance: 2500 });
+  await setDoc(doc(db, 'stories/st1'), { title: 'x', active: true });
   await setDoc(doc(db, 'orders/o1'), {
     customerUid: 'alice', storeId: 's1', status: 'pending',
     payment: { method: 'cash', status: 'pending' },
@@ -98,6 +101,22 @@ await t('لا أحد يكتب transactions من العميل', () =>
 
 await t('الأدمن يقرأ أي مستخدم', () =>
   assertSucceeds(getDoc(doc(as('admin1', 'admin'), 'users/bob'))));
+
+// ---- ديار Meals + الستوري ----
+await t('الموظف يقرأ حساب وجباته فقط', () =>
+  assertSucceeds(getDoc(doc(as('alice', 'customer'), 'mealAccounts/alice'))));
+await t('زبون آخر لا يقرأ حساب وجبات غيره', () =>
+  assertFails(getDoc(doc(as('bob', 'customer'), 'mealAccounts/alice'))));
+await t('لا أحد يكتب رصيد الوجبات من العميل (Functions فقط)', () =>
+  assertFails(updateDoc(doc(as('alice', 'customer'), 'mealAccounts/alice'), { balance: 999999 })));
+await t('الزبون لا ينشئ شركة', () =>
+  assertFails(setDoc(doc(as('alice', 'customer'), 'organizations/x'), { name: 'h' })));
+await t('الأدمن يدير الشركات', () =>
+  assertSucceeds(setDoc(doc(as('admin1', 'admin'), 'organizations/x'), { name: 'h', active: true })));
+await t('الستوري قراءة عامة', () =>
+  assertSucceeds(getDoc(doc(as('alice', 'customer'), 'stories/st1'))));
+await t('الزبون لا يكتب ستوري', () =>
+  assertFails(setDoc(doc(as('alice', 'customer'), 'stories/x'), { title: 'h' })));
 
 // ---- دور خدمة العملاء (staff + perms) ----
 await t('موظف خدمة العملاء يقرأ تذاكر الدعم', () =>

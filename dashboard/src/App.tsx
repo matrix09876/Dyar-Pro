@@ -31,6 +31,7 @@ import Settings from './pages/Settings';
 import Features from './pages/Features';
 import Live from './pages/Live';
 import Stories from './pages/Stories';
+import Companies from './pages/Companies';
 import { Spinner } from './components/ui';
 
 const queryClient = new QueryClient();
@@ -68,6 +69,7 @@ export default function App() {
                 <Route path="/cities/:id" element={<CitySettings />} />
                 <Route path="/banners" element={<Banners />} />
                 <Route path="/stories" element={<Stories />} />
+                <Route path="/companies" element={<Companies />} />
                 <Route path="/reports" element={<Reports />} />
                 <Route path="/broadcast" element={<Broadcast />} />
                 <Route path="/blocked-addresses" element={<BlockedAddresses />} />

@@ -569,3 +569,13 @@ expiresAt?                       // اختياري
 يديرها backoffice من صفحة «الستوري» (رفع للوسائط في Storage `stories/`،
 صور+فيديو حتى 50م). الزبون يقرأ النشطة عبر `storiesProvider` ويعرضها
 بعارض إنستجرام (أشرطة تقدّم + تقدّم تلقائي + نقر تنقّل).
+
+
+### ديار Meals — بدل وجبات الشركات (نمط 10bis/Cibus)
+- `organizations/{orgId}` = { name, active, budget:{amount(أغورة), period:'daily'|'monthly'},
+  members:[uid], allowedDietary?, policy? } — تديرها اللوحة (صفحة الشركات).
+- `mealAccounts/{uid}` = { orgId, balance(أغورة use-it-or-lose-it), period, lastResetAt, ledger:[{orderId,amount,at}] }
+  — قراءة للمالك/الإدارة، الكتابة Functions فقط.
+- `payWithMealBudget` (callable): يخصم من الرصيد لطلب (transaction، يرفض الفائض).
+- `grantMealBudgets` (مجدول يومي 00:05 Asia/Jerusalem): يضبط الرصيد=مبلغ
+  السياسة (لا يجمع)؛ الشهري يوم 1 فقط. order.payment.method='meal_budget'.

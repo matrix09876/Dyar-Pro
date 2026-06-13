@@ -195,6 +195,16 @@ service cloud.firestore {
       allow write: if isBackoffice();
     }
 
+    // ---- ديار Meals: الشركات وحسابات الوجبات ----
+    match /organizations/{orgId} {
+      allow read: if isBackoffice();
+      allow write: if isAdmin();
+    }
+    match /mealAccounts/{uid} {
+      allow read: if isOwner(uid) || isBackoffice();
+      allow write: if false; // grantMealBudgets/payWithMealBudget عبر Functions
+    }
+
     // ---- notifications ----
     match /notifications/{id} {
       allow read: if isOwner(resource.data.uid) || isAdmin();

@@ -28,6 +28,7 @@ const NAV = [
   { to: '/jobs', key: 'jobs', icon: Briefcase },
   { to: '/support', key: 'support', icon: Headset },
   { to: '/cities', key: 'city', icon: Building2 },
+  { to: '/companies', key: 'companies', icon: Building2 },
   { to: '/notes', key: 'notes', icon: StickyNote },
   { to: '/banners', key: 'banners', icon: Image },
   { to: '/stories', key: 'stories', icon: Clapperboard },
