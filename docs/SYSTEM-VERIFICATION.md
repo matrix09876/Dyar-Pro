@@ -18,11 +18,12 @@
 
 ## 🟡 الفجوات المتبقية (روادماب وجودة — ليست أعطالًا) — رتّبناها للبدء
 
-### 1) اختبارات Flutter = 0 (أعلى أولوية جودة)
-الخلفية مغطّاة (قواعد 23 + عمولة 10)، لكن التطبيقات الثلاثة + dyar_core
-بلا أي اختبار. **نبدأ هنا**: unit للنماذج (Store/MenuItem/Order/FeatureFlags/
-Story.fromDoc + dietary/stageMins) + منطق السلة/التسعير + widget لـ checkout
-وفلتر الحِمية. الهدف ≥70% على المسارات المالية.
+### 1) اختبارات Flutter — ✅ بدأت (21 اختبارًا الآن)
+- **dyar_core (16)**: Store/MenuItem/AppUser/FeatureFlags/DyarStory.fromDoc
+  + getters (isHalal/lat/lng/minQty/merchant/points/cover) + geo + dietary.
+- **تطبيق الزبون (5)**: منطق السلة والتسعير (CartLine/CartState).
+- مُزيّف خفيف لـ DocumentSnapshot (`test/fake_doc.dart`) بلا حِزم mock.
+- **التالي**: widget tests لـ checkout/dietary filter + اختبار driver/partner.
 
 ### 2) ميزات مصمّمة تنتظر الكود (مرتّبة بالقيمة السوقية)
 - **ديار Meals** (بدل وجبات الشركات 10bis/Cibus) — أكبر رافعة بالسوق
