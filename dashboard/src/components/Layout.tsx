@@ -4,6 +4,7 @@ import {
   Store, Bike, Users, BadgePercent, Wallet, Briefcase, Headset, Settings,
   Moon, Sun, LogOut, Globe, ShieldCheck, Building2, StickyNote, ScrollText,
   GraduationCap, Image, ShoppingBag, Megaphone, Ban, BarChart3, ToggleRight, Radar, Clapperboard,
+  FileText,
 } from 'lucide-react';
 import { where } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
@@ -29,6 +30,7 @@ const NAV = [
   { to: '/support', key: 'support', icon: Headset },
   { to: '/cities', key: 'city', icon: Building2 },
   { to: '/companies', key: 'companies', icon: Building2 },
+  { to: '/rfqs', key: 'rfqs', icon: FileText },
   { to: '/notes', key: 'notes', icon: StickyNote },
   { to: '/banners', key: 'banners', icon: Image },
   { to: '/stories', key: 'stories', icon: Clapperboard },
