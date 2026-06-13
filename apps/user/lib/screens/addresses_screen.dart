@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dyar_core/dyar_core.dart';
 import 'package:dyar_ui/dyar_ui.dart';
 
+import 'pin_picker_screen.dart';
+
 /// عناويني: عرض/إضافة/حذف — مربوطة بـ users/{uid}.addresses.
 class AddressesScreen extends ConsumerWidget {
   const AddressesScreen({super.key});
@@ -12,28 +14,52 @@ class AddressesScreen extends ConsumerWidget {
     final s = ref.read(stringsProvider);
     final label = TextEditingController();
     final line = TextEditingController();
+    double? lat, lng; // إحداثيات دقيقة من منتقي الخريطة
     final ok = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(s('addAddress')),
-        content: Column(mainAxisSize: MainAxisSize.min, children: [
-          TextField(controller: label,
-              decoration: InputDecoration(labelText: s('name'))),
-          const SizedBox(height: 8),
-          TextField(controller: line,
-              decoration: InputDecoration(labelText: s('dropoffLocation'))),
-        ]),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false),
-              child: Text(s('cancel'))),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true),
-              child: Text(s('save'))),
-        ],
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setLocal) => AlertDialog(
+          title: Text(s('addAddress')),
+          content: Column(mainAxisSize: MainAxisSize.min, children: [
+            TextField(controller: label,
+                decoration: InputDecoration(labelText: s('name'))),
+            const SizedBox(height: 8),
+            TextField(controller: line,
+                decoration: InputDecoration(labelText: s('dropoffLocation'))),
+            const SizedBox(height: 12),
+            // اختيار الموقع بدقة المتر على الخريطة
+            OutlinedButton.icon(
+              onPressed: () async {
+                final res = await Navigator.of(ctx).push<Map<String, dynamic>>(
+                  MaterialPageRoute(builder: (_) => const PinPickerScreen()),
+                );
+                if (res != null) {
+                  setLocal(() {
+                    lat = (res['lat'] as num?)?.toDouble();
+                    lng = (res['lng'] as num?)?.toDouble();
+                  });
+                }
+              },
+              icon: Icon(lat == null ? LucideIcons.mapPin : LucideIcons.check,
+                  size: 16, color: lat == null ? null : DyarTokens.success),
+              label: Text(lat == null
+                  ? s('pickOnMap')
+                  : '${lat!.toStringAsFixed(4)}, ${lng!.toStringAsFixed(4)}'),
+            ),
+          ]),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx, false),
+                child: Text(s('cancel'))),
+            FilledButton(onPressed: () => Navigator.pop(ctx, true),
+                child: Text(s('save'))),
+          ],
+        ),
       ),
     );
     if (ok == true && line.text.isNotEmpty) {
       await ref.read(userServiceProvider).addAddress(uid, {
-        'label': label.text, 'line': line.text, 'lat': 0.0, 'lng': 0.0,
+        'label': label.text, 'line': line.text,
+        'lat': lat ?? 0.0, 'lng': lng ?? 0.0,
       });
     }
     label.dispose();

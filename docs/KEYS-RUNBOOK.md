@@ -53,9 +53,31 @@ firebase deploy --only functions:createEasycardPayment,functions:easycardWebhook
 (بديل/إضافي: `STRIPE_SECRET` + `STRIPE_WEBHOOK` بنفس الطريقة.)
 
 ## 4) Google Maps
-- مفتاح Android في `apps/driver/android/app/src/main/AndroidManifest.xml`
-  (meta-data `com.google.android.geo.API_KEY`).
-- مفتاح iOS في `AppDelegate`. مفتاح Web (اختياري للوحة المناطق).
+الكود جاهز بالكامل: خريطة تتبّع حية (السائق→الوجهة) في تطبيق الزبون،
+ومنتقي دبوس بدقة المتر لاختيار العنوان. حتى تُضيف المفتاح يعرض التطبيق
+بديلًا أنيقًا (إحداثيات + فتح بالملاحة الخارجية + موقع GPS الحالي) بلا تعطّل.
+
+**خطوات التفعيل (بعد الحصول على المفتاح من Google Cloud — Maps SDK for
+Android/iOS + Geocoding):**
+1. **Android** — في `apps/{user,driver}/android/app/src/main/AndroidManifest.xml`
+   داخل `<application>`:
+   ```xml
+   <meta-data android:name="com.google.android.geo.API_KEY"
+              android:value="YOUR_ANDROID_MAPS_KEY"/>
+   ```
+2. **iOS** — في `apps/{user,driver}/ios/Runner/AppDelegate.swift`:
+   ```swift
+   import GoogleMaps
+   GMSServices.provideAPIKey("YOUR_IOS_MAPS_KEY")  // قبل return
+   ```
+3. **تفعيل العرض داخل التطبيق** عبر علم البناء:
+   ```bash
+   flutter build apk   --dart-define=DYAR_MAPS=true   # وكذلك ipa
+   flutter run         --dart-define=DYAR_MAPS=true
+   ```
+   (العلم `kMapsEnabled` في `dyar_core/utils/links.dart` — الافتراضي false
+   ليبقى البناء آمنًا قبل ضبط المفتاح الأصلي.)
+- مفتاح Web (اختياري للوحة المناطق/التغطية).
 
 ## 5) البريد (اختياري لكنه جاهز)
 ثبّت Firebase Extension **Trigger Email** على مجموعة `mail` بحساب SMTP —

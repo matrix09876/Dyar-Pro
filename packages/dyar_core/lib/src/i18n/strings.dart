@@ -231,6 +231,12 @@ class S {
     'aiAddAndContinue': ['أضف للسلة وتابع', 'הוסף לעגלה והמשך', 'Add to cart & continue'],
     'aiTryAgain': ['جرّب طلبًا آخر', 'נסה בקשה אחרת', 'Try another request'],
     'estimatedTotal': ['الإجمالي التقريبي', 'סכום משוער', 'Estimated total'],
+    // الخرائط واختيار الموقع بدقة
+    'openInMaps': ['افتح بالملاحة', 'פתח בניווט', 'Open in navigation'],
+    'pickOnMap': ['حدّد على الخريطة', 'בחר על המפה', 'Pick on map'],
+    'confirmLocation': ['تأكيد الموقع', 'אישור מיקום', 'Confirm location'],
+    'useCurrentLocation': ['موقعي الحالي', 'המיקום שלי', 'My current location'],
+    'dragToAdjust': ['حرّك الخريطة لضبط الدبوس بدقة', 'הזז את המפה לדיוק', 'Drag the map to fine-tune the pin'],
     'talkToTalya': ['🎙️ مكالمة مع تاليا — خدمة العملاء', '🎙️ שיחה עם טליה — שירות לקוחות', '🎙️ Call Talya — customer care'],
     'nearestFirst': ['الأقرب أولًا 📍', 'הקרוב ביותר 📍', 'Nearest first 📍'],
     'topRated': ['الأعلى تقييمًا ⭐', 'המדורגים ביותר ⭐', 'Top rated ⭐'],

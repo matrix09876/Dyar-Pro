@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dyar_core/dyar_core.dart';
 import 'package:dyar_ui/dyar_ui.dart';
 
+import '../widgets/live_map.dart';
+
 /// تتبع الطلب الحي: خط زمني للمراحل يتحدث لحظيًا + تقييم بعد التسليم.
 class TrackingScreen extends ConsumerWidget {
   const TrackingScreen({super.key, required this.orderId});
@@ -115,6 +117,13 @@ class TrackingScreen extends ConsumerWidget {
                   !order.status.isTerminal &&
                   idx >= 3) ...[
                 const SizedBox(height: 16),
+                // خريطة حية: السائق يتحرك نحو وجهة التسليم
+                LiveTrackingMap(
+                  destLat: (order.address?['lat'] as num?)?.toDouble() ?? 0,
+                  destLng: (order.address?['lng'] as num?)?.toDouble() ?? 0,
+                  driverUid: order.driverUid,
+                ),
+                const SizedBox(height: 12),
                 StreamBuilder<Map<String, dynamic>?>(
                   stream: ref
                       .read(trackingServiceProvider)

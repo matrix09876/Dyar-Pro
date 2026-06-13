@@ -2,6 +2,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import '../models/driver_profile.dart';
 
+/// موقع حي للسائق — يُبث من تطبيق السائق ويُقرأ في خريطة تتبّع الزبون.
+class DriverLocation {
+  final double lat;
+  final double lng;
+  final double heading;
+  const DriverLocation({required this.lat, required this.lng, this.heading = 0});
+}
+
 class DriverService {
   DriverService({FirebaseFirestore? db}) : _db = db ?? FirebaseFirestore.instance;
   final FirebaseFirestore _db;
@@ -12,6 +20,18 @@ class DriverService {
   Stream<DriverProfile?> watchProfile(String uid) => _doc(uid)
       .snapshots()
       .map((d) => d.exists ? DriverProfile.fromDoc(d) : null);
+
+  /// بثّ موقع السائق الحي (للخريطة في تطبيق الزبون أثناء التتبّع).
+  Stream<DriverLocation?> watchLocation(String uid) =>
+      _doc(uid).snapshots().map((d) {
+        final l = d.data()?['currentLocation'] as Map<String, dynamic>?;
+        if (l == null || l['lat'] == null || l['lng'] == null) return null;
+        return DriverLocation(
+          lat: (l['lat'] as num).toDouble(),
+          lng: (l['lng'] as num).toDouble(),
+          heading: ((l['heading'] ?? 0) as num).toDouble(),
+        );
+      });
 
   /// تسجيل سائق جديد (يبدأ pending حتى توافق الإدارة على الوثائق)
   Future<void> register(String uid, {required String vehicleType, String? plate}) =>
