@@ -22,6 +22,16 @@ class _ParcelScreenState extends ConsumerState<ParcelScreen> {
   String? _otp;
   int? _total;
 
+  @override
+  void dispose() {
+    _senderName.dispose();
+    _senderPhone.dispose();
+    _recipName.dispose();
+    _recipPhone.dispose();
+    _weight.dispose();
+    super.dispose();
+  }
+
   Future<void> _send() async {
     final s = ref.read(stringsProvider);
     setState(() => _busy = true);

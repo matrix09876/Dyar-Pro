@@ -196,7 +196,9 @@ class _Header extends ConsumerWidget {
         SizedBox(
           height: 240, width: double.infinity,
           child: store?.coverUrl != null
-              ? CachedNetworkImage(imageUrl: store!.coverUrl!, fit: BoxFit.cover)
+              ? CachedNetworkImage(
+                  imageUrl: store!.coverUrl!, fit: BoxFit.cover,
+                  memCacheWidth: 1080) // غلاف بعرض الشاشة
               : Container(color: brand.accentSoft),
         ),
         Container(

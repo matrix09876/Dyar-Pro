@@ -657,7 +657,9 @@ class _StoreCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final s = ref.watch(stringsProvider);
-    return GestureDetector(
+    // RepaintBoundary: تعزل إعادة رسم البطاقة أثناء تمرير القائمة الطويلة
+    return RepaintBoundary(
+      child: GestureDetector(
       onTap: store.isOpen
           ? () => Navigator.of(context).push(MaterialPageRoute(
               builder: (_) => StoreScreen(storeId: store.id)))
@@ -681,7 +683,9 @@ class _StoreCard extends ConsumerWidget {
               SizedBox(
                 height: 150, width: double.infinity,
                 child: store.coverUrl != null
-                    ? CachedNetworkImage(imageUrl: store.coverUrl!, fit: BoxFit.cover)
+                    ? CachedNetworkImage(
+                        imageUrl: store.coverUrl!, fit: BoxFit.cover,
+                        memCacheWidth: 800) // غلاف بطاقة ~358px → كفاية 2x DPR
                     : Container(
                         decoration: const BoxDecoration(
                           gradient: LinearGradient(colors: [
@@ -838,6 +842,7 @@ class _StoreCard extends ConsumerWidget {
           ],
         ),
       ),
+    ),
     );
   }
 }

@@ -18,6 +18,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool _busy = false;
   String? _error;
 
+  @override
+  void dispose() {
+    _phone.dispose();
+    _code.dispose();
+    super.dispose();
+  }
+
   Future<void> _send() async {
     final s = ref.read(stringsProvider);
     setState(() { _busy = true; _error = null; });

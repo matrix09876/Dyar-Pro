@@ -25,6 +25,13 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
     'أحتاج موظف دعم 🧑‍💼',
   ];
 
+  @override
+  void dispose() {
+    _input.dispose();
+    _scroll.dispose();
+    super.dispose();
+  }
+
   Future<void> _send([String? preset]) async {
     final uid = FirebaseAuth.instance.currentUser!.uid;
     final text = (preset ?? _input.text).trim();

@@ -107,9 +107,9 @@ class _InstantPayoutState extends ConsumerState<_InstantPayout> {
         ],
       ),
     );
-    if (ok != true) return;
     final amount = ((double.tryParse(ctrl.text) ?? 0) * 100).round();
-    if (amount <= 0) return;
+    ctrl.dispose();
+    if (ok != true || amount <= 0) return;
     setState(() => _busy = true);
     try {
       await ref.read(driverServiceProvider).requestPayout(amount);

@@ -18,6 +18,12 @@ class _ActiveParcelScreenState extends ConsumerState<ActiveParcelScreen> {
   final _otp = TextEditingController();
   bool _busy = false;
 
+  @override
+  void dispose() {
+    _otp.dispose();
+    super.dispose();
+  }
+
   Future<void> _do(Future<void> Function() op) async {
     final s = ref.read(stringsProvider);
     setState(() => _busy = true);

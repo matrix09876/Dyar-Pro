@@ -36,6 +36,8 @@ class AddressesScreen extends ConsumerWidget {
         'label': label.text, 'line': line.text, 'lat': 0.0, 'lng': 0.0,
       });
     }
+    label.dispose();
+    line.dispose();
   }
 
   @override

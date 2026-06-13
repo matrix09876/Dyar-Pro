@@ -18,6 +18,13 @@ class _PartnerLoginScreenState extends ConsumerState<PartnerLoginScreen> {
   bool _busy = false;
   String? _error;
 
+  @override
+  void dispose() {
+    _email.dispose();
+    _password.dispose();
+    super.dispose();
+  }
+
   Future<void> _login() async {
     final s = ref.read(stringsProvider);
     setState(() { _busy = true; _error = null; });

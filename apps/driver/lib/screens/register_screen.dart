@@ -21,6 +21,14 @@ class _DriverRegisterScreenState extends ConsumerState<DriverRegisterScreen> {
   final _idNumber = TextEditingController();
   bool _busy = false;
 
+  @override
+  void dispose() {
+    _plate.dispose();
+    _license.dispose();
+    _idNumber.dispose();
+    super.dispose();
+  }
+
   Future<void> _submit() async {
     final uid = FirebaseAuth.instance.currentUser!.uid;
     setState(() => _busy = true);

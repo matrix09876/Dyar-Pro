@@ -41,6 +41,13 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     }
   }
 
+  @override
+  void dispose() {
+    _promo.dispose();
+    _notes.dispose();
+    super.dispose();
+  }
+
   Future<void> _loadDefaultAddress() async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) return;
