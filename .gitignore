@@ -19,3 +19,7 @@ backend/functions/lib/
 
 # لقطات شاشة عابرة في الجذر (تُولّد للفحص فقط)
 /*.png
+
+# Flutter build artifacts
+**/build/
+**/.dart_tool/
