@@ -16,3 +16,6 @@ backend/functions/lib/
 .firebase/
 .claude/worktrees/
 *.tsbuildinfo
+
+# لقطات شاشة عابرة في الجذر (تُولّد للفحص فقط)
+/*.png
