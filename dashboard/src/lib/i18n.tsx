@@ -34,6 +34,7 @@ export const T: Dict = {
   rfqStatus_accepted:{ ar: 'مقبول', he: 'אושר', en: 'Accepted' },
   rfqStatus_declined:{ ar: 'مرفوض', he: 'נדחה', en: 'Declined' },
   rfqStatus_expired: { ar: 'منتهٍ', he: 'פג תוקף', en: 'Expired' },
+  workHours:    { ar: 'ساعات العمل', he: 'שעות פעילות', en: 'Work hours' },
   companiesHint:{ ar: 'ديار Meals — ميزانية وجبات للموظفين تُصرف داخل ديار (نمط 10bis/Cibus)', he: 'דיאר Meals — תקציב ארוחות לעובדים', en: 'Dyar Meals — employee meal budgets spent inside Dyar' },
   addCompany:   { ar: 'إضافة شركة', he: 'הוספת חברה', en: 'Add company' },
   mealBudget:   { ar: 'ميزانية الوجبة', he: 'תקציב ארוחה', en: 'Meal budget' },
