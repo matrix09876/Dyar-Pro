@@ -241,6 +241,48 @@ export const updateOrderStatus = onCall(async (req) => {
       },
     }, { merge: true });
 
+    // ⏱️ توقيت كل مرحلة من الخط الزمني + تعلّم AI-lite (EMA 80/20) حسب
+    // المتجر/السائق/نوع الطلب — أساس التتبع الحي والتحسين المستمر.
+    const tl = (after.timeline ?? []) as Array<{ status: string; at?: Timestamp }>;
+    const atOf = (s: string) => tl.find((x) => x.status === s)?.at?.toMillis();
+    const t0 = after.createdAt.toMillis();
+    const span = (a?: number, b?: number) =>
+      a != null && b != null && b >= a ? Math.round((b - a) / 60_000) : null;
+    const tAcc = atOf('accepted');
+    const tReady = atOf('ready');
+    const tPick = atOf('picked_up') ?? atOf('on_the_way');
+    const tDel = atOf('delivered') ?? Date.now();
+    const stageMins = {
+      accept: span(t0, tAcc),    // الطلب → قبول المتجر
+      prep: span(tAcc, tReady),  // قبول → جاهز للاستلام
+      pickup: span(tReady, tPick), // جاهز → استلام السائق
+      deliver: span(tPick, tDel), // استلام → تسليم الزبون
+      total: actualMins,
+    };
+    await ref.update({ stageMins });
+
+    // EMA لكل مرحلة على وثيقة — يتجاهل المراحل المفقودة (null)
+    const ema = (prev: number | undefined, v: number) =>
+      Math.round((prev ?? v) * 0.8 + v * 0.2);
+    const stageStatsUpdate = (prev: Record<string, number> | undefined) => {
+      const out: Record<string, number> = { ...(prev ?? {}) };
+      for (const k of ['accept', 'prep', 'pickup', 'deliver', 'total'] as const) {
+        const v = stageMins[k];
+        if (v != null) out[k] = ema(prev?.[k], v);
+      }
+      out.count = (prev?.count ?? 0) + 1;
+      return out;
+    };
+    // تعلّم المتجر (مراحل التحضير) + نوع الطلب (تعلّم حسب النوع)
+    await stRef.set({ stageStats: stageStatsUpdate(st?.stageStats) }, { merge: true });
+    const typeRef = db().doc(`learning/byType_${after.type ?? 'order'}`);
+    const typePrev = (await typeRef.get()).data()?.stageStats;
+    await typeRef.set({
+      type: after.type ?? 'order',
+      stageStats: stageStatsUpdate(typePrev),
+      updatedAt: FieldValue.serverTimestamp(),
+    }, { merge: true });
+
     // 🎁 نظام النقاط (config/loyalty): نقاط ولاء للزبون عند كل تسليم
     const loyalty = (await db().doc('config/loyalty').get()).data();
     if (loyalty?.enabled) {
@@ -262,6 +304,13 @@ export const updateOrderStatus = onCall(async (req) => {
           avgDeliveryMins: Math.round(dAvg * 0.8 + actualMins * 0.2),
           deliveries: (dr?.stats?.deliveries ?? 0) + 1,
           deliveredCount,
+          // متوسطات متحركة لمرحلتي السائق (الاستلام والتوصيل) — هوية أدائه
+          ...(stageMins.pickup != null
+            ? { avgPickupMins: ema(dr?.stats?.avgPickupMins, stageMins.pickup) }
+            : {}),
+          ...(stageMins.deliver != null
+            ? { avgDeliverMins: ema(dr?.stats?.avgDeliverMins, stageMins.deliver) }
+            : {}),
         },
       }, { merge: true });
 

@@ -183,6 +183,12 @@ service cloud.firestore {
       allow write: if false; // Admin SDK فقط
     }
 
+    // ---- learning (تعلّم AI لتوقيت المراحل حسب النوع) — اللوحة تقرأ، الخادم يكتب ----
+    match /learning/{id} {
+      allow read: if isBackoffice();
+      allow write: if false; // Cloud Functions فقط
+    }
+
     // ---- notifications ----
     match /notifications/{id} {
       allow read: if isOwner(resource.data.uid) || isAdmin();

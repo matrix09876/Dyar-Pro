@@ -85,6 +85,8 @@ export interface Order {
   payment: { method: string; status: string };
   timeline?: { status: OrderStatus; at: Timestamp; by: string }[];
   etaMins?: number;
+  /** توقيت كل مرحلة بالدقائق (يُحسب عند التسليم) — قبول/تحضير/استلام/توصيل */
+  stageMins?: { accept?: number; prep?: number; pickup?: number; deliver?: number; total?: number };
   address?: { line?: string; notes?: string };
   createdAt?: Timestamp;
 }

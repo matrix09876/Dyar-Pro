@@ -82,13 +82,14 @@ class DyarOrder {
   final Map<String, dynamic>? address;
   final DateTime? createdAt;
   final int? etaMins; // ETA متعلَّم من الخادم
+  final Map<String, dynamic>? stageMins; // توقيت المراحل (accept/prep/pickup/deliver/total)
 
   const DyarOrder({
     required this.id, required this.code, required this.customerUid,
     required this.storeId, this.driverUid, required this.items,
     required this.status, required this.type, required this.pricing,
     required this.paymentMethod, required this.paymentStatus,
-    this.address, this.createdAt, this.etaMins,
+    this.address, this.createdAt, this.etaMins, this.stageMins,
   });
 
   factory DyarOrder.fromDoc(DocumentSnapshot<Map<String, dynamic>> doc) {
@@ -113,6 +114,9 @@ class DyarOrder {
           : Map<String, dynamic>.from(d['address']),
       createdAt: (d['createdAt'] as Timestamp?)?.toDate(),
       etaMins: d['etaMins'] as int?,
+      stageMins: d['stageMins'] == null
+          ? null
+          : Map<String, dynamic>.from(d['stageMins']),
     );
   }
 }

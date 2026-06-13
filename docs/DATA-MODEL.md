@@ -551,3 +551,11 @@ byRegion: { <cityId>: { <featureKey>: boolean } }   // تجاوز للمنطقة
 التطبيقات عبر `featureFlagsProvider` (dyar_core) وتدمجها مع رؤية المدينة
 (CityConfig). تُدار من صفحة **الميزات** باللوحة. المفاتيح المعروفة في
 `kFeatureKeysByAudience`.
+
+### تتبّع المراحل والتعلّم (Live tracking + AI-lite)
+- `orders/{id}.stageMins` = `{ accept, prep, pickup, deliver, total }` —
+  دقائق كل مرحلة، تُحسب من الخط الزمني عند التسليم (تظهر في درج الطلب باللوحة).
+- `stores/{id}.stageStats` و`drivers/{id}.stats.avgPickupMins/avgDeliverMins` —
+  متوسطات متحركة EMA (80/20) = هوية أداء المتجر/السائق.
+- `learning/byType_{type}` = `{ type, stageStats:{accept,prep,pickup,deliver,total,count} }`
+  — تعلّم التوقيت حسب نوع الطلب. تقرأها اللوحة (backoffice) فقط؛ الكتابة Functions.

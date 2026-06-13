@@ -155,6 +155,21 @@ export default function Orders() {
                   {selected.address.notes ? ` · 📝 ${selected.address.notes}` : ''}
                 </p>
               )}
+              {/* ⏱️ توقيت كل مرحلة (يُحسب عند التسليم) — تتبّع وتعلّم */}
+              {selected.stageMins && (
+                <div className="mt-3 flex flex-wrap gap-1.5">
+                  {([
+                    ['accept', 'قبول'], ['prep', 'تحضير'],
+                    ['pickup', 'استلام'], ['deliver', 'توصيل'], ['total', 'الكل'],
+                  ] as const).map(([k, lbl]) =>
+                    selected.stageMins?.[k] != null ? (
+                      <span key={k} className={`badge !text-xs ${k === 'total' ? 'bg-brand-100 text-brand-700' : 'bg-gray-100 text-gray-600'}`}>
+                        {lbl} {selected.stageMins[k]}د
+                      </span>
+                    ) : null,
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="card !shadow-none p-4 mb-4 space-y-2">
