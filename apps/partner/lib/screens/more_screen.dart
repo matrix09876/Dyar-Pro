@@ -8,6 +8,7 @@ import 'hours_screen.dart';
 import 'promotions_screen.dart';
 import 'balance_screen.dart';
 import 'meal_pos_screen.dart';
+import 'rfq_inbox_screen.dart';
 
 /// "المزيد": تقييم المتجر + اللغة + الوضع الليلي + الخروج.
 /// (مواعيد العمل، مناطق التوصيل، الطابعة... تُضاف تباعًا بنفس النمط.)
@@ -84,6 +85,19 @@ class MoreScreen extends ConsumerWidget {
             ]),
           ),
           const SizedBox(height: 10),
+          // ديار B2B — صندوق طلبات عرض السعر الواردة (موردو الجملة)
+          if (store.type == 'wholesale')
+            DyarCard(
+              onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) => RfqInboxScreen(storeId: store.id))),
+              child: Row(children: [
+                const Icon(LucideIcons.fileText, color: DyarTokens.brand),
+                const SizedBox(width: 10),
+                Expanded(child: Text(s('rfqInbox'))),
+                const Icon(Icons.chevron_left, color: DyarTokens.inkMuted),
+              ]),
+            ),
+          if (store.type == 'wholesale') const SizedBox(height: 10),
         ],
         DyarCard(
           child: Column(

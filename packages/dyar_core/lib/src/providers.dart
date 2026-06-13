@@ -21,6 +21,7 @@ import 'services/sfx_service.dart';
 import 'services/market_service.dart';
 import 'services/job_service.dart';
 import 'services/ai_service.dart';
+import 'services/b2b_service.dart';
 
 /// مزوّدات Riverpod المشتركة بين التطبيقات الثلاثة.
 
@@ -39,6 +40,7 @@ final sfxServiceProvider = Provider((_) => SfxService());
 final marketServiceProvider = Provider((_) => MarketService());
 final jobServiceProvider = Provider((_) => JobService());
 final aiServiceProvider = Provider((_) => AiService());
+final b2bServiceProvider = Provider((_) => B2bService());
 
 final authStateProvider = StreamProvider<User?>(
     (ref) => ref.watch(authServiceProvider).authState);

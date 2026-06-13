@@ -9,6 +9,7 @@ import 'login_screen.dart';
 import 'addresses_screen.dart';
 import 'bookings_screen.dart';
 import 'notifications_screen.dart';
+import 'rfq_screen.dart';
 
 /// حسابي: المحفظة، العناوين، الإشعارات، اللغة (3 لغات)، الوضع الليلي،
 /// ادعُ واربح (رمز مشاركة)، استرداد بطاقة هدية، الخروج — كلها مربوطة.
@@ -155,6 +156,16 @@ class UserProfileScreen extends ConsumerWidget {
                   builder: (_) => const MyBookingsScreen())),
             ),
             const SizedBox(height: 10),
+            // ديار B2B — طلبات عرض السعر (لحسابات التجار فقط)
+            if (ref.watch(appUserProvider).value?.merchant == true) ...[
+              _Tile(
+                icon: LucideIcons.fileText,
+                label: s('myRfqs'),
+                onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => const RfqScreen())),
+              ),
+              const SizedBox(height: 10),
+            ],
             // مكالمة حية مع تاليا — وكيلة خدمة العملاء الصوتية
             _Tile(
               icon: LucideIcons.headphones,

@@ -38,6 +38,7 @@ await env.withSecurityRulesDisabled(async (ctx) => {
   await setDoc(doc(db, 'mealAccounts/alice'), { orgId: 'org1', balance: 2500 });
   await setDoc(doc(db, 'stories/st1'), { title: 'x', active: true });
   await setDoc(doc(db, 'posCodes/123456'), { uid: 'alice', orgId: 'org1', status: 'active' });
+  await setDoc(doc(db, 'rfqs/rfq1'), { merchantUid: 'alice', storeId: 's1', productName: 'دقيق', qty: 100, status: 'open' });
   await setDoc(doc(db, 'orders/o1'), {
     customerUid: 'alice', storeId: 's1', status: 'pending',
     payment: { method: 'cash', status: 'pending' },
@@ -130,6 +131,20 @@ await t('لا أحد يكتب/يزوّر رمز POS من العميل', () =>
 await t('التاجر لا يصرف رمز POS بالكتابة المباشرة', () =>
   assertFails(updateDoc(doc(as('p1', 'partner'), 'posCodes/123456'),
     { status: 'used' })));
+
+// ---- ديار B2B: طلبات عرض السعر (RFQ) ----
+await t('التاجر صاحب الطلب يقرأ RFQ', () =>
+  assertSucceeds(getDoc(doc(as('alice', 'customer'), 'rfqs/rfq1'))));
+await t('المورد (صاحب متجر الجملة) يقرأ RFQ المستهدف', () =>
+  assertSucceeds(getDoc(doc(as('p1', 'partner'), 'rfqs/rfq1'))));
+await t('طرف ثالث لا يقرأ RFQ غيره', () =>
+  assertFails(getDoc(doc(as('bob', 'customer'), 'rfqs/rfq1'))));
+await t('لا أحد يكتب RFQ من العميل (Functions فقط)', () =>
+  assertFails(setDoc(doc(as('alice', 'customer'), 'rfqs/x'),
+    { merchantUid: 'alice', storeId: 's1', status: 'open' })));
+await t('المورد لا يكتب عرضًا بالكتابة المباشرة (Functions فقط)', () =>
+  assertFails(updateDoc(doc(as('p1', 'partner'), 'rfqs/rfq1'),
+    { status: 'quoted' })));
 
 // ---- دور خدمة العملاء (staff + perms) ----
 await t('موظف خدمة العملاء يقرأ تذاكر الدعم', () =>

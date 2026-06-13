@@ -6,6 +6,7 @@ import 'package:dyar_ui/dyar_ui.dart';
 
 import 'home_screen.dart' show approvedStoresProvider;
 import 'store_screen.dart';
+import 'rfq_screen.dart';
 
 /// فئة تجار الجملة B2B — تظهر فقط لحسابات التجار (users.merchant من
 /// اللوحة). متاجر type=='wholesale' بأسعار جملة وحد أدنى للكميات.
@@ -138,6 +139,25 @@ class WholesaleScreen extends ConsumerWidget {
                                       fontSize: 10.5,
                                       fontWeight: FontWeight.w800,
                                       color: Color(0xFF1D4ED8))),
+                            ),
+                            const SizedBox(height: 8),
+                            // طلب عرض سعر — يفتح RFQ لهذا المورد
+                            SizedBox(
+                              height: 32,
+                              child: OutlinedButton.icon(
+                                style: OutlinedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 12),
+                                    visualDensity: VisualDensity.compact),
+                                onPressed: () =>
+                                    Navigator.of(context).push(MaterialPageRoute(
+                                        builder: (_) => RfqScreen(
+                                            storeId: st.id,
+                                            storeName: st.name))),
+                                icon: const Icon(LucideIcons.fileText, size: 14),
+                                label: Text(s('requestQuote'),
+                                    style: const TextStyle(fontSize: 11.5)),
+                              ),
                             ),
                           ],
                         ),

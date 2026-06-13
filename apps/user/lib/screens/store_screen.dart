@@ -84,6 +84,9 @@ class _StoreScreenState extends ConsumerState<StoreScreen> {
       builder: (context, storeSnap) {
         final store = storeSnap.data;
         final brand = MenuBrand.of(store?.brand);
+        // أسعار الجملة مخفية لغير التجار (B2B): يُعرض قفل + طلب عرض سعر
+        final wholesaleLocked = store?.type == 'wholesale' &&
+            ref.watch(appUserProvider).value?.merchant != true;
         return Scaffold(
           backgroundColor: brand.pageBackground,
           body: StreamBuilder<List<MenuItem>>(
@@ -161,7 +164,8 @@ class _StoreScreenState extends ConsumerState<StoreScreen> {
                                       child: _MenuTile(
                                           storeId: storeId,
                                           item: it,
-                                          brand: brand),
+                                          brand: brand,
+                                          wholesaleLocked: wholesaleLocked),
                                     ),
                                 ],
                               ],
@@ -501,10 +505,14 @@ class _InfoChip extends StatelessWidget {
 
 class _MenuTile extends ConsumerWidget {
   const _MenuTile(
-      {required this.storeId, required this.item, required this.brand});
+      {required this.storeId,
+      required this.item,
+      required this.brand,
+      this.wholesaleLocked = false});
   final String storeId;
   final MenuItem item;
   final MenuBrand brand;
+  final bool wholesaleLocked; // سعر جملة مخفي لغير التجار
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -546,17 +554,24 @@ class _MenuTile extends ConsumerWidget {
       );
     }
 
-    // السعر: شارة ملوّنة وفق القالب، أو نص عادي في الهوية الافتراضية
-    final price = Text(MoneyText.format(item.price),
-        textDirection: TextDirection.ltr,
-        style: TextStyle(
-            color: brand.priceColor,
-            fontWeight: FontWeight.w900,
-            fontSize: brand.priceBadgeBg == null ? 15 : 13.5));
+    // السعر: شارة ملوّنة وفق القالب، أو نص عادي في الهوية الافتراضية.
+    // في متاجر الجملة لغير التجار يُخفى السعر (قفل) — اطلب عرض سعر.
+    final price = wholesaleLocked
+        ? const Icon(LucideIcons.lock, size: 16, color: DyarTokens.inkMuted)
+        : Text(MoneyText.format(item.price),
+            textDirection: TextDirection.ltr,
+            style: TextStyle(
+                color: brand.priceColor,
+                fontWeight: FontWeight.w900,
+                fontSize: brand.priceBadgeBg == null ? 15 : 13.5));
 
     return GestureDetector(
-      // فتح نافذة الصنف بخياراته (نمط Wolt) — النقر على البطاقة كاملة
-      onTap: () => showItemSheet(context, ref, storeId, item, brand: brand),
+      // فتح نافذة الصنف بخياراته (نمط Wolt) — النقر على البطاقة كاملة.
+      // في الجملة لغير التاجر: لا سلة مباشرة — وجّهه لطلب عرض سعر.
+      onTap: () => wholesaleLocked
+          ? ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(s('b2bMerchantOnly'))))
+          : showItemSheet(context, ref, storeId, item, brand: brand),
       child: Container(
         decoration: BoxDecoration(
           color: brand.cardColor,

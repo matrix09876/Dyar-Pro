@@ -208,6 +208,16 @@ service cloud.firestore {
       allow read, write: if false; // عبر generate/redeemMealPosCode فقط
     }
 
+    // ---- ديار B2B: طلبات عرض السعر (RFQ) — الكتابة عبر Functions فقط ----
+    match /rfqs/{rfqId} {
+      // التاجر صاحب الطلب، أو مورد متجر الجملة المستهدف، أو الإدارة
+      allow read: if isBackoffice()
+        || isOwner(resource.data.merchantUid)
+        || (isPartner()
+            && get(/databases/$(database)/documents/stores/$(resource.data.storeId)).data.ownerUid == uid());
+      allow write: if false; // createRfq/quoteRfq/respondRfq عبر Functions
+    }
+
     // ---- notifications ----
     match /notifications/{id} {
       allow read: if isOwner(resource.data.uid) || isAdmin();
