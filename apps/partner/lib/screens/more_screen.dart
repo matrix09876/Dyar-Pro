@@ -7,6 +7,7 @@ import 'shell.dart';
 import 'hours_screen.dart';
 import 'promotions_screen.dart';
 import 'balance_screen.dart';
+import 'meal_pos_screen.dart';
 
 /// "المزيد": تقييم المتجر + اللغة + الوضع الليلي + الخروج.
 /// (مواعيد العمل، مناطق التوصيل، الطابعة... تُضاف تباعًا بنفس النمط.)
@@ -67,6 +68,18 @@ class MoreScreen extends ConsumerWidget {
               const Icon(LucideIcons.wallet, color: DyarTokens.brand),
               const SizedBox(width: 10),
               Expanded(child: Text(s('wallet'))),
+              const Icon(Icons.chevron_left, color: DyarTokens.inkMuted),
+            ]),
+          ),
+          const SizedBox(height: 10),
+          // ديار Meals — نقطة بيع: التاجر يصرف رمز ميزانية وجبات الزبون
+          DyarCard(
+            onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => const MealPosScreen())),
+            child: Row(children: [
+              const Text('🍱', style: TextStyle(fontSize: 20)),
+              const SizedBox(width: 10),
+              Expanded(child: Text(s('mealPos'))),
               const Icon(Icons.chevron_left, color: DyarTokens.inkMuted),
             ]),
           ),

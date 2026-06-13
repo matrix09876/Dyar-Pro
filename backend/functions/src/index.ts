@@ -12,7 +12,7 @@ export { createEasycardPayment, easycardWebhook } from './payments/easycard';
 export { speak, liveSupportUrl } from './ai/voice';
 export { hookOrderStatus, hookCreateTicket, hookRefundRequest } from './ai/supportHooks';
 export { redeemGiftCard } from './wallet/giftcards';
-export { payWithMealBudget, grantMealBudgets } from './meals/budget';
+export { payWithMealBudget, grantMealBudgets, generateMealPosCode, redeemMealPosCode } from './meals/budget';
 export { requestPayout } from './wallet/payouts';
 export { claimParcel, startParcelTransit } from './parcels/shipping';
 export { updateRideStatus } from './rides/taxi';

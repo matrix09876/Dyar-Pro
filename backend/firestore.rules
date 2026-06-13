@@ -204,6 +204,9 @@ service cloud.firestore {
       allow read: if isOwner(uid) || isBackoffice();
       allow write: if false; // grantMealBudgets/payWithMealBudget عبر Functions
     }
+    match /posCodes/{code} {
+      allow read, write: if false; // عبر generate/redeemMealPosCode فقط
+    }
 
     // ---- notifications ----
     match /notifications/{id} {

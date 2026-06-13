@@ -37,6 +37,7 @@ await env.withSecurityRulesDisabled(async (ctx) => {
   await setDoc(doc(db, 'organizations/org1'), { name: 'Acme', active: true, budget: { amount: 2500, period: 'daily' }, members: ['alice'] });
   await setDoc(doc(db, 'mealAccounts/alice'), { orgId: 'org1', balance: 2500 });
   await setDoc(doc(db, 'stories/st1'), { title: 'x', active: true });
+  await setDoc(doc(db, 'posCodes/123456'), { uid: 'alice', orgId: 'org1', status: 'active' });
   await setDoc(doc(db, 'orders/o1'), {
     customerUid: 'alice', storeId: 's1', status: 'pending',
     payment: { method: 'cash', status: 'pending' },
@@ -117,6 +118,18 @@ await t('الستوري قراءة عامة', () =>
   assertSucceeds(getDoc(doc(as('alice', 'customer'), 'stories/st1'))));
 await t('الزبون لا يكتب ستوري', () =>
   assertFails(setDoc(doc(as('alice', 'customer'), 'stories/x'), { title: 'h' })));
+
+// ---- ديار Meals: رموز POS (Functions فقط — generate/redeem) ----
+await t('الزبون لا يقرأ رمز POS (Functions فقط)', () =>
+  assertFails(getDoc(doc(as('alice', 'customer'), 'posCodes/123456'))));
+await t('التاجر لا يقرأ رمز POS مباشرة (يصرفه عبر الدالة)', () =>
+  assertFails(getDoc(doc(as('p1', 'partner'), 'posCodes/123456'))));
+await t('لا أحد يكتب/يزوّر رمز POS من العميل', () =>
+  assertFails(setDoc(doc(as('alice', 'customer'), 'posCodes/999999'),
+    { uid: 'alice', status: 'active' })));
+await t('التاجر لا يصرف رمز POS بالكتابة المباشرة', () =>
+  assertFails(updateDoc(doc(as('p1', 'partner'), 'posCodes/123456'),
+    { status: 'used' })));
 
 // ---- دور خدمة العملاء (staff + perms) ----
 await t('موظف خدمة العملاء يقرأ تذاكر الدعم', () =>

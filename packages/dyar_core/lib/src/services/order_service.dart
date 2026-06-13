@@ -62,6 +62,14 @@ class OrderService {
     return (res.data['remaining'] ?? 0) as int;
   }
 
+  /// التاجر يصرف رمز POS لميزانية الوجبات بمبلغ (أغورة) — يعيد المتبقي.
+  Future<int> redeemMealPos(String code, int amount, {String? storeId}) async {
+    final res = await _fns.httpsCallable('redeemMealPosCode').call({
+      'code': code, 'amount': amount, if (storeId != null) 'storeId': storeId,
+    });
+    return (res.data['remaining'] ?? 0) as int;
+  }
+
   Future<String> createPaymentIntent(String orderId) async {
     final res =
         await _fns.httpsCallable('createPaymentIntent').call({'orderId': orderId});

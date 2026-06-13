@@ -109,3 +109,76 @@ export const grantMealBudgets = onSchedule(
     }
   },
 );
+
+/**
+ * ديار Meals — الدفع بالمطعم (scan-to-pay، نمط 10bis):
+ * الزبون يولّد رمزًا قصيرًا (صالح دقيقتين)، والتاجر يصرفه بإدخاله + المبلغ.
+ */
+function randomCode(): string {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+/** الزبون يولّد رمز POS لميزانية وجباته (صالح 2 دقيقة). */
+export const generateMealPosCode = onCall(async (req) => {
+  const uid = req.auth?.uid;
+  if (!uid) throw new HttpsError('unauthenticated', 'login required');
+  const acc = (await db().doc(`mealAccounts/${uid}`).get()).data();
+  if (!acc || (acc.balance ?? 0) <= 0) {
+    throw new HttpsError('failed-precondition', 'no meal budget');
+  }
+  const code = randomCode();
+  await db().doc(`posCodes/${code}`).set({
+    uid, orgId: acc.orgId ?? null, status: 'active',
+    createdAt: Timestamp.now(),
+    expiresAt: Timestamp.fromMillis(Date.now() + 2 * 60_000),
+  });
+  return { code, balance: acc.balance ?? 0, expiresInSec: 120 };
+});
+
+/** التاجر يصرف رمز POS بمبلغ — يخصم من ميزانية الزبون (transaction). */
+export const redeemMealPosCode = onCall(async (req) => {
+  const merchant = req.auth?.uid;
+  const role = req.auth?.token?.role;
+  if (!merchant || (role !== 'partner' && role !== 'admin')) {
+    throw new HttpsError('permission-denied', 'merchant only');
+  }
+  const code = String(req.data?.code ?? '').trim();
+  const amount = Math.round(Number(req.data?.amount ?? 0)); // أغورة
+  const storeId = req.data?.storeId ? String(req.data.storeId) : null;
+  if (!code || amount <= 0) {
+    throw new HttpsError('invalid-argument', 'code and amount required');
+  }
+
+  const result = await db().runTransaction(async (tx) => {
+    const cRef = db().doc(`posCodes/${code}`);
+    const cSnap = await tx.get(cRef);
+    if (!cSnap.exists) throw new HttpsError('not-found', 'invalid code');
+    const c = cSnap.data()!;
+    if (c.status !== 'active') throw new HttpsError('failed-precondition', 'code used');
+    if ((c.expiresAt as Timestamp).toMillis() < Date.now()) {
+      throw new HttpsError('failed-precondition', 'code expired');
+    }
+    const aRef = db().doc(`mealAccounts/${c.uid}`);
+    const aSnap = await tx.get(aRef);
+    const balance = (aSnap.data()?.balance ?? 0) as number;
+    if (balance < amount) throw new HttpsError('failed-precondition', 'insufficient budget');
+
+    tx.update(aRef, {
+      balance: FieldValue.increment(-amount),
+      ledger: FieldValue.arrayUnion({ posCode: code, amount: -amount, storeId, at: Timestamp.now() }),
+    });
+    tx.update(cRef, { status: 'used', usedBy: merchant, amount, usedAt: Timestamp.now() });
+    tx.set(db().collection('transactions').doc(), {
+      uid: c.uid, type: 'meal_pos', amount, gateway: 'meal_budget',
+      meta: { orgId: c.orgId ?? null, storeId, merchant }, createdAt: Timestamp.now(),
+    });
+    return { uid: c.uid, remaining: balance - amount };
+  });
+
+  await logAction({
+    category: 'business',
+    action: `meal POS redeemed (-${(amount / 100).toFixed(2)}) by ${merchant}`,
+    by: merchant,
+  });
+  return { ok: true, ...result };
+});
