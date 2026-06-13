@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'i18n/strings.dart';
 import 'models/app_user.dart';
+import 'models/feature_flags.dart';
 import 'services/auth_service.dart';
 import 'services/order_service.dart';
 import 'services/store_service.dart';
@@ -96,4 +97,11 @@ final cityConfigProvider = StreamProvider<CityConfig>((ref) async* {
         if (e.value is bool) e.key.toString(): e.value as bool,
     });
   });
+});
+
+/// مفاتيح ميزات ديار العالمية — `config/features` (تديرها اللوحة).
+/// الأقسام تستعملها لإظهار/إخفاء الميزات. الافتراضي: ظاهرة.
+final featureFlagsProvider = StreamProvider<FeatureFlags>((ref) {
+  return FirebaseFirestore.instance.doc('config/features').snapshots().map(
+      (d) => d.exists ? FeatureFlags.fromDoc(d) : FeatureFlags.empty);
 });

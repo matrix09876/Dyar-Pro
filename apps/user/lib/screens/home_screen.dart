@@ -52,6 +52,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     // قواعد الرؤية لكل مدينة (cities.categories من اللوحة) — افتراضي آمن:
     // كل شيء ظاهر إن لم تُضبط الوثيقة.
     final city = ref.watch(cityConfigProvider).value ?? const CityConfig({});
+    // مفاتيح الميزات العالمية من اللوحة (config/features) — تُدمج مع رؤية المدينة
+    final flags = ref.watch(featureFlagsProvider).value ?? FeatureFlags.empty;
+    // الظهور = ظاهر بالمدينة (CityConfig) ومُفعّل عالميًا (FeatureFlags)
+    bool vis(String k) => city.shows(k) && flags.on(k);
     // حساب تاجر B2B؟ تظهر له فئة تجار الجملة (تفعّلها الإدارة من اللوحة)
     final isMerchant = ref.watch(appUserProvider).value?.merchant == true;
     final storesAsync = ref.watch(approvedStoresProvider(_type));
@@ -239,26 +243,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   _ServiceTile(null, s('home'), LucideIcons.layoutGrid,
                       const [Color(0xFFF4691E), Color(0xFFBA3A11)],
                       _type, _select),
-                  if (city.shows('restaurants'))
+                  if (vis('restaurants'))
                     _ServiceTile('restaurant', s('restaurants'),
                         LucideIcons.utensils,
                         const [Color(0xFFEF4444), Color(0xFF991B1B)],
                         _type, _select),
-                  if (city.shows('groceries'))
+                  if (vis('groceries'))
                     _ServiceTile('grocery', s('groceries'),
                         LucideIcons.shoppingBag,
                         const [Color(0xFF22C55E), Color(0xFF15803D)],
                         _type, _select),
-                  if (city.shows('pharmacies'))
+                  if (vis('pharmacies'))
                     _ServiceTile('pharmacy', s('pharmacies'),
                         LucideIcons.pill,
                         const [Color(0xFF06B6D4), Color(0xFF0E7490)],
                         _type, _select),
-                  if (city.shows('flowers'))
+                  if (vis('flowers'))
                     _ServiceTile('flowers', s('flowers'), LucideIcons.flower2,
                         const [Color(0xFFEC4899), Color(0xFF9D174D)],
                         _type, _select),
-                  if (city.shows('services'))
+                  if (vis('services'))
                     // بلاطة "خدمات" تفتح شاشة مهن مقدمي الخدمات
                     _ServiceTile('service', s('services'), LucideIcons.wrench,
                         const [Color(0xFF8B5CF6), Color(0xFF5B21B6)],
@@ -272,17 +276,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           const SliverToBoxAdapter(child: SizedBox(height: 18)),
 
           // ===== تاكسي + طرود + بيع وشراء (حسب رؤية المدينة) =====
-          if (city.shows('taxi') ||
-              city.shows('parcel') ||
-              city.shows('marketplace') ||
-              city.shows('jobs'))
+          if (vis('taxi') ||
+              vis('parcel') ||
+              vis('marketplace') ||
+              vis('jobs'))
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(children: [
-                  if (city.shows('taxi') || city.shows('parcel'))
+                  if (vis('taxi') || vis('parcel'))
                     Row(children: [
-                      if (city.shows('taxi'))
+                      if (vis('taxi'))
                         Expanded(
                           child: _ActionCard(
                             emoji: '🚕',
@@ -297,9 +301,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                     builder: (_) => const TaxiScreen())),
                           ),
                         ),
-                      if (city.shows('taxi') && city.shows('parcel'))
+                      if (vis('taxi') && vis('parcel'))
                         const SizedBox(width: 12),
-                      if (city.shows('parcel'))
+                      if (vis('parcel'))
                         Expanded(
                           child: _ActionCard(
                             emoji: '📦',
@@ -315,10 +319,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           ),
                         ),
                     ]),
-                  if ((city.shows('taxi') || city.shows('parcel')) &&
-                      city.shows('marketplace'))
+                  if ((vis('taxi') || vis('parcel')) &&
+                      vis('marketplace'))
                     const SizedBox(height: 12),
-                  if (city.shows('marketplace'))
+                  if (vis('marketplace'))
                     _ActionCard(
                       emoji: '🛍️',
                       label: s('marketplace'),
@@ -328,9 +332,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           MaterialPageRoute(
                               builder: (_) => const MarketplaceScreen())),
                     ),
-                  if (city.shows('marketplace') && city.shows('jobs'))
+                  if (vis('marketplace') && vis('jobs'))
                     const SizedBox(height: 12),
-                  if (city.shows('jobs'))
+                  if (vis('jobs'))
                     _ActionCard(
                       emoji: '💼',
                       label: s('jobsBoard'),
@@ -341,7 +345,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               builder: (_) => const JobsScreen())),
                     ),
                   // فئة B2B — لحسابات التجار فقط (users.merchant من اللوحة)
-                  if (isMerchant && city.shows('wholesale')) ...[
+                  if (isMerchant && vis('wholesale')) ...[
                     const SizedBox(height: 12),
                     _ActionCard(
                       emoji: '🏪',

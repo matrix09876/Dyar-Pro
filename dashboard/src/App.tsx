@@ -28,6 +28,7 @@ import Broadcast from './pages/Broadcast';
 import Reports from './pages/Reports';
 import BlockedAddresses from './pages/BlockedAddresses';
 import Settings from './pages/Settings';
+import Features from './pages/Features';
 import { Spinner } from './components/ui';
 
 const queryClient = new QueryClient();
@@ -70,6 +71,7 @@ export default function App() {
                 <Route path="/notes" element={<Notes />} />
                 <Route path="/logs" element={<Logs />} />
                 <Route path="/training" element={<Training />} />
+                <Route path="/features" element={<Features />} />
                 <Route path="/settings" element={<Settings />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Route>

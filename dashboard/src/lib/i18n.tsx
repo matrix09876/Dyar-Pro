@@ -31,6 +31,8 @@ export const T: Dict = {
   marketplace:  { ar: 'بيع وشراء', he: 'קנייה ומכירה', en: 'Marketplace' },
   marketplaceCommission: { ar: 'عمولة السوق %', he: 'עמלת השוק %', en: 'Market commission %' },
   settings:     { ar: 'الإعدادات', he: 'הגדרות', en: 'Settings' },
+  features:     { ar: 'الميزات', he: 'תכונות', en: 'Features' },
+  featuresHint: { ar: 'أظهر/أخفِ أي ميزة لكل جمهور — التحكم بالمنطقة من صفحة المدن', he: 'הצג/הסתר תכונות לכל קהל — שליטה לפי אזור בעמוד הערים', en: 'Show/hide features per audience — region control in Cities' },
   logout:       { ar: 'تسجيل الخروج', he: 'התנתקות', en: 'Log out' },
   hello:        { ar: 'مرحبًا،', he: 'שלום,', en: 'Hello,' },
   broadcast:    { ar: 'بث الإشعارات', he: 'שידור התראות', en: 'Broadcast' },

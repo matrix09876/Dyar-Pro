@@ -541,3 +541,13 @@ pending → accepted → preparing → ready → assigned → picked_up
 | transactions | R(own) | R(own) | R(own) | RW |
 
 التفاصيل الكاملة منفّذة في `backend/firestore.rules`.
+
+### `config/features`  (مفاتيح إظهار/إخفاء الميزات — تديرها اللوحة)
+```
+<featureKey>: boolean          // مفتاح عالمي (الافتراضي true = ظاهر)
+byRegion: { <cityId>: { <featureKey>: boolean } }   // تجاوز للمنطقة
+```
+الجمهور (user/partner/driver/service) ضمنيٌّ في مفتاح الميزة. تقرأها كل
+التطبيقات عبر `featureFlagsProvider` (dyar_core) وتدمجها مع رؤية المدينة
+(CityConfig). تُدار من صفحة **الميزات** باللوحة. المفاتيح المعروفة في
+`kFeatureKeysByAudience`.

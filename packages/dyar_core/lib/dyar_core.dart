@@ -12,6 +12,7 @@ export 'src/models/booking.dart';
 export 'src/models/market_product.dart';
 export 'src/models/job.dart';
 export 'src/models/service_category.dart';
+export 'src/models/feature_flags.dart';
 export 'src/services/auth_service.dart';
 export 'src/services/order_service.dart';
 export 'src/services/store_service.dart';

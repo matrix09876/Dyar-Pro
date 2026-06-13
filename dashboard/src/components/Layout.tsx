@@ -3,7 +3,7 @@ import {
   LayoutDashboard, ReceiptText, CarTaxiFront, Package, CalendarCheck,
   Store, Bike, Users, BadgePercent, Wallet, Briefcase, Headset, Settings,
   Moon, Sun, LogOut, Globe, ShieldCheck, Building2, StickyNote, ScrollText,
-  GraduationCap, Image, ShoppingBag, Megaphone, Ban, BarChart3,
+  GraduationCap, Image, ShoppingBag, Megaphone, Ban, BarChart3, ToggleRight,
 } from 'lucide-react';
 import { where } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
@@ -34,6 +34,7 @@ const NAV = [
   { to: '/training', key: 'training', icon: GraduationCap },
   { to: '/logs', key: 'logs', icon: ScrollText },
   { to: '/team', key: 'team', icon: ShieldCheck },
+  { to: '/features', key: 'features', icon: ToggleRight },
   { to: '/settings', key: 'settings', icon: Settings },
 ];
 
