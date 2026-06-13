@@ -1,0 +1,137 @@
+# فجوات المنافسين 2026 — ما ينقص Dyar v10 قبل الإطلاق
+
+> **الغرض**: تقرير فجوات مُركّز ومُرتّب بالأولوية، يكمّل ولا يكرّر
+> `WOLT-HAAT-DEEPDIVE.md` و`COMPETITOR-TEARDOWN.md` و`COMPETITIVE-MATRIX.md`.
+> الفجوات المغطّاة سابقًا (طلب جماعي G1، Dyar+ G2، Cibus G6، سلع رقمية G7،
+> خريطة حرارة سائق G14، سحب فوري G16، حملات تاجر self-service G10، تقارير
+> تاجر G11، استلام ذاتي Pickup، طلب كضيف، Cross-sell، GPS متعلَّم G5) **لا
+> تُعاد هنا** — هذه الوثيقة تركّز على ما لم يُرصد بعد.
+>
+> المنافسون المرجعيون لهذه الجولة: **Careem · Uber Eats / Uber One ·
+> Bolt Food / Bolt Plus · Noon Food / Noon One · Talabat / Talabat Pro ·
+> Glovo / Glovo Prime · Booking.com / Genius**. التاريخ: 2026-06-13.
+>
+> الرموز: ✅ موجود · 🔶 جزئي · ❌ غير موجود. الأولوية: **P0** معطِّل إطلاق ·
+> **P1** قوي · **P2** لطيف. — تُدرج فقط صفوف ❌ أو 🔶 (الفجوات الحقيقية).
+
+---
+
+## جدول الفجوات (فقط ما ينقصنا — ❌/🔶)
+
+| # | الميزة | من يملكها | لدى Dyar؟ | الأولوية | تصميم فقط / يحتاج كود | لماذا تهمّ للجليل |
+|---|---|---|---|---|---|---|
+| 1 | **مستويات ولاء متدرّجة** (برونزي/فضي/ذهبي بمزايا تتصاعد) | Booking Genius L1/L2/L3 · Noon VIP · Talabat Rewards | 🔶 نقاط مسطّحة بلا مستويات (`config/loyalty`) | **P1** | كود (خلفية+واجهة) | عميل الجليل يطلب متكررًا من قلة متاجر؛ التدرّج يثبّته قبل أن يجرّب Wolt/HAAT |
+| 2 | **نقاط تُكتسب على كل طلب وتُستبدل عبر كل الخدمات** | Careem Rewards (ركوب/طعام/صيدلية/شركاء) | 🔶 نقاط عند `delivered` فقط، استبدالها عبر العموديات غير معلن/موحّد | **P1** | كود | السوبر-آب يبيعه التقاطع: نقطة من تاكسي تُنفق على طعام = سبب للبقاء داخل ديار |
+| 3 | **اشتراك يجمع توصيل + ركوب/تاكسي** (مزايا متقاطعة) | Bolt Plus (€4.99: ركوب+طعام+إلغاءات) · Careem Plus (رصيد ركوب+توصيل مجاني) | 🔶 Dyar+ في المواصفة توصيل فقط (G2) | **P1** | كود | عندنا تاكسي أصلًا — ربط الاشتراك بالركوب ميزة لا يملكها Wolt/HAAT محليًا |
+| 4 | **فلتر حلال/كوشير + شارة تصديق على المتجر/الصنف** | Wolt (فلتر كوشير/نباتي) — معيار سوق إسرائيل | ❌ لا فلتر ولا شارة | **P0** | كود (حقل + فلتر + شارة) | الجليل سوق مختلط: مسلم يريد حلال، يهودي يريد كوشير — غيابها يفقد شريحتين كاملتين |
+| 5 | **ساعات واعية بالسبت/الأعياد** (إغلاق/فتح تلقائي يوم السبت ورمضان) | معيار سوق إسرائيل (متاجر كوشير تغلق السبت) | 🔶 `openingHours` موجود بلا منطق سبت/أعياد | **P1** | كود | متجر كوشير يظهر "مفتوح" السبت = طلب فاشل وغضب؛ ووعي رمضان يخدم المسلمين |
+| 6 | **فلاتر حِمية مرئية** (نباتي/فيغان/خالٍ من الغلوتين) كفلتر اكتشاف | Wolt · Uber Eats · معظم المنافسين | 🔶 ملف حساسية المستخدم موجود (تميّز) لكن لا فلتر/وسم على المتاجر والأصناف | **P1** | كود (وسم صنف + فلتر) | يحوّل تميّز الحساسية لدينا من "تحذير سلبي" إلى "اكتشاف إيجابي" |
+| 7 | **طلب بالمسح من الطاولة (QR dine-in) + ادفع/قسّم الفاتورة** | معيار 2026 (Sunday, Deliverect, Square; Glovo dine-in) | ❌ لدينا حجز طاولة فقط، لا طلب/دفع من الطاولة | **P1** | كود (مسار جديد) | مقاهي/مطاعم الجليل تمتلئ صيفًا؛ المسح يقلّل وقت الطاولة ويربط الـ dine-in بنظامنا |
+| 8 | **تقسيم الفاتورة (Split bill)** عند الدفع | معيار QR-pay 2026 · جزئي بالطلب الجماعي | 🔶 الدفع المنقسم مخطّط داخل الطلب الجماعي (G1) فقط، لا تقسيم عام | **P2** | كود | مجموعات الشباب/العائلات في الجليل تطلب جماعيًا؛ التقسيم يزيل احتكاك "من يدفع" |
+| 9 | **الدفع الآجل / التقسيط (BNPL — Tabby/Tamara نمط)** | Talabat/Careem (Tabby) في الخليج | ❌ | **P2** | كود (تكامل مزوّد) | قدرة شرائية متفاوتة في الجليل؛ التقسيط يرفع متوسط السلة للطلبات الكبيرة والحجوزات |
+| 10 | **"اطلب من أي متجر" / Shop-for-Me** (أصناف خارج الكتالوج بالوصف) | Uber Eats "Shop for Me" 2025 | 🔶 لدينا طرود (parcel) لكنها نقل أغراض، لا "اشترِ لي X غير المدرج" | **P2** | كود | يغطّي دكاكين الجليل غير المرقمنة بعد — السائق يشتري ويوصّل، توسعة تغطية بلا onboarding متجر |
+| 11 | **سلة/دفع موحّد عبر عدة متاجر** (طلب من مطعم+بقالة بدفعة واحدة) | Glovo (any store) · اتجاه السوبر-آب | ❌ سلة لكل متجر | **P2** | كود | يرفع متوسط الطلب ويستثمر تعدد عموديات ديار |
+| 12 | **مطابقة المنصة للبقشيش** (نضاعف بقشيش السائق فترة ترويجية) | Talabat (يطابق البقشيش) | ❌ لدينا بقشيش 100% للسائق (تميّز) بلا مطابقة | **P2** | كود (قاعدة تمويل) | أداة توظيف/تحفيز سائقين قوية في الجليل بكلفة مضبوطة زمنيًا |
+| 13 | **فلتر/شارة استدامة + توصيل بمركبة كهربائية + Eco-rating** | اتجاه 2026 (Just Eat net-zero, eco-filters, EV badges) | 🔶 لدينا checkbox "أدوات مائدة" مخطّط فقط (teardown) | **P2** | كود (وسم + فلتر) | تمايز علامة تجارية ناشئة؛ يجذب الشريحة الشابة الواعية بيئيًا |
+| 14 | **حجز صوتي على مستوى النظام** (Siri / Google Assistant / اختصارات) | Careem (حجز صوتي عربي + Siri/Assistant) · Uber (Voice Bookings AI) | 🔶 مساعد Talya داخل التطبيق فقط، لا تكامل OS | **P2** | كود (App Intents / Shortcuts) | "يا سيري اطلب من ديار" بالعربية = أول من يفعلها بالعربية في الشمال |
+| 15 | **اشتراك سنوي بمزايا حصرية (هدية/محتوى)** | Talabat Pro (هدية اشتراك TOD مونديال 2026) · Glovo Prime · Noon One | ❌ Dyar+ شهري فقط بالمواصفة | **P2** | كود | الخطة السنوية ترفع الاحتفاظ والتدفّق النقدي المقدّم؛ هدية موسمية تخلق ضجة |
+| 16 | **سقف سعر/حماية تسعير للمشترك في التاكسي** (ride price cap) | Bolt Plus (price cap عند الذروة) | ❌ لدينا تسعير ديناميكي بلا حماية مشترك | **P2** | كود | يربط Dyar+ بالتاكسي ويهدّئ شكوى "السعر قفز" الكلاسيكية |
+| 17 | **شاشة onboarding أول تشغيل تُبرز ثلاثية اللغة** | درس FoxJek (مرصود) — لم يُنفّذ بعد | 🔶 تبديل اللغة في الملف الشخصي فقط | **P1** | تصميم + كود خفيف | "التطبيق الوحيد بعربية كاملة في الشمال" يجب أن يُرى في أول 5 ثوانٍ |
+
+> **ملاحظات صدق/يقين**: حالة "ألعاب in-app/كروت خدش" لدى Careem/Talabat **غير
+> مؤكدة** من المصادر (وجدنا نقاط/كاش-باك لا ألعابًا) — لذا لم تُدرج كفجوة
+> مؤكدة. Tabby/BNPL مؤكد في الخليج لكن توفّره في سوق إسرائيل غير مؤكد —
+> أُدرج كـ P2 استكشافي. مطابقة بقشيش Talabat كانت حملة مؤقتة (ديسمبر) لا
+> ميزة دائمة.
+
+---
+
+## أفضل 10 لإضافتها قبل الإطلاق (مرتّبة)
+
+1. **فلتر + شارة حلال/كوشير** (P0) — معطِّل سوقي في الجليل المختلط؛ غيابه
+   يفقد شريحة دينية كاملة من كل جانب. (#4)
+2. **ساعات واعية بالسبت/الأعياد** (P1) — يمنع طلبات فاشلة من متاجر كوشير
+   مغلقة السبت، ويضيف وعي رمضان. (#5)
+3. **مستويات ولاء متدرّجة** (P1) — أقوى محرّك احتفاظ ضد Genius/Noon VIP. (#1)
+4. **نقاط موحّدة قابلة للاستبدال عبر كل العموديات** (P1) — يفعّل قيمة
+   السوبر-آب الحقيقية (نقطة تاكسي → طعام). (#2)
+5. **Dyar+ يشمل التاكسي** + سقف سعر للمشترك (P1) — تمايز لا يملكه Wolt/HAAT
+   محليًا، يدمج عموديّينا الأكبرين. (#3 + #16)
+6. **فلاتر الحِمية المرئية** (نباتي/فيغان/خالٍ من الغلوتين) (P1) — يحوّل
+   تميّز الحساسية لدينا إلى اكتشاف. (#6)
+7. **onboarding أول تشغيل ثلاثي اللغة** (P1) — يُظهر أكبر تمايزاتنا فورًا. (#17)
+8. **QR dine-in: اطلب وادفع من الطاولة** (P1) — يربط جلوس المقاهي الصيفي
+   بنظامنا، ويوسّع الحجوزات الحالية. (#7)
+9. **تقسيم الفاتورة العام** (P2) — احتكاك دفع جماعي شائع في عائلات الجليل. (#8)
+10. **خطة Dyar+ سنوية بهدية موسمية** (P2) — احتفاظ + تدفّق نقدي مقدّم. (#15)
+
+---
+
+## تمايزات Dyar الفريدة — كبّرها (ما لا يملكه المنافسون)
+
+هذه ميزات **نملكها والمنافسون لا** — يجب إبرازها تسويقيًا وتعميقها لا
+الاكتفاء بوجودها:
+
+- **سوبر-آب أوسع من الجميع**: طعام + بقالة + صيدلية + ورود + **خدمات (14
+  مهنة)** + **تاكسي** + **طرود بـ OTP** + **سوق C2C** + **وظائف** +
+  **B2B جملة** + **حجوزات (طاولات/فنادق/سيارات/بيوت/فعاليات)** + سلع رقمية.
+  لا Careem ولا Talabat ولا Wolt يجمع هذا المدى — خصوصًا **الخدمات + B2B +
+  الحجوزات** في تطبيق واحد. *كبّرها*: عروض متقاطعة بين العموديات.
+- **ثلاثية اللغة فورية RTL/LTR (ع/عب/EN)**: Wolt عبري أساسًا، Careem/Talabat
+  خليجي — لا أحد يقدّم **عربية كاملة + عبرية + إنجليزية بتبديل لحظي** في
+  الشمال. *كبّرها*: onboarding اللغة (#17) + شعار "العربية أولًا".
+- **حماية ديار — OTP تسليم الطرود + صورة إثبات + خرائط متعلَّمة**: أمان
+  تسليم لا يملكه أي منافس فوق خندق HAAT (التوصيل بلا عناوين).
+- **مساعد Talya الصوتي + رد دعم AI لحظي**: Wolt/HAAT شكواهما الأولى الدعم
+  البطيء — نحن نردّ AI فورًا. *كبّرها*: ربطه بـ OS (#14) + تعويض تلقائي
+  (Refund SLA من الـ deep-dive، قوة 3).
+- **دردشة/اتصال زبون↔سائق دائمًا**: أكبر شكوى ضد HAAT (لا قناة سائق) —
+  نعلنها كميزة.
+- **بقشيش 100% للسائق مُثبَت بإيصال "وصل البقشيش ✓"**: ضد فضائح حجب البقشيش
+  لدى منافسي Wolt.
+- **عمولة متدرّجة شفافة معلنة** (15%→12% للسلع، 6% للخدمات) + جزء من Dyar+
+  يخفّض عمولة المطعم — سلاح اكتساب تجار يجعلهم يروّجون لاشتراكنا بدل كرهه.
+- **حجوزات Booking-grade داخل تطبيق توصيل**: لا Wolt/HAAT/Careem يحجز فندقًا
+  أو سيارة أو فعالية — تقاطع فريد (احجز فندقًا → اطلب فطورًا لغرفتك).
+
+---
+
+## المصادر (Sources)
+
+- Careem Plus / Rewards / حجز صوتي عربي + Siri:
+  https://help.careem.com/hc/en-us/articles/18217510601363-Careem-Plus ·
+  https://www.thenationalnews.com/business/technology/careem-introduces-subscription-model-on-its-super-app-1.1198002 ·
+  https://www.cbinsights.com/compare/careem-networks-vs-talabat-general-trading-and-contracting-company
+- Uber Eats "Shop for Me" + Voice Bookings + Uber One 50M + GO-GET 2026:
+  https://www.uber.com/us/en/newsroom/go-get-2026/ ·
+  https://chainstoreage.com/uber-launches-new-digital-shopping-payment-features
+- Bolt Plus (price cap, rides+food, free cancellations, cashback):
+  https://bolt.eu/en/blog/bolt-plus-benefits/ · https://bolt.eu/en/plus/ ·
+  https://meetinc.com.mt/news/bolt-launches-new-subscription-service-combining-food-delivery-and-rides/
+- Noon One / Noon VIP loyalty (points, BOGO, free delivery):
+  https://www.picodi.com/ae/noon-food · https://www.promocodeuae.com/noon-food
+- Talabat Pro / Rewards / FIFA 2026 bundle / tip-match:
+  https://www.talabat.com/uae/campaign/pro ·
+  https://www.timeoutdubai.com/news/talabat-just-launched-the-ultimate-fifa-world-cup-2026-sponsored ·
+  https://gulfnews.com/amp/business/corporate-news/talabat-pledges-to-match-rider-tips-during-one-week-in-december-1.1608453329796 ·
+  https://enatega.com/talabat-business-model/
+- Glovo Prime (unlimited free delivery, any store):
+  https://glovoapp.com/en/it/glovo-prime · https://en.wikipedia.org/wiki/Glovo
+- Booking.com Genius L1/L2/L3 + Connected Trip + Smart Flex:
+  https://otelciro.com/en/resources/blog/booking-genius-loyalty-program-hotel-strategy-2026 ·
+  https://partnerships.booking.com/connected-trip-experiences ·
+  https://partner.booking.com/en-us/help/reservations/manage/all-you-need-know-about-smart-flex-reservations
+- كوشير/سبت/فلاتر إسرائيل (Wolt vegan/kosher filter, متاجر تغلق السبت):
+  https://www.touristisrael.com/order-food-delivery-tel-aviv/24355/ ·
+  https://www.prohebrew.com/post/ordering-food-in-israel-the-complete-guide ·
+  https://wolt.com/en/isr
+- QR dine-in / scan-to-order / split check / 2026:
+  https://sundayapp.com/how-does-qr-code-ordering-work/ ·
+  https://www.deliverect.com/en-us/order-and-pay ·
+  https://squareup.com/us/en/online-ordering/qr-code-ordering
+- استدامة / لا أدوات مائدة / EV / eco-filter:
+  https://www.sganalytics.com/blog/reducing-food-waste-and-carbon-footprint-for-food-delivery-services/ ·
+  https://merchants.doordash.com/en-us/blog/food-delivery-containers
+
+> قاعدة التحديث (CLAUDE.md #5): أي بند يُنفَّذ → حدّث `docs/DATA-MODEL.md` +
+> الأنواع + `backend/firestore.rules` + صف الميزة في `COMPETITIVE-MATRIX.md`.
