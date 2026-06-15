@@ -1,53 +1,107 @@
-# Dyar — سياق المشروع (Project Context)
+# Dyar v10 — سياق المشروع (Project Context)
 
-> منظومة عقارية/خدمية مبنية بـ **Flutter (Dart)** تستهدف iOS + Android.
-> عربية أولاً (RTL) مع دعم الإنجليزية. التصميم في Figma باسم **Dyar Ultra UI**.
+> **اسم المشروع الرسمي: Dyar v10** — مشروع جديد مبني من الصفر (ليس قالبًا
+> جاهزًا ولا استنساخًا)، هدفه التفوق على Wolt / HAAT / Talabat / Uber / Careem.
 
-## التطبيقات الأربعة (Apps)
+> **ديار = سوبر آب توصيل وطلبات وخدمات (Delivery Super-App)** على غرار
+> **Wolt / Haat.delivery / Talabat**. الهدف: منتج أقوى من المنافسين.
+> يخدم: طعام من المطاعم، بقالة، صيدليات، متاجر، ورود، **وخدمات** (حلاقة،
+> صالونات، أطباء، ميكانيكيين...)، بالإضافة إلى **توصيل + نقل** عبر السائقين.
+>
+> عربية أولاً (RTL) + إنجليزية + عبرية (سوق إسرائيل حاليًا). التصميم في
+> Figma باسم **Dyar Ultra UI**.
 
-| التطبيق | الجمهور | الدور |
-|---|---|---|
-| `dyar.app` | عام / Super App | الواجهة الرئيسية والتسويق ونقطة الدخول |
-| `dyar.user` | المستخدم النهائي | البحث، التصفّح، الحجز/الطلب، الدفع، التقييم |
-| `dyar.partner` | المالك / الوكيل / مزوّد الخدمة | إدارة العروض، الطلبات، التوفر، الأرباح |
-| `dyar.driver` | السائق / المندوب الميداني | استلام المهام، الخرائط، التتبّع، الإنجاز |
+> ⚠️ ملاحظة: وصف سابق صنّف ديار خطأً كتطبيق "عقارات". هذا غير صحيح — ديار
+> تطبيق توصيل/طلبات، وهذا الملف هو مصدر الحقيقة.
 
-> الأرجح أن المشاريع الأربعة تشترك في حزمة أساسية (core/design system) — يُفضّل
-> هيكلة **monorepo + melos** مع package مشترك (`dyar_core`, `dyar_ui`).
+## المنظومة — 4 عملاء + خلفية واحدة
+
+| المكوّن | المنصة | الجمهور | الحالة |
+|---|---|---|---|
+| **Dashboard (لوحة التحكم)** | Web — React+Vite+TS | الإدارة | **المرحلة 1 (الأولوية)** |
+| `dyar.driver` | Flutter (iOS+Android) | السائق/المندوب | مرحلة 2 |
+| `dyar.partner` | Flutter | التاجر/المتجر | مرحلة 3 |
+| `dyar.user` | Flutter | الزبون | مرحلة 4 |
+| `dyar.app` (web) | React | تسويق + طلب ويب | لاحقًا |
+
+**كل العملاء يتصلون بخلفية Firebase واحدة** (مصدر حقيقة واحد). لوحة التحكم
+هي المتحكّم المركزي: المتاجر، الطلبات، السائقون، المستخدمون، الأصناف،
+العروض، المدفوعات، الإعدادات، التحليلات.
 
 ## التقنية (Stack)
 
-- **Flutter / Dart** — تطبيق موبايل (iOS + Android).
-- إدارة الحالة: *(يُحدّد — يُنصح بـ Riverpod أو Bloc للاتساق عبر 4 تطبيقات).*
-- الشبكة: *(Dio + retrofit مقترح).*
-- التخزين الآمن: `flutter_secure_storage` للـ tokens، لا تُخزَّن أسرار في `SharedPreferences`.
-- الخرائط (مهم لـ driver/user): Google Maps / Mapbox.
-- التعريب: `flutter_localizations` + `intl`، مع **دعم RTL إلزامي**.
+### الخلفية — `backend/` (Firebase)
+- **Firestore** — قاعدة بيانات لحظية. انظر `docs/DATA-MODEL.md`.
+- **Firebase Auth** — مصادقة (هاتف/OTP + بريد). أدوار عبر Custom Claims:
+  `admin`, `partner`, `driver`, `customer`.
+- **Cloud Functions (TypeScript)** — دورة حياة الطلب، تعيين السائق،
+  مدفوعات Stripe/PayPal، إشعارات FCM، التسويات المالية.
+- **Storage** — صور المتاجر/المنتجات/الوثائق.
+- **FCM** — إشعارات لحظية لكل تطبيق.
+
+### لوحة التحكم — `dashboard/`
+- React 18 + Vite + TypeScript + TailwindCSS + React Router + TanStack Query.
+- Firebase Web SDK. رسوم: Recharts. RTL إلزامي.
+
+### الموبايل — `apps/*` + `packages/*`
+- Flutter / Dart، monorepo بـ **melos**. حزم مشتركة: `dyar_core` (نماذج،
+  خدمات Firebase، حالة)، `dyar_ui` (نظام تصميم Dyar Ultra UI).
+- إدارة الحالة: **Riverpod**. الخرائط: Google Maps. التعريب: `intl`.
+
+## هيكل المستودع (Monorepo)
+
+```
+Dyar-Pro/
+├── CLAUDE.md                 # مصدر الحقيقة
+├── docs/                     # المعمارية، نموذج البيانات، خارطة الطريق
+├── backend/                  # Firebase (rules, functions, indexes)
+│   └── functions/src/        # Cloud Functions (TypeScript)
+├── dashboard/                # لوحة التحكم (React) — المرحلة 1
+├── apps/                     # تطبيقات Flutter (المراحل 2–4)
+│   ├── driver/ partner/ user/
+└── packages/                 # حزم Flutter مشتركة (dyar_core, dyar_ui)
+```
+
+## أوامر البناء والتشغيل
+
+| المهمة | الأمر |
+|---|---|
+| تشغيل لوحة التحكم | `cd dashboard && npm install && npm run dev` |
+| بناء لوحة التحكم | `cd dashboard && npm run build` |
+| Cloud Functions | `cd backend/functions && npm install && npm run build` |
+| نشر القواعد | `cd backend && firebase deploy --only firestore:rules,storage` |
+| نشر الدوال | `cd backend && firebase deploy --only functions` |
 
 ## قواعد إلزامية (Hard Rules)
 
-1. **RTL أولاً**: كل واجهة تُختبر في الوضع العربي. استخدم `EdgeInsetsDirectional`،
-   `AlignmentDirectional`، `start/end` بدل `left/right`.
-2. **لا أسرار في الكود**: مفاتيح الـ API والأسرار عبر `--dart-define` / متغيرات بيئة،
-   لا تُرفع إلى git أبداً.
-3. **الأداء**: حافظ على 60fps. تجنّب إعادة بناء الـ widgets غير الضرورية، استخدم
-   `const` constructors، و `ListView.builder` للقوائم الطويلة.
-4. **التصميم من Figma فقط**: التزم بـ tokens من *Dyar Ultra UI* (ألوان، مسافات، خطوط).
+1. **لا أسرار في الكود**: كل المفاتيح عبر `.env` (لوحة) و
+   `functions:config`/`--dart-define` (دوال/موبايل). القوالب في `.env.example`.
+2. **RTL أولاً**: كل واجهة تُختبر بالعربية. ويب `dir="rtl"`؛ Flutter `start/end`.
+3. **الأمان أولًا**: Firestore Rules تمنع أي وصول غير مصرّح. كل عملية حساسة
+   (دفع، تغيير حالة، أرباح) تمرّ عبر Cloud Functions.
+4. **التصميم من Figma**: التزم بـ tokens من *Dyar Ultra UI*.
+5. **عقد بيانات واحد**: أي تغيير يُحدَّث في `docs/DATA-MODEL.md` + الأنواع +
+   قواعد الأمان معًا.
 
-## المهارات المتاحة (Skills) — في `.claude/skills/`
+## المفاتيح المطلوبة من المالك (تُضاف لاحقًا)
+- إعدادات مشروع Firebase. مفاتيح Stripe/PayPal. مفتاح Google Maps.
+- شهادات النشر (Apple Developer + Google Play).
 
-| المهارة | الاستدعاء | الوظيفة |
-|---|---|---|
-| `llm-council` | `council this` | مجلس 5 مستشارين لمراجعة القرارات |
-| `flutter-code-review` | `راجع الكود` / `review flutter` | مراجعة جودة وصحّة كود Flutter/Dart |
-| `flutter-security-audit` | `فحص أمني` / `security audit` | فحص أمان (MASVS): تخزين، tokens، API |
-| `flutter-testing` | `اكتب اختبارات` / `add tests` | اختبارات unit/widget/integration/golden |
-| `flutter-performance` | `حسّن الأداء` / `optimize perf` | معالجة الـ jank وتحسين الأداء |
-| `figma-to-flutter` | `حوّل التصميم` / `figma to flutter` | تحويل Dyar Ultra UI إلى widgets |
-| `ux-ui-review` | `راجع التصميم` / `ux review` | مراجعة UX/UI + RTL + إتاحة |
-| `competitor-analysis` | `حلل المنافسين` / `competitor analysis` | تحليل منافسي تطبيقات العقارات |
+## المهارات (`.claude/skills/`)
+`llm-council`, `flutter-code-review`, `flutter-security-audit`,
+`flutter-testing`, `flutter-performance`, `figma-to-flutter`,
+`ux-ui-review`, `competitor-analysis`.
 
-## ملاحظة
+## الوكلاء (`.claude/agents/`)
+- **`dyar-inspector`** — فاحص موحّد يراجع أي كود/أمر/تصميم ويُصدر تقريرًا
+  مرقّمًا (PASS/WARN/FAIL) عبر 8 معايير (صحّة، أمان، عقد بيانات+فهارس،
+  أداء، تصميم/RTL، i18n، اختبارات، تراجعية الأوامر) مع تحقّق آلي
+  (tsc + قواعد المحاكي + بناء اللوحة). استخدمه قبل كل دمج/إطلاق.
 
-المستودع حالياً في مرحلة التأسيس. حدّث هذا الملف فور إضافة الكود الفعلي
-(هيكل المجلدات، حزمة إدارة الحالة المختارة، أوامر البناء والاختبار).
+## الحالة الحالية
+المرحلة 1: الـ monorepo + خلفية Firebase + اللوحة منشورة على الإنتاج
+(`dyar-ai`). الميزات الرائدة الثلاث مكتملة: **AI Shopping Assistant**
+(`aiBuildCart`)، **الخرائط الحية + منتقي الدبوس** (مُسيّجة بـ `kMapsEnabled`)،
+**B2B RFQ** (إنشاء/تسعير/قبول بعمولة خادمية + صفحة مراقبة في اللوحة).
+المتبقّي للإطلاق تشغيلي: مفتاح Google Maps · تدوير المفاتيح المكشوفة ·
+App Check · تشغيل `flutter analyze` على بيئة فيها SDK.

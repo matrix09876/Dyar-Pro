@@ -1,0 +1,7 @@
+{
+  "name": "dyar-rules-tests",
+  "private": true,
+  "type": "module",
+  "scripts": { "test": "node rules.test.mjs" },
+  "dependencies": { "@firebase/rules-unit-testing": "^4.0.1", "firebase": "^10.14.1" }
+}

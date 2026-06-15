@@ -1,0 +1,258 @@
+rules_version = '2';
+// Dyar Firestore Security Rules — تنفّذ مصفوفة الصلاحيات في docs/DATA-MODEL.md
+// المبدأ: العميل لا يُوثَق به للعمليات الحساسة (الدفع/الحالة/الأرباح) —
+// تلك تمرّ عبر Cloud Functions بصلاحيات Admin.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() { return request.auth != null; }
+    function uid() { return request.auth.uid; }
+    // الأدوار من Custom Claims (تُضبط عبر Cloud Functions)
+    function role() { return request.auth.token.role; }
+    function isAdmin() { return isSignedIn() && role() == 'admin'; }
+    function isStaff() { return isSignedIn() && role() == 'staff'; }
+    // staff لديه صلاحية معينة إن كانت ضمن claims.perms (يضبطها admin)
+    function staffCan(p) { return isStaff() && request.auth.token.perms.hasAny([p]); }
+    // قراءة لوحة التحكم: admin أو staff
+    function isBackoffice() { return isAdmin() || isStaff(); }
+    function isDriver() { return isSignedIn() && role() == 'driver'; }
+    function isPartner() { return isSignedIn() && role() == 'partner'; }
+    function isOwner(resourceUid) { return isSignedIn() && uid() == resourceUid; }
+
+    // ---- users ----
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      // إنشاء الملف الخاص فقط؛ الحقول الحسّاسة (role, walletBalance,
+      // merchant=تاجر B2B) لا تُكتب من العميل — تمنحها الإدارة فقط
+      allow create: if isOwner(userId)
+        && !request.resource.data.keys().hasAny(['role','walletBalance','status','merchant']);
+      allow update: if isAdmin() ||
+        (isOwner(userId)
+         && !request.resource.data.diff(resource.data).affectedKeys()
+              .hasAny(['role','walletBalance','status','merchant']));
+      allow delete: if isAdmin();
+    }
+
+    // ---- stores + menu ----
+    match /stores/{storeId} {
+      allow read: if true; // عامة للتصفّح
+      allow create: if isPartner() && request.resource.data.ownerUid == uid()
+        && request.resource.data.status == 'pending';
+      allow update: if isAdmin() ||
+        (isPartner() && resource.data.ownerUid == uid()
+         && !request.resource.data.diff(resource.data).affectedKeys()
+              .hasAny(['status','commissionPct','rating','ratingCount','dietaryVerified']));
+      allow delete: if isAdmin();
+
+      match /menu/{itemId} {
+        allow read: if true;
+        allow write: if isAdmin() ||
+          (isPartner() && get(/databases/$(database)/documents/stores/$(storeId)).data.ownerUid == uid());
+      }
+      match /options/{groupId} {
+        allow read: if true;
+        allow write: if isAdmin() ||
+          (isPartner() && get(/databases/$(database)/documents/stores/$(storeId)).data.ownerUid == uid());
+      }
+      match /tables/{tableId} {
+        allow read: if true;
+        allow write: if isAdmin() ||
+          (isPartner() && get(/databases/$(database)/documents/stores/$(storeId)).data.ownerUid == uid());
+      }
+    }
+
+    // ---- orders ----
+    match /orders/{orderId} {
+      allow read: if isBackoffice()
+        || isOwner(resource.data.customerUid)
+        || (isDriver() && resource.data.driverUid == uid())
+        || (isPartner() && get(/databases/$(database)/documents/stores/$(resource.data.storeId)).data.ownerUid == uid());
+      // الزبون ينشئ طلبًا بحالة pending فقط؛ الدفع والتعيين عبر Functions
+      allow create: if isOwner(request.resource.data.customerUid)
+        && request.resource.data.status == 'pending';
+      // تحديثات محدودة: التاجر يقبل/يحضّر؛ السائق يحدّث حالة التوصيل.
+      // تغيير الدفع/الأرباح/تعيين السائق ممنوع من العميل (Functions فقط).
+      // خدمة العملاء (staffCan orders.manage): حل مشاكل الطلب وتغيير
+      // حالته — دون المساس بالدفع/التسعير/الملكية (Functions فقط)
+      allow update: if isAdmin() ||
+        ( (isPartner() || isDriver() || staffCan('orders.manage'))
+          && !request.resource.data.diff(resource.data).affectedKeys()
+               .hasAny(['payment','pricing','customerUid','storeId','items']) );
+      allow delete: if isAdmin();
+    }
+
+    // ---- bookings (طاولات/مواعيد): الكتابة عبر Functions فقط ----
+    match /bookings/{bookingId} {
+      allow read: if isBackoffice()
+        || isOwner(resource.data.customerUid)
+        || (isPartner() && get(/databases/$(database)/documents/stores/$(resource.data.storeId)).data.ownerUid == uid());
+      allow write: if false; // createBooking/updateBookingStatus عبر Functions
+    }
+
+    // ---- drivers ----
+    match /drivers/{driverId} {
+      allow read: if isAdmin() || isOwner(driverId);
+      allow create: if isOwner(driverId) && request.resource.data.status == 'pending';
+      allow update: if isAdmin() ||
+        (isOwner(driverId)
+         && !request.resource.data.diff(resource.data).affectedKeys()
+              .hasAny(['status','earnings','rating','ratingCount']));
+      allow delete: if isAdmin();
+    }
+
+    // ---- مرجعية عامة: قراءة للجميع، كتابة للإدارة ----
+    match /categories/{id}   { allow read: if true; allow write: if isAdmin(); }
+    match /cities/{id}       { allow read: if true; allow write: if isAdmin(); }
+    match /coupons/{id}      { allow read: if true; allow write: if isAdmin(); }
+    match /promotions/{id}   { allow read: if true; allow write: if isAdmin(); }
+    match /config/{id}       { allow read: if true; allow write: if isAdmin(); }
+
+    // ---- driverPrizes (جوائز المندوبين): قراءة للجميع، كتابة للإدارة ----
+    match /driverPrizes/{id} { allow read: if true; allow write: if isAdmin(); }
+
+    // ---- blockedAddresses (مكافحة الاحتيال): إدارة فقط ----
+    match /blockedAddresses/{id} {
+      allow read, write: if isAdmin();
+    }
+
+    // ---- broadcasts (بث الإشعارات): قراءة اللوحة، كتابة Functions فقط ----
+    match /broadcasts/{id} {
+      allow read: if isBackoffice();
+      allow write: if false; // sendBroadcast عبر Functions
+    }
+
+    // ---- marketProducts (سوق C2C: بيع وشراء) ----
+    match /marketProducts/{productId} {
+      // المنتجات المعتمدة عامة للتصفّح؛ البائع يقرأ منتجاته بكل الحالات
+      allow read: if resource.data.status == 'approved'
+        || isOwner(resource.data.sellerUid) || isBackoffice();
+      // أي مسجّل ينشئ منتجًا باسمه بحالة pending فقط (الاعتماد من الإدارة)
+      allow create: if isSignedIn()
+        && request.resource.data.sellerUid == uid()
+        && request.resource.data.status == 'pending';
+      // البائع يعدّل منتجه دون المساس بالحالة/الملكية؛ admin كل شيء
+      // (البيع النهائي sold عبر markProductSold في Functions)
+      allow update: if isAdmin() ||
+        (isOwner(resource.data.sellerUid)
+         && !request.resource.data.diff(resource.data).affectedKeys()
+              .hasAny(['status','sellerUid']));
+      allow delete: if isAdmin() || isOwner(resource.data.sellerUid);
+    }
+
+    // ---- jobs (لوحة الوظائف): القراءة عامة، الإدارة تنشر وتدير ----
+    match /jobs/{jobId} {
+      allow read: if true;
+      allow write: if isAdmin() || staffCan('jobs');
+    }
+
+    // ---- jobApplications (طلبات التوظيف + CV) ----
+    match /jobApplications/{appId} {
+      // partner صاحب متجر الوظيفة المرتبطة بالطلب
+      function isJobOwner() {
+        return isPartner()
+          && get(/databases/$(database)/documents/stores/$(
+               get(/databases/$(database)/documents/jobs/$(resource.data.jobId)).data.storeId
+             )).data.ownerUid == uid();
+      }
+      // المتقدم يقرأ طلباته؛ الإدارة وصاحب الوظيفة يقرآن الكل
+      allow read: if isBackoffice()
+        || isOwner(resource.data.applicantUid)
+        || isJobOwner();
+      // المتقدم ينشئ طلبًا باسمه بحالة new فقط
+      allow create: if isSignedIn()
+        && request.resource.data.applicantUid == uid()
+        && request.resource.data.status == 'new';
+      // الإدارة/صاحب الوظيفة يغيّران الحالة فقط (shortlisted/rejected/hired)
+      allow update: if isAdmin() ||
+        ((isStaff() || isJobOwner())
+         && request.resource.data.diff(resource.data).affectedKeys()
+              .hasOnly(['status']));
+      allow delete: if isAdmin();
+    }
+
+    // ---- reviews ----
+    match /reviews/{id} {
+      allow read: if true;
+      allow create: if isOwner(request.resource.data.customerUid);
+      allow update, delete: if isAdmin();
+    }
+
+    // ---- transactions (مالية): قراءة للمالك، كتابة Functions فقط ----
+    match /transactions/{id} {
+      allow read: if isAdmin() || isOwner(resource.data.uid);
+      allow write: if false; // Admin SDK فقط
+    }
+
+    // ---- learning (تعلّم AI لتوقيت المراحل حسب النوع) — اللوحة تقرأ، الخادم يكتب ----
+    match /learning/{id} {
+      allow read: if isBackoffice();
+      allow write: if false; // Cloud Functions فقط
+    }
+
+    // ---- stories (ستوري نمط إنستجرام) — قراءة عامة، إدارة backoffice ----
+    match /stories/{id} {
+      allow read: if true;
+      allow write: if isBackoffice();
+    }
+
+    // ---- ديار Meals: الشركات وحسابات الوجبات ----
+    match /organizations/{orgId} {
+      allow read: if isBackoffice();
+      allow write: if isAdmin();
+    }
+    match /mealAccounts/{uid} {
+      allow read: if isOwner(uid) || isBackoffice();
+      allow write: if false; // grantMealBudgets/payWithMealBudget عبر Functions
+    }
+    match /posCodes/{code} {
+      allow read, write: if false; // عبر generate/redeemMealPosCode فقط
+    }
+
+    // ---- ديار B2B: طلبات عرض السعر (RFQ) — الكتابة عبر Functions فقط ----
+    match /rfqs/{rfqId} {
+      // التاجر صاحب الطلب، أو مورد متجر الجملة المستهدف، أو الإدارة
+      allow read: if isBackoffice()
+        || isOwner(resource.data.merchantUid)
+        || (isPartner()
+            && get(/databases/$(database)/documents/stores/$(resource.data.storeId)).data.ownerUid == uid());
+      allow write: if false; // createRfq/quoteRfq/respondRfq عبر Functions
+    }
+
+    // ---- notifications ----
+    match /notifications/{id} {
+      allow read: if isOwner(resource.data.uid) || isAdmin();
+      allow update: if isOwner(resource.data.uid)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
+      allow create, delete: if isAdmin();
+    }
+
+    // ---- support ----
+    // سجلات الأمن: تسجيل دخول/أجهزة — كتابة العميل لنفسه فقط، قراءة إدارة
+    match /logs/{logId} {
+      allow read: if isAdmin() || isStaff();
+      // العميل يسجّل أحداثه الأمنية فقط؛ اللوحة (backoffice) تسجّل
+      // عمليات التدقيق باسمها (مثل نسخ نشاط)
+      allow create: if (isSignedIn()
+          && request.resource.data.category == 'security'
+          && request.resource.data.by == uid())
+        || (isBackoffice() && request.resource.data.by == uid());
+    }
+    match /support/{ticketId}/messages/{msgId} {
+      // محادثة الدعم: صاحب التذكرة يقرأ ويرسل؛ فريق خدمة العملاء
+      // (staffCan support.manage) يقرأ ويرد باسمه؛ ردود AI من الخادم
+      allow read: if isAdmin() || staffCan('support.manage')
+        || (isSignedIn() && ticketId == uid());
+      allow create: if (isSignedIn() && ticketId == uid()
+          && request.resource.data.senderUid == uid())
+        || ((isAdmin() || staffCan('support.manage'))
+          && request.resource.data.senderUid == uid());
+    }
+    match /support/{ticketId} {
+      allow read, create: if isSignedIn() &&
+        (isAdmin() || staffCan('support.manage')
+         || request.resource.data.uid == uid() || resource.data.uid == uid());
+      allow update: if isAdmin() || staffCan('support.manage')
+        || (isSignedIn() && resource.data.uid == uid());
+    }
+  }
+}

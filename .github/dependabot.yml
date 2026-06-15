@@ -1,0 +1,29 @@
+# تحديثات أمنية تلقائية لكل منظومات الحزم في المونوريبو
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /dashboard
+    schedule: { interval: weekly }
+    open-pull-requests-limit: 5
+  - package-ecosystem: npm
+    directory: /backend/functions
+    schedule: { interval: weekly }
+    open-pull-requests-limit: 5
+  - package-ecosystem: npm
+    directory: /web
+    schedule: { interval: weekly }
+  - package-ecosystem: pub
+    directory: /apps/user
+    schedule: { interval: weekly }
+  - package-ecosystem: pub
+    directory: /apps/driver
+    schedule: { interval: weekly }
+  - package-ecosystem: pub
+    directory: /apps/partner
+    schedule: { interval: weekly }
+  - package-ecosystem: pub
+    directory: /packages/dyar_core
+    schedule: { interval: weekly }
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: { interval: weekly }

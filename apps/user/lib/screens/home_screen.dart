@@ -1,0 +1,1051 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:dyar_core/dyar_core.dart';
+import 'package:dyar_ui/dyar_ui.dart';
+
+import 'store_screen.dart';
+import 'taxi_screen.dart';
+import 'parcel_screen.dart';
+import 'marketplace_screen.dart';
+import 'jobs_screen.dart';
+import 'services_screen.dart';
+import 'wholesale_screen.dart';
+import 'story_viewer.dart';
+import 'ai_shopping_screen.dart';
+
+final approvedStoresProvider = StreamProvider.family<List<Store>, String?>(
+    (ref, type) => ref.watch(storeServiceProvider).watchApproved(type: type));
+
+/// متاجر المستخدم المفضلة (♥) — حية من ملفه
+final favoriteStoresProvider = StreamProvider<Set<String>>((ref) {
+  final uid = FirebaseAuth.instance.currentUser?.uid;
+  if (uid == null) return Stream.value(const <String>{});
+  return FirebaseFirestore.instance.doc('users/$uid').snapshots().map((d) =>
+      Set<String>.from(d.data()?['favorites']?['stores'] ?? const []));
+});
+
+/// الرئيسية بمعيار Dyar Ultra UI: ترويسة متدرجة + بحث عائم + بانرات عروض
+/// + شبكة خدمات ملوّنة + بطاقات متاجر غنية بالصور والشارات.
+class HomeScreen extends ConsumerStatefulWidget {
+  const HomeScreen({super.key});
+
+  @override
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  String? _type;
+  String _query = '';
+  // فلتر الحِمية/التصديق: المتجر يجب أن يحمل كل الوسوم المختارة
+  final Set<String> _diet = {};
+
+  static const _grad = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Color(0xFFFF8A3D), DyarTokens.brand, DyarTokens.brandDark],
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    final s = ref.watch(stringsProvider);
+    // قواعد الرؤية لكل مدينة (cities.categories من اللوحة) — افتراضي آمن:
+    // كل شيء ظاهر إن لم تُضبط الوثيقة.
+    final city = ref.watch(cityConfigProvider).value ?? const CityConfig({});
+    // مفاتيح الميزات العالمية من اللوحة (config/features) — تُدمج مع رؤية المدينة
+    final flags = ref.watch(featureFlagsProvider).value ?? FeatureFlags.empty;
+    // الظهور = ظاهر بالمدينة (CityConfig) ومُفعّل عالميًا (FeatureFlags)
+    bool vis(String k) => city.shows(k) && flags.on(k);
+    // حساب تاجر B2B؟ تظهر له فئة تجار الجملة (تفعّلها الإدارة من اللوحة)
+    final isMerchant = ref.watch(appUserProvider).value?.merchant == true;
+    final storesAsync = ref.watch(approvedStoresProvider(_type));
+    final allStores = storesAsync.value ?? [];
+    // بحث وظيفي: بالاسم أو الوصف (غير حسّاس لحالة الأحرف)
+    final q = _query.trim().toLowerCase();
+    final stores = allStores.where((st) {
+      if (q.isNotEmpty &&
+          !st.name.toLowerCase().contains(q) &&
+          !(st.description ?? '').toLowerCase().contains(q)) {
+        return false;
+      }
+      // فلتر الحِمية: كل الوسوم المختارة يجب أن تتوفر في المتجر
+      if (_diet.isNotEmpty && !_diet.every(st.dietary.contains)) return false;
+      return true;
+    }).toList();
+
+    return Scaffold(
+      backgroundColor: const Color(0xFFF6F7FB),
+      body: CustomScrollView(
+        slivers: [
+          // ===== الترويسة المتدرجة + البحث العائم =====
+          SliverToBoxAdapter(
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Container(
+                  height: 200,
+                  decoration: const BoxDecoration(
+                    gradient: _grad,
+                    borderRadius:
+                        BorderRadius.vertical(bottom: Radius.circular(34)),
+                  ),
+                  padding: const EdgeInsets.fromLTRB(20, 52, 20, 0),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('👋 ${s('appName')}',
+                                style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 26,
+                                    fontWeight: FontWeight.w900)),
+                            const SizedBox(height: 2),
+                            Row(children: [
+                              const Icon(LucideIcons.mapPin,
+                                  color: Colors.white70, size: 15),
+                              const SizedBox(width: 4),
+                              Text(s('allYouNeed'),
+                                  style: const TextStyle(
+                                      color: Colors.white70, fontSize: 13)),
+                            ]),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        height: 44, width: 44,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.18),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child:
+                            const Icon(LucideIcons.bell, color: Colors.white),
+                      ),
+                    ],
+                  ),
+                ),
+                PositionedDirectional(
+                  start: 20, end: 20, bottom: -26,
+                  child: Container(
+                    height: 54,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(18),
+                      boxShadow: [
+                        BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.10),
+                            blurRadius: 22,
+                            offset: const Offset(0, 8)),
+                      ],
+                    ),
+                    padding: const EdgeInsetsDirectional.only(start: 16),
+                    child: Row(children: [
+                      const Icon(LucideIcons.search, color: DyarTokens.brand),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: TextField(
+                          onChanged: (v) => setState(() => _query = v),
+                          decoration: InputDecoration(
+                            hintText: s('searchHint'),
+                            hintStyle: const TextStyle(
+                                color: DyarTokens.inkMuted, fontSize: 14),
+                            border: InputBorder.none,
+                            enabledBorder: InputBorder.none,
+                            focusedBorder: InputBorder.none,
+                            filled: false,
+                            isDense: true,
+                          ),
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                      ),
+                      if (_query.isNotEmpty)
+                        IconButton(
+                          icon: const Icon(Icons.close_rounded, size: 18),
+                          onPressed: () => setState(() => _query = ''),
+                        ),
+                    ]),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SliverToBoxAdapter(child: SizedBox(height: 46)),
+
+          // ===== ديار AI — المساعد الذكي يتسوّق عنك (ميزة التمايز) =====
+          if (vis('aiAssistant'))
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 14),
+                child: GestureDetector(
+                  onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) => const AiShoppingScreen())),
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                          colors: [DyarTokens.brand, DyarTokens.brandDark]),
+                      borderRadius: BorderRadius.circular(DyarTokens.radiusLg),
+                      boxShadow: [
+                        BoxShadow(
+                            color: DyarTokens.brand.withValues(alpha: 0.30),
+                            blurRadius: 18,
+                            offset: const Offset(0, 8)),
+                      ],
+                    ),
+                    child: Row(children: [
+                      const Text('✨', style: TextStyle(fontSize: 26)),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(s('aiTagline'),
+                                style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w900,
+                                    fontSize: 16)),
+                            Text(s('aiHint'),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                    color: Colors.white70, fontSize: 12)),
+                          ],
+                        ),
+                      ),
+                      const Icon(Icons.chevron_left, color: Colors.white),
+                    ]),
+                  ),
+                ),
+              ),
+            ),
+
+          // ===== Stories — نمط إنستجرام (فيديو + صور) من اللوحة، مع
+          //        احتياطي حلقات المتاجر إن لم تُضبط ستوريات بعد =====
+          SliverToBoxAdapter(
+            child: SizedBox(
+              height: 96,
+              child: Builder(builder: (_) {
+                final stories =
+                    ref.watch(storiesProvider).value ?? const <DyarStory>[];
+                if (stories.isNotEmpty) {
+                  return ListView(
+                    scrollDirection: Axis.horizontal,
+                    padding:
+                        const EdgeInsetsDirectional.only(start: 20, end: 8),
+                    children: [
+                      for (int i = 0; i < stories.length; i++)
+                        _StoryRing(
+                            name: stories[i].title,
+                            imageUrl: stories[i].cover,
+                            onTap: () => Navigator.of(context).push(
+                                MaterialPageRoute(
+                                    builder: (_) => StoryViewer(
+                                        stories: stories, startIndex: i)))),
+                    ],
+                  );
+                }
+                return ListView(
+                  scrollDirection: Axis.horizontal,
+                  padding:
+                      const EdgeInsetsDirectional.only(start: 20, end: 8),
+                  children: [
+                    for (final st in stores.take(6))
+                      _StoryRing(
+                          name: st.name,
+                          imageUrl: st.coverUrl,
+                          onTap: () => Navigator.of(context).push(
+                              MaterialPageRoute(
+                                  builder: (_) =>
+                                      StoreScreen(storeId: st.id)))),
+                  ],
+                );
+              }),
+            ),
+          ),
+          const SliverToBoxAdapter(child: SizedBox(height: 16)),
+
+          // ===== بانرات العروض =====
+          SliverToBoxAdapter(
+            child: SizedBox(
+              height: 120,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                padding:
+                    const EdgeInsetsDirectional.only(start: 20, end: 8),
+                children: const [
+                  _PromoBanner(
+                    colors: [Color(0xFF16A34A), Color(0xFF065F46)],
+                    emoji: '🚚',
+                    title: 'توصيل مجاني',
+                    subtitle: 'لطلبك الأول فوق ₪80',
+                  ),
+                  SizedBox(width: 12),
+                  _PromoBanner(
+                    colors: [Color(0xFF7C3AED), Color(0xFF4C1D95)],
+                    emoji: '🎁',
+                    title: 'DYAR10',
+                    subtitle: 'خصم 10% بالكوبون',
+                  ),
+                  SizedBox(width: 12),
+                  _PromoBanner(
+                    colors: [Color(0xFF0284C7), Color(0xFF075985)],
+                    emoji: '🚕',
+                    title: 'تاكسي ديار',
+                    subtitle: 'مشاويرك بسعر عادل',
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SliverToBoxAdapter(child: SizedBox(height: 22)),
+
+          // ===== شبكة الخدمات الملوّنة =====
+          SliverToBoxAdapter(
+            child: SizedBox(
+              height: 100,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                padding:
+                    const EdgeInsetsDirectional.only(start: 20, end: 8),
+                children: [
+                  _ServiceTile(null, s('home'), LucideIcons.layoutGrid,
+                      const [Color(0xFFF4691E), Color(0xFFBA3A11)],
+                      _type, _select),
+                  if (vis('restaurants'))
+                    _ServiceTile('restaurant', s('restaurants'),
+                        LucideIcons.utensils,
+                        const [Color(0xFFEF4444), Color(0xFF991B1B)],
+                        _type, _select),
+                  if (vis('groceries'))
+                    _ServiceTile('grocery', s('groceries'),
+                        LucideIcons.shoppingBag,
+                        const [Color(0xFF22C55E), Color(0xFF15803D)],
+                        _type, _select),
+                  if (vis('pharmacies'))
+                    _ServiceTile('pharmacy', s('pharmacies'),
+                        LucideIcons.pill,
+                        const [Color(0xFF06B6D4), Color(0xFF0E7490)],
+                        _type, _select),
+                  if (vis('flowers'))
+                    _ServiceTile('flowers', s('flowers'), LucideIcons.flower2,
+                        const [Color(0xFFEC4899), Color(0xFF9D174D)],
+                        _type, _select),
+                  if (vis('services'))
+                    // بلاطة "خدمات" تفتح شاشة مهن مقدمي الخدمات
+                    _ServiceTile('service', s('services'), LucideIcons.wrench,
+                        const [Color(0xFF8B5CF6), Color(0xFF5B21B6)],
+                        _type,
+                        (_) => Navigator.of(context).push(MaterialPageRoute(
+                            builder: (_) => const ServicesScreen()))),
+                ],
+              ),
+            ),
+          ),
+          const SliverToBoxAdapter(child: SizedBox(height: 18)),
+
+          // ===== تاكسي + طرود + بيع وشراء (حسب رؤية المدينة) =====
+          if (vis('taxi') ||
+              vis('parcel') ||
+              vis('marketplace') ||
+              vis('jobs'))
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(children: [
+                  if (vis('taxi') || vis('parcel'))
+                    Row(children: [
+                      if (vis('taxi'))
+                        Expanded(
+                          child: _ActionCard(
+                            emoji: '🚕',
+                            label: s('taxi'),
+                            sub: s('whereTo'),
+                            colors: const [
+                              Color(0xFF111827),
+                              Color(0xFF374151)
+                            ],
+                            onTap: () => Navigator.of(context).push(
+                                MaterialPageRoute(
+                                    builder: (_) => const TaxiScreen())),
+                          ),
+                        ),
+                      if (vis('taxi') && vis('parcel'))
+                        const SizedBox(width: 12),
+                      if (vis('parcel'))
+                        Expanded(
+                          child: _ActionCard(
+                            emoji: '📦',
+                            label: s('parcel'),
+                            sub: 'OTP · حماية ديار',
+                            colors: const [
+                              Color(0xFFF59E0B),
+                              Color(0xFFB45309)
+                            ],
+                            onTap: () => Navigator.of(context).push(
+                                MaterialPageRoute(
+                                    builder: (_) => const ParcelScreen())),
+                          ),
+                        ),
+                    ]),
+                  if ((vis('taxi') || vis('parcel')) &&
+                      vis('marketplace'))
+                    const SizedBox(height: 12),
+                  if (vis('marketplace'))
+                    _ActionCard(
+                      emoji: '🛍️',
+                      label: s('marketplace'),
+                      sub: s('marketplaceSub'),
+                      colors: const [Color(0xFF8B5CF6), Color(0xFF5B21B6)],
+                      onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                              builder: (_) => const MarketplaceScreen())),
+                    ),
+                  if (vis('marketplace') && vis('jobs'))
+                    const SizedBox(height: 12),
+                  if (vis('jobs'))
+                    _ActionCard(
+                      emoji: '💼',
+                      label: s('jobsBoard'),
+                      sub: s('jobsSub'),
+                      colors: const [Color(0xFF1E3A8A), Color(0xFF0F172A)],
+                      onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                              builder: (_) => const JobsScreen())),
+                    ),
+                  // فئة B2B — لحسابات التجار فقط (users.merchant من اللوحة)
+                  if (isMerchant && vis('wholesale')) ...[
+                    const SizedBox(height: 12),
+                    _ActionCard(
+                      emoji: '🏪',
+                      label: s('wholesale'),
+                      sub: s('wholesaleSub'),
+                      colors: const [Color(0xFF0F172A), Color(0xFF1D4ED8)],
+                      onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                              builder: (_) => const WholesaleScreen())),
+                    ),
+                  ],
+                ]),
+              ),
+            ),
+          const SliverToBoxAdapter(child: SizedBox(height: 24)),
+
+          // ===== عنوان قسم المتاجر =====
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                children: [
+                  const Expanded(
+                    child: Text('الأشهر بالقرب منك 🔥',
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.w900)),
+                  ),
+                  Text('عرض الكل',
+                      style: const TextStyle(
+                          color: DyarTokens.brand,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 13)),
+                ],
+              ),
+            ),
+          ),
+          // ===== فلتر الحِمية والتصديق (حلال/كوشير/نباتي…) =====
+          SliverToBoxAdapter(
+            child: SizedBox(
+              height: 38,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+                children: [
+                  for (final tag in kDietaryTags)
+                    Padding(
+                      padding: const EdgeInsetsDirectional.only(end: 8),
+                      child: _DietChip(
+                        label: '${tag.emoji} ${s('diet_${tag.key}')}',
+                        selected: _diet.contains(tag.key),
+                        onTap: () => setState(() => _diet.contains(tag.key)
+                            ? _diet.remove(tag.key)
+                            : _diet.add(tag.key)),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+          const SliverToBoxAdapter(child: SizedBox(height: 12)),
+
+          // ===== بطاقات المتاجر =====
+          if (storesAsync.isLoading)
+            // Skeletons أثناء التحميل بدل المؤشر الدوّار
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 110),
+              sliver: SliverList.separated(
+                itemCount: 2,
+                separatorBuilder: (_, __) => const SizedBox(height: 16),
+                itemBuilder: (_, __) => const _StoreSkeleton(),
+              ),
+            )
+          else if (stores.isEmpty)
+            SliverToBoxAdapter(
+                child:
+                    EmptyState(message: s('noData'), icon: LucideIcons.store))
+          else
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 110),
+              sliver: SliverList.separated(
+                itemCount: stores.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 16),
+                itemBuilder: (context, i) => _StoreCard(store: stores[i]),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  void _select(String? t) => setState(() => _type = t);
+}
+
+class _StoryRing extends StatelessWidget {
+  const _StoryRing({required this.name, this.imageUrl, required this.onTap});
+  final String name;
+  final String? imageUrl;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsetsDirectional.only(end: 14),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Column(children: [
+          Container(
+            height: 64, width: 64,
+            padding: const EdgeInsets.all(3),
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFFFFC53D),
+                  DyarTokens.brand,
+                  Color(0xFFE91E63),
+                ],
+              ),
+            ),
+            child: Container(
+              padding: const EdgeInsets.all(2),
+              decoration: const BoxDecoration(
+                  color: Colors.white, shape: BoxShape.circle),
+              child: ClipOval(
+                child: imageUrl != null
+                    ? CachedNetworkImage(imageUrl: imageUrl!, fit: BoxFit.cover)
+                    : Container(
+                        color: DyarTokens.brandLight,
+                        child: const Center(child: Text('🍜'))),
+              ),
+            ),
+          ),
+          const SizedBox(height: 5),
+          SizedBox(
+            width: 66,
+            child: Text(name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                    fontSize: 10.5, fontWeight: FontWeight.w700)),
+          ),
+        ]),
+      ),
+    );
+  }
+}
+
+class _PromoBanner extends StatelessWidget {
+  const _PromoBanner({
+    required this.colors,
+    required this.emoji,
+    required this.title,
+    required this.subtitle,
+  });
+  final List<Color> colors;
+  final String emoji, title, subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 290,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(colors: colors),
+        borderRadius: BorderRadius.circular(22),
+        boxShadow: [
+          BoxShadow(
+              color: colors.first.withValues(alpha: 0.35),
+              blurRadius: 16,
+              offset: const Offset(0, 8)),
+        ],
+      ),
+      padding: const EdgeInsets.all(18),
+      child: Row(children: [
+        Text(emoji, style: const TextStyle(fontSize: 38)),
+        const SizedBox(width: 14),
+        Expanded(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title,
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 19,
+                      fontWeight: FontWeight.w900)),
+              const SizedBox(height: 3),
+              Text(subtitle,
+                  style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.85),
+                      fontSize: 12.5)),
+            ],
+          ),
+        ),
+      ]),
+    );
+  }
+}
+
+class _ServiceTile extends StatelessWidget {
+  const _ServiceTile(this.type, this.label, this.icon, this.colors,
+      this.selected, this.onTap);
+  final String? type;
+  final String label;
+  final IconData icon;
+  final List<Color> colors;
+  final String? selected;
+  final void Function(String?) onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final isSel = selected == type;
+    return Padding(
+      padding: const EdgeInsetsDirectional.only(end: 12),
+      child: GestureDetector(
+        onTap: () => onTap(type),
+        child: Column(children: [
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            height: 62, width: 62,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: colors),
+              borderRadius: BorderRadius.circular(20),
+              border:
+                  isSel ? Border.all(color: Colors.white, width: 3) : null,
+              boxShadow: [
+                BoxShadow(
+                    color:
+                        colors.first.withValues(alpha: isSel ? 0.55 : 0.30),
+                    blurRadius: isSel ? 18 : 10,
+                    offset: const Offset(0, 6)),
+              ],
+            ),
+            child: Icon(icon, color: Colors.white, size: 27),
+          ),
+          const SizedBox(height: 7),
+          Text(label,
+              style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: isSel ? FontWeight.w900 : FontWeight.w600)),
+        ]),
+      ),
+    );
+  }
+}
+
+class _ActionCard extends StatelessWidget {
+  const _ActionCard({
+    required this.emoji,
+    required this.label,
+    required this.sub,
+    required this.colors,
+    required this.onTap,
+  });
+  final String emoji, label, sub;
+  final List<Color> colors;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 84,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(colors: colors),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+                color: colors.first.withValues(alpha: 0.30),
+                blurRadius: 14,
+                offset: const Offset(0, 6)),
+          ],
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 14),
+        child: Row(children: [
+          Text(emoji, style: const TextStyle(fontSize: 28)),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label,
+                    style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w900,
+                        fontSize: 15)),
+                Text(sub,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.8),
+                        fontSize: 11)),
+              ],
+            ),
+          ),
+        ]),
+      ),
+    );
+  }
+}
+
+class _StoreCard extends ConsumerWidget {
+  const _StoreCard({required this.store});
+  final Store store;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final s = ref.watch(stringsProvider);
+    // RepaintBoundary: تعزل إعادة رسم البطاقة أثناء تمرير القائمة الطويلة
+    return RepaintBoundary(
+      child: GestureDetector(
+      onTap: store.isOpen
+          ? () => Navigator.of(context).push(MaterialPageRoute(
+              builder: (_) => StoreScreen(storeId: store.id)))
+          : null,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+                color: Colors.black.withValues(alpha: 0.07),
+                blurRadius: 18,
+                offset: const Offset(0, 8)),
+          ],
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Stack(children: [
+              SizedBox(
+                height: 150, width: double.infinity,
+                child: store.coverUrl != null
+                    ? CachedNetworkImage(
+                        imageUrl: store.coverUrl!, fit: BoxFit.cover,
+                        memCacheWidth: 800) // غلاف بطاقة ~358px → كفاية 2x DPR
+                    : Container(
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(colors: [
+                            Color(0xFFFFD3B2),
+                            Color(0xFFFFE6D5)
+                          ]),
+                        ),
+                        child: const Center(
+                            child:
+                                Text('🍜', style: TextStyle(fontSize: 52))),
+                      ),
+              ),
+              PositionedDirectional(
+                top: 12, start: 12,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.15),
+                          blurRadius: 8),
+                    ],
+                  ),
+                  child: Row(mainAxisSize: MainAxisSize.min, children: [
+                    const Icon(LucideIcons.star,
+                        size: 15, color: Color(0xFFF59E0B)),
+                    const SizedBox(width: 4),
+                    Text('${store.rating}',
+                        style: const TextStyle(
+                            fontWeight: FontWeight.w900, fontSize: 13)),
+                    Text(' (${store.ratingCount})',
+                        style: const TextStyle(
+                            color: DyarTokens.inkMuted, fontSize: 11)),
+                  ]),
+                ),
+              ),
+              PositionedDirectional(
+                top: 12, end: 12,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: store.isOpen
+                        ? const Color(0xFF16A34A)
+                        : Colors.grey,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(store.isOpen ? s('open') : s('closed'),
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w800)),
+                ),
+              ),
+              // المفضلة ♥ — حية لكل مستخدم
+              PositionedDirectional(
+                bottom: 10, end: 12,
+                child: Consumer(builder: (context, ref, _) {
+                  final favs =
+                      ref.watch(favoriteStoresProvider).value ?? const {};
+                  final isFav = favs.contains(store.id);
+                  return GestureDetector(
+                    onTap: () {
+                      final uid = FirebaseAuth.instance.currentUser?.uid;
+                      if (uid != null) {
+                        ref
+                            .read(userServiceProvider)
+                            .toggleFavoriteStore(uid, store.id, !isFav);
+                      }
+                    },
+                    child: Container(
+                      height: 36, width: 36,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.18),
+                              blurRadius: 8),
+                        ],
+                      ),
+                      child: Icon(
+                        isFav
+                            ? Icons.favorite_rounded
+                            : Icons.favorite_outline_rounded,
+                        size: 20,
+                        color: isFav
+                            ? const Color(0xFFE11D48)
+                            : DyarTokens.inkMuted,
+                      ),
+                    ),
+                  );
+                }),
+              ),
+            ]),
+            Padding(
+              padding: const EdgeInsets.all(14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(store.name,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w900, fontSize: 17)),
+                  // شارات التصديق/الحِمية (حلال/كوشير + ✓ إن وُثّقت)
+                  if (store.dietary.isNotEmpty) ...[
+                    const SizedBox(height: 6),
+                    Wrap(
+                      spacing: 6, runSpacing: 6,
+                      children: [
+                        for (final key in store.dietary)
+                          if (dietaryTagByKey(key) != null)
+                            _DietBadge(
+                              tag: dietaryTagByKey(key)!,
+                              verified: store.dietaryVerified,
+                            ),
+                      ],
+                    ),
+                  ],
+                  if (store.description != null) ...[
+                    const SizedBox(height: 2),
+                    Text(store.description!,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                            color: DyarTokens.inkMuted, fontSize: 12.5)),
+                  ],
+                  const SizedBox(height: 10),
+                  Row(children: [
+                    _Chip(
+                        icon: LucideIcons.clock,
+                        text: '${store.prepTimeMins}-'
+                            '${store.prepTimeMins + 10} د'),
+                    const SizedBox(width: 8),
+                    _Chip(
+                        icon: LucideIcons.bike,
+                        text: MoneyText.format(store.deliveryFee)),
+                    const Spacer(),
+                    Container(
+                      height: 34, width: 34,
+                      decoration: BoxDecoration(
+                        color: DyarTokens.brandLight,
+                        borderRadius: BorderRadius.circular(11),
+                      ),
+                      child: const Icon(Icons.chevron_left,
+                          color: DyarTokens.brandDark, size: 20),
+                    ),
+                  ]),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+    );
+  }
+}
+
+class _Chip extends StatelessWidget {
+  const _Chip({required this.icon, required this.text});
+  final IconData icon;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF3F4F6),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(mainAxisSize: MainAxisSize.min, children: [
+        Icon(icon, size: 14, color: DyarTokens.inkMuted),
+        const SizedBox(width: 5),
+        Text(text,
+            style:
+                const TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+      ]),
+    );
+  }
+}
+
+/// شريحة فلتر حِمية في صف الفلاتر (قابلة للتحديد).
+class _DietChip extends StatelessWidget {
+  const _DietChip(
+      {required this.label, required this.selected, required this.onTap});
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        alignment: Alignment.center,
+        padding: const EdgeInsets.symmetric(horizontal: 14),
+        decoration: BoxDecoration(
+          color: selected ? DyarTokens.brand : Colors.white,
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(
+              color: selected ? DyarTokens.brand : const Color(0xFFE5E7EB)),
+        ),
+        child: Text(label,
+            style: TextStyle(
+                fontSize: 12.5,
+                fontWeight: FontWeight.w800,
+                color: selected ? Colors.white : DyarTokens.inkMuted)),
+      ),
+    );
+  }
+}
+
+/// شارة تصديق/حِمية على بطاقة المتجر — حلال أخضر، كوشير أزرق، ✓ إن وُثّقت.
+class _DietBadge extends ConsumerWidget {
+  const _DietBadge({required this.tag, required this.verified});
+  final DietaryTag tag;
+  final bool verified;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final s = ref.watch(stringsProvider);
+    final (bg, fg) = switch (tag.key) {
+      'halal' => (const Color(0xFFDCFCE7), const Color(0xFF15803D)),
+      'kosher' => (const Color(0xFFDBEAFE), const Color(0xFF1D4ED8)),
+      'spicy' => (const Color(0xFFFEE2E2), const Color(0xFFB91C1C)),
+      _ => (const Color(0xFFDCFCE7), const Color(0xFF166534)),
+    };
+    final showCheck = tag.certification && verified;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: bg, borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+          '${tag.emoji} ${s('diet_${tag.key}')}${showCheck ? ' ✓' : ''}',
+          style: TextStyle(
+              fontSize: 11, fontWeight: FontWeight.w800, color: fg)),
+    );
+  }
+}
+
+class _StoreSkeleton extends StatelessWidget {
+  const _StoreSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    Widget box(double h, double w, [double r = 12]) => Container(
+          height: h, width: w,
+          decoration: BoxDecoration(
+            color: const Color(0xFFE9EAEE),
+            borderRadius: BorderRadius.circular(r),
+          ),
+        );
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          box(150, double.infinity, 0),
+          Padding(
+            padding: const EdgeInsets.all(14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                box(16, 140),
+                const SizedBox(height: 8),
+                box(12, 220),
+                const SizedBox(height: 12),
+                Row(children: [
+                  box(24, 70), const SizedBox(width: 8), box(24, 70),
+                ]),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
