@@ -1,25 +1,30 @@
-# LLM Council generated artifacts
-council-report-*.html
-council-transcript-*.md
-
-# Common
-*.log
-.DS_Store
-node_modules/
-
+# Dependencies / build
 node_modules/
 dist/
 backend/functions/lib/
-.env
-*.local
-.DS_Store
-.firebase/
-.claude/worktrees/
 *.tsbuildinfo
-
-# لقطات شاشة عابرة في الجذر (تُولّد للفحص فقط)
-/*.png
 
 # Flutter build artifacts
 **/build/
 **/.dart_tool/
+
+# Secrets / env
+.env
+*.local
+
+# Firebase
+.firebase/
+
+# Claude / worktrees
+.claude/worktrees/
+
+# LLM Council generated artifacts
+council-report-*.html
+council-transcript-*.md
+
+# لقطات شاشة عابرة في الجذر (تُولّد للفحص فقط)
+/*.png
+
+# Common
+*.log
+.DS_Store
