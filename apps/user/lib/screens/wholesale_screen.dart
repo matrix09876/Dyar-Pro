@@ -134,8 +134,8 @@ class WholesaleScreen extends ConsumerWidget {
                                 color: const Color(0xFFDBEAFE),
                                 borderRadius: BorderRadius.circular(999),
                               ),
-                              child: const Text('B2B · أسعار جملة',
-                                  style: TextStyle(
+                              child: Text(s('b2bWholesale'),
+                                  style: const TextStyle(
                                       fontSize: 10.5,
                                       fontWeight: FontWeight.w800,
                                       color: Color(0xFF1D4ED8))),

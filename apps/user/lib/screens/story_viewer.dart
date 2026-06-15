@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dyar_core/dyar_core.dart';
 import 'package:dyar_ui/dyar_ui.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -9,16 +10,16 @@ import 'package:url_launcher/url_launcher.dart';
 /// نقر يمين/يسار للتالي/السابق، ضغط مطوّل للإيقاف المؤقت، سحب/✕ للإغلاق.
 /// الصور مؤقّتة؛ عناصر الفيديو تُفتح بالمشغّل الخارجي (تشغيل مضمّن لاحقًا
 /// بإضافة حزمة video_player عند توفّر الشبكة).
-class StoryViewer extends StatefulWidget {
+class StoryViewer extends ConsumerStatefulWidget {
   const StoryViewer({super.key, required this.stories, this.startIndex = 0});
   final List<DyarStory> stories;
   final int startIndex;
 
   @override
-  State<StoryViewer> createState() => _StoryViewerState();
+  ConsumerState<StoryViewer> createState() => _StoryViewerState();
 }
 
-class _StoryViewerState extends State<StoryViewer>
+class _StoryViewerState extends ConsumerState<StoryViewer>
     with SingleTickerProviderStateMixin {
   late int _story = widget.startIndex;
   int _item = 0;
@@ -79,6 +80,7 @@ class _StoryViewerState extends State<StoryViewer>
   @override
   Widget build(BuildContext context) {
     final m = _media;
+    final s = ref.watch(stringsProvider);
     return Scaffold(
       backgroundColor: Colors.black,
       body: GestureDetector(
@@ -164,7 +166,7 @@ class _StoryViewerState extends State<StoryViewer>
                 style: FilledButton.styleFrom(
                     backgroundColor: DyarTokens.brand),
                 icon: const Icon(Icons.play_arrow_rounded),
-                label: const Text('تشغيل الفيديو'),
+                label: Text(s('playVideo')),
                 onPressed: () => launchUrl(Uri.parse(m.url),
                     mode: LaunchMode.externalApplication),
               ),

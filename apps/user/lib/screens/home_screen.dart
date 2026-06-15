@@ -440,12 +440,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Row(
                 children: [
-                  const Expanded(
-                    child: Text('الأشهر بالقرب منك 🔥',
-                        style: TextStyle(
+                  Expanded(
+                    child: Text(s('nearbyPopular'),
+                        style: const TextStyle(
                             fontSize: 18, fontWeight: FontWeight.w900)),
                   ),
-                  Text('عرض الكل',
+                  Text(s('seeAll'),
                       style: const TextStyle(
                           color: DyarTokens.brand,
                           fontWeight: FontWeight.w700,
