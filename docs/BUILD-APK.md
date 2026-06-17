@@ -2,6 +2,10 @@
 
 تبني الـ APK سحابياً (لا حاجة لتثبيت Flutter محلياً) وتنزّله على هاتفك.
 
+> ✅ **خط البناء الكامل مُتحقَّق منه** (flutter create → applicationId/minSdk →
+> حقن google-services في Gradle → `flutter build apk --release`) عبر تشغيل
+> اختباري بملف وهمي. أضِف سرّك فقط وسينجح من أول مرّة.
+
 ## خطوة لمرة واحدة
 
 ### 1) سجّل تطبيق Android في Firebase
