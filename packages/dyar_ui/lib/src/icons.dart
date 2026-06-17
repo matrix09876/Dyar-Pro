@@ -59,4 +59,7 @@ abstract final class LucideIcons {
   static const IconData tag = Icons.sell_rounded;
   static const IconData phone = Icons.call_rounded;
   static const IconData headphones = Icons.headset_mic_rounded;
+  static const IconData sparkles = Icons.auto_awesome_rounded;
+  static const IconData locate = Icons.my_location_rounded;
+  static const IconData locateFixed = Icons.gps_fixed_rounded;
 }

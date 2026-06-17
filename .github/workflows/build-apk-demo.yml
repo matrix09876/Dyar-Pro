@@ -11,7 +11,8 @@ on:
     branches: ['**']
     paths:
       - '.github/workflows/build-apk-demo.yml'
-      - 'packages/dyar_core/lib/src/firebase_boot.dart'
+      - 'apps/user/**'
+      - 'packages/**'
 
 jobs:
   build-demo:
