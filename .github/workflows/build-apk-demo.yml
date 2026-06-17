@@ -1,0 +1,58 @@
+name: Build User APK (Demo)
+
+# APK معاينة لتطبيق المستخدم — واجهة فقط، بلا Firebase حقيقي ولا أي secret.
+# يبني بـ --dart-define=DYAR_DEMO=true فيُهيّأ Firebase بإعدادات وهمية ولا يتعطّل.
+# التشغيل: تبويب Actions ← "Build User APK (Demo)" ← Run workflow، ثم نزّل
+# الـ artifact "dyar-user-apk-demo".
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  build-demo:
+    runs-on: ubuntu-latest
+    env:
+      APP_ID: com.dyar.user.demo
+      MIN_SDK: '23'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.44.2
+          cache: true
+
+      - name: توليد سقالة android
+        working-directory: apps/user
+        run: flutter create --platforms=android --org com.dyar --project-name dyar_user .
+
+      - name: ضبط applicationId و minSdk
+        working-directory: apps/user/android
+        run: |
+          set -e
+          if [ -f app/build.gradle.kts ]; then G=app/build.gradle.kts; else G=app/build.gradle; fi
+          sed -i -E "s/applicationId(\s*=)?\s*\"[^\"]*\"/applicationId = \"${APP_ID}\"/" "$G" || true
+          sed -i -E "s/applicationId(\s*=)?\s*'[^']*'/applicationId '${APP_ID}'/" "$G" || true
+          sed -i -E "s/minSdk(Version)?(\s*=)?\s*[A-Za-z0-9_.]+/minSdk = ${MIN_SDK}/" "$G" || true
+          grep -nE "applicationId|minSdk" "$G" || true
+
+      - name: جلب الحزم
+        working-directory: apps/user
+        run: flutter pub get
+
+      - name: بناء APK المعاينة
+        working-directory: apps/user
+        run: flutter build apk --debug --dart-define=DYAR_DEMO=true
+
+      - name: رفع الـ APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: dyar-user-apk-demo
+          path: apps/user/build/app/outputs/flutter-apk/*.apk
+          if-no-files-found: error
+          retention-days: 14
