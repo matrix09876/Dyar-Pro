@@ -38,7 +38,7 @@ jobs:
 
       - uses: subosito/flutter-action@v2
         with:
-          channel: stable
+          flutter-version: 3.44.2
           cache: true
 
       - name: توليد سقالة android (flutter create)
@@ -90,6 +90,11 @@ jobs:
           fi
           echo "----- settings -----"; cat settings.gradle.kts 2>/dev/null || cat settings.gradle
           echo "----- app plugins -----"; grep -nE "google-services|com.android.application" app/build.gradle.kts 2>/dev/null || grep -nE "google-services" app/build.gradle
+          # تأكّد أنّ الحقن نجح فعلاً (وإلا فشل واضح بدل بناء بلا Firebase)
+          S=$( [ -f settings.gradle.kts ] && echo settings.gradle.kts || echo settings.gradle )
+          A=$( [ -f app/build.gradle.kts ] && echo app/build.gradle.kts || echo app/build.gradle )
+          grep -q 'com.google.gms.google-services' "$S" && grep -q 'com.google.gms.google-services' "$A" \
+            || { echo "::error::فشل حقن إضافة google-services في Gradle — راجع anchors التصحيح."; exit 1; }
 
       - name: جلب الحزم
         working-directory: apps/user
