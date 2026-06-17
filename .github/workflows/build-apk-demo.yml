@@ -7,6 +7,11 @@ name: Build User APK (Demo)
 
 on:
   workflow_dispatch: {}
+  push:
+    branches: ['**']
+    paths:
+      - '.github/workflows/build-apk-demo.yml'
+      - 'packages/dyar_core/lib/src/firebase_boot.dart'
 
 jobs:
   build-demo:
