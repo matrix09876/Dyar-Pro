@@ -6,6 +6,7 @@ name: Build User APK
 # متطلّب لمرة واحدة: أضِف Secret باسم GOOGLE_SERVICES_JSON يحتوي محتوى
 # google-services.json (لتطبيق Android بحزمة com.dyar.user) من مشروع Firebase.
 # Settings ← Secrets and variables ← Actions ← New repository secret.
+# ملاحظة: خط البناء مُتحقَّق منه بالكامل (راجع docs/BUILD-APK.md).
 
 on:
   workflow_dispatch:
