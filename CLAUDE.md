@@ -90,7 +90,12 @@ Dyar-Pro/
 ## المهارات (`.claude/skills/`)
 `llm-council`, `flutter-code-review`, `flutter-security-audit`,
 `flutter-testing`, `flutter-performance`, `figma-to-flutter`,
-`ux-ui-review`, `competitor-analysis`.
+`ux-ui-review`, `competitor-analysis`, `memory-bank`.
+
+## الذاكرة الدائمة (`memory-bank/`)
+ذاكرة مشروع عبر الجلسات (تكييف RooFlow): `productContext` · `activeContext` ·
+`progress` · `decisionLog` · `systemPatterns`. تُقرأ في بداية المهام وتُحدَّث
+عند الأحداث المهمّة أو بأمر «حدّث الذاكرة» / «UMB». مهارة `memory-bank` تديرها.
 
 ## الوكلاء (`.claude/agents/`)
 - **`dyar-inspector`** — فاحص موحّد يراجع أي كود/أمر/تصميم ويُصدر تقريرًا
