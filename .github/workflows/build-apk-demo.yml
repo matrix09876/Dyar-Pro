@@ -56,7 +56,7 @@ jobs:
         run: flutter build apk --debug --dart-define=DYAR_DEMO=true
 
       - name: رفع الـ APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: dyar-user-apk-demo
           path: apps/user/build/app/outputs/flutter-apk/*.apk
